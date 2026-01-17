@@ -592,7 +592,7 @@ export function CakeConfigurator() {
                             
                             window.open(checkoutUrl, "_blank");
                           }}
-                          className="w-full md:w-auto md:px-16 text-lg md:text-xl py-7 font-bold tracking-wide rounded-xl transition-all duration-300 hover:scale-105"
+                          className="w-full md:w-auto md:px-16 py-6 font-bold tracking-wide rounded-xl transition-all duration-300 hover:scale-105"
                           style={{
                             background: "linear-gradient(135deg, hsl(43, 74%, 49%) 0%, hsl(38, 80%, 45%) 50%, hsl(43, 74%, 49%) 100%)",
                             color: "hsl(20, 15%, 8%)",
@@ -600,8 +600,16 @@ export function CakeConfigurator() {
                             border: "1px solid hsl(43, 74%, 60%)",
                           }}
                         >
-                          <span className="flex items-center justify-center gap-2">
-                            💍 YES, I WANT THIS CAKE! - CHECKOUT NOW
+                          <span className="flex flex-col items-center justify-center">
+                            <span className="flex items-center gap-2 text-3xl md:text-4xl font-extrabold">
+                              💍 YES!
+                            </span>
+                            <span className="text-base md:text-lg font-bold mt-1">
+                              I WANT THIS CAKE!
+                            </span>
+                            <span className="text-xs font-medium mt-1 opacity-80 tracking-widest uppercase">
+                              Checkout
+                            </span>
                           </span>
                         </Button>
                       </motion.div>
