@@ -42,9 +42,17 @@ export function GlobalOptionsPanel({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
-      className="card-architectural space-y-5"
+      className="relative overflow-hidden rounded-lg border-2 border-secondary/30 bg-gradient-to-br from-card via-card to-secondary/5 p-6 shadow-lg"
     >
-      <h3 className="heading-editorial text-xl">Frosting & Decoration</h3>
+      {/* Decorative corner accents */}
+      <div className="absolute top-0 left-0 h-4 w-4 border-t-2 border-l-2 border-secondary/50" />
+      <div className="absolute top-0 right-0 h-4 w-4 border-t-2 border-r-2 border-secondary/50" />
+      <div className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-secondary/50" />
+      <div className="absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-secondary/50" />
+
+      <h3 className="font-display text-2xl md:text-3xl font-medium text-secondary mb-5 tracking-wide">
+        Frosting & Decoration
+      </h3>
 
       {/* Frosting / Coating */}
       <div className="space-y-2">
