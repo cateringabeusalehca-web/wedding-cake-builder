@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cake, ExternalLink, Crown, Sparkles } from "lucide-react";
+import { Cake, ExternalLink, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CakeSVG } from "./CakeSVG";
 import { GuestSlider } from "./GuestSlider";
@@ -9,6 +9,7 @@ import { LeadForm } from "./LeadForm";
 import { SuccessScreen } from "./SuccessScreen";
 import { GlobalOptionsPanel } from "./GlobalOptionsPanel";
 import { ConfettiCelebration } from "./ConfettiCelebration";
+import { BrandLogoShape, BrandCornerDecor, BrandAccent } from "./BrandLogoShape";
 import {
   getRecommendedStructure,
   TierConfiguration,
@@ -414,30 +415,29 @@ export function CakeConfigurator() {
                       style={{ boxShadow: "inset 0 0 60px hsl(43, 74%, 49%, 0.2), 0 0 40px hsl(43, 74%, 49%, 0.15)" }} 
                     />
 
-                    {/* Ornate corner decorations */}
+                    {/* Brand logo corner decorations */}
                     <div className="absolute top-3 left-3">
-                      <svg width="40" height="40" viewBox="0 0 40 40" className="text-secondary">
-                        <path d="M0 40 L0 15 Q0 0 15 0 L40 0" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />
-                        <circle cx="15" cy="15" r="3" fill="currentColor" opacity="0.6" />
-                      </svg>
+                      <BrandCornerDecor size={35} color="hsl(43, 74%, 49%)" opacity={0.7} />
                     </div>
-                    <div className="absolute top-3 right-3 rotate-90">
-                      <svg width="40" height="40" viewBox="0 0 40 40" className="text-secondary">
-                        <path d="M0 40 L0 15 Q0 0 15 0 L40 0" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />
-                        <circle cx="15" cy="15" r="3" fill="currentColor" opacity="0.6" />
-                      </svg>
+                    <div className="absolute top-3 right-3 -scale-x-100">
+                      <BrandCornerDecor size={35} color="hsl(43, 74%, 49%)" opacity={0.7} />
                     </div>
-                    <div className="absolute bottom-3 left-3 -rotate-90">
-                      <svg width="40" height="40" viewBox="0 0 40 40" className="text-secondary">
-                        <path d="M0 40 L0 15 Q0 0 15 0 L40 0" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />
-                        <circle cx="15" cy="15" r="3" fill="currentColor" opacity="0.6" />
-                      </svg>
+                    <div className="absolute bottom-3 left-3 -scale-y-100">
+                      <BrandCornerDecor size={35} color="hsl(43, 74%, 49%)" opacity={0.7} />
                     </div>
-                    <div className="absolute bottom-3 right-3 rotate-180">
-                      <svg width="40" height="40" viewBox="0 0 40 40" className="text-secondary">
-                        <path d="M0 40 L0 15 Q0 0 15 0 L40 0" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />
-                        <circle cx="15" cy="15" r="3" fill="currentColor" opacity="0.6" />
-                      </svg>
+                    <div className="absolute bottom-3 right-3 scale-[-1]">
+                      <BrandCornerDecor size={35} color="hsl(43, 74%, 49%)" opacity={0.7} />
+                    </div>
+
+                    {/* Subtle brand accents floating */}
+                    <div className="absolute top-1/4 left-6 opacity-20">
+                      <BrandAccent size={25} color="hsl(43, 74%, 49%)" />
+                    </div>
+                    <div className="absolute top-1/3 right-8 opacity-15">
+                      <BrandAccent size={20} color="hsl(43, 74%, 49%)" />
+                    </div>
+                    <div className="absolute bottom-1/4 left-10 opacity-10">
+                      <BrandAccent size={18} color="hsl(43, 74%, 49%)" />
                     </div>
 
                     {/* Floating golden particles */}
@@ -465,7 +465,7 @@ export function CakeConfigurator() {
                     ))}
 
                     <div className="relative z-10 p-8 md:p-12 text-center space-y-6">
-                      {/* Crown Icon */}
+                      {/* Brand Logo Icon */}
                       <motion.div
                         initial={{ opacity: 0, scale: 0, rotate: -20 }}
                         animate={{ opacity: 1, scale: 1, rotate: 0 }}
@@ -473,15 +473,20 @@ export function CakeConfigurator() {
                         className="flex justify-center"
                       >
                         <div className="relative">
-                          <Crown className="h-16 w-16 md:h-20 md:w-20 text-secondary" 
-                            style={{ filter: "drop-shadow(0 0 20px hsl(43, 74%, 49%, 0.6))" }} 
+                          <BrandLogoShape 
+                            size={100} 
+                            color="hsl(43, 74%, 49%)" 
+                            animate={true}
                           />
                           <motion.div
-                            animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.8, 0.5] }}
+                            animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }}
                             transition={{ duration: 2, repeat: Infinity }}
-                            className="absolute inset-0 flex justify-center items-center"
+                            className="absolute inset-0 flex justify-center items-center -z-10"
                           >
-                            <div className="w-24 h-24 rounded-full bg-secondary/20 blur-xl" />
+                            <div 
+                              className="w-32 h-32 rounded-full blur-2xl" 
+                              style={{ background: "hsl(43, 74%, 49%, 0.4)" }}
+                            />
                           </motion.div>
                         </div>
                       </motion.div>
@@ -558,60 +563,86 @@ export function CakeConfigurator() {
                         </motion.span>
                       </motion.div>
 
-                      {/* CTA Button */}
+                      {/* CTA Button with pulsing animation */}
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 1 }}
                       >
-                        <Button
-                          onClick={() => {
-                            const productId = "PRODUCT_ID";
-                            const checkoutUrl = `https://cateringabeusaleh.ca/?add-to-cart=${productId}&custom_price=${totalPrice.toFixed(2)}`;
-                            
-                            const configData = {
-                              guests: guestCount,
-                              tiers: structure.tiers.map((tier, index) => {
-                                const config = tierConfigs[index];
-                                return {
-                                  tier: tier.tierLevel,
-                                  size: tier.sizeInches,
-                                  servings: tier.servings,
-                                  sponge: spongeOptions.find(s => s.id === config?.spongeId)?.name,
-                                  filling: fillingOptions.find(f => f.id === config?.fillingId)?.name,
-                                };
-                              }),
-                              coating: coatingOptions.find(c => c.id === coatingId)?.name,
-                              decoration: decorationOptions.find(d => d.id === decorationId)?.name,
-                              topper: topperOptions.find(t => t.id === topperId)?.name,
-                              topperNames: topperNames || null,
-                              floralPalette: floralPalette || null,
-                              totalPrice: totalPrice,
-                            };
-                            console.log("Wedding Cake Configuration:", JSON.stringify(configData, null, 2));
-                            
-                            window.open(checkoutUrl, "_blank");
+                        <motion.div
+                          animate={{ 
+                            scale: [1, 1.03, 1],
+                            boxShadow: [
+                              "0 0 30px hsl(43, 74%, 49%, 0.5), 0 10px 40px rgba(0,0,0,0.4)",
+                              "0 0 50px hsl(43, 74%, 49%, 0.8), 0 15px 50px rgba(0,0,0,0.5)",
+                              "0 0 30px hsl(43, 74%, 49%, 0.5), 0 10px 40px rgba(0,0,0,0.4)",
+                            ]
                           }}
-                          className="w-full md:w-auto md:px-16 py-6 font-bold tracking-wide rounded-xl transition-all duration-300 hover:scale-105"
-                          style={{
-                            background: "linear-gradient(135deg, hsl(43, 74%, 49%) 0%, hsl(38, 80%, 45%) 50%, hsl(43, 74%, 49%) 100%)",
-                            color: "hsl(20, 15%, 8%)",
-                            boxShadow: "0 0 30px hsl(43, 74%, 49%, 0.5), 0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 hsl(45, 100%, 80%)",
-                            border: "1px solid hsl(43, 74%, 60%)",
+                          transition={{ 
+                            duration: 1.5, 
+                            repeat: Infinity, 
+                            ease: "easeInOut" 
                           }}
+                          className="rounded-xl"
                         >
-                          <span className="flex flex-col items-center justify-center">
-                            <span className="flex items-center gap-2 text-3xl md:text-4xl font-extrabold">
-                              💍 YES!
-                            </span>
-                            <span className="text-base md:text-lg font-bold mt-1">
-                              I WANT THIS CAKE!
-                            </span>
-                            <span className="text-xs font-medium mt-1 opacity-80 tracking-widest uppercase">
-                              Checkout
-                            </span>
-                          </span>
-                        </Button>
+                          <Button
+                            onClick={() => {
+                              const productId = "PRODUCT_ID";
+                              const checkoutUrl = `https://cateringabeusaleh.ca/?add-to-cart=${productId}&custom_price=${totalPrice.toFixed(2)}`;
+                              
+                              const configData = {
+                                guests: guestCount,
+                                tiers: structure.tiers.map((tier, index) => {
+                                  const config = tierConfigs[index];
+                                  return {
+                                    tier: tier.tierLevel,
+                                    size: tier.sizeInches,
+                                    servings: tier.servings,
+                                    sponge: spongeOptions.find(s => s.id === config?.spongeId)?.name,
+                                    filling: fillingOptions.find(f => f.id === config?.fillingId)?.name,
+                                  };
+                                }),
+                                coating: coatingOptions.find(c => c.id === coatingId)?.name,
+                                decoration: decorationOptions.find(d => d.id === decorationId)?.name,
+                                topper: topperOptions.find(t => t.id === topperId)?.name,
+                                topperNames: topperNames || null,
+                                floralPalette: floralPalette || null,
+                                totalPrice: totalPrice,
+                              };
+                              console.log("Wedding Cake Configuration:", JSON.stringify(configData, null, 2));
+                              
+                              window.open(checkoutUrl, "_blank");
+                            }}
+                            className="w-full md:w-auto md:px-20 py-8 font-bold tracking-wide rounded-xl transition-all duration-300 hover:scale-105"
+                            style={{
+                              background: "linear-gradient(135deg, hsl(43, 74%, 49%) 0%, hsl(38, 80%, 45%) 50%, hsl(43, 74%, 49%) 100%)",
+                              color: "hsl(20, 15%, 8%)",
+                              border: "2px solid hsl(43, 74%, 60%)",
+                            }}
+                          >
+                            <motion.span 
+                              className="flex flex-col items-center justify-center"
+                              animate={{ 
+                                textShadow: [
+                                  "0 0 0px transparent",
+                                  "0 0 10px hsl(43, 74%, 49%, 0.5)",
+                                  "0 0 0px transparent",
+                                ]
+                              }}
+                              transition={{ duration: 1.5, repeat: Infinity }}
+                            >
+                              <span className="flex items-center gap-2 text-3xl md:text-5xl font-extrabold">
+                                💍 YES!
+                              </span>
+                              <span className="text-base md:text-xl font-bold mt-2">
+                                I WANT THIS CAKE!
+                              </span>
+                              <span className="text-xs font-medium mt-2 opacity-80 tracking-widest uppercase">
+                                Checkout
+                              </span>
+                            </motion.span>
+                          </Button>
+                        </motion.div>
                       </motion.div>
 
                       {/* Back button */}
