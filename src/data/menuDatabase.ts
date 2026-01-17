@@ -294,11 +294,12 @@ export interface TopperOption {
   name: string;
   description: string;
   price: number;
+  hasNameInput?: boolean;
 }
 
 export const topperOptions: TopperOption[] = [
   { id: "none", name: "No Topper", description: "", price: 0 },
-  { id: "custom_names", name: "Custom 3D Print Names", description: "Two names included", price: 28 },
+  { id: "custom_names", name: "Custom 3D Print Names", description: "Two names included", price: 28, hasNameInput: true },
 ];
 
 // ============= EVENT TYPES =============
