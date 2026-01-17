@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Upload, Send, X } from "lucide-react";
+import { Calendar as CalendarIcon, Upload, Send, X, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,27 +20,42 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { TierConfig } from "./TierConfigPanel";
 import {
   eventTypes,
   getMinEventDate,
-  calculateEstimate,
-  flavorDetails,
-  fillingDetails,
+  CakeStructure,
+  TierConfiguration,
+  spongeOptions,
+  dietaryUpgrades,
+  fillingOptions,
+  outerFinishes,
+  decorationOptions,
+  topperOptions,
+  getTierLabel,
 } from "@/data/menuDatabase";
 
 interface LeadFormProps {
   guestCount: number;
-  tierCount: number;
-  tierConfigs: TierConfig[];
+  structure: CakeStructure;
+  tierConfigs: TierConfiguration[];
+  finishId: string;
+  decorationId: string;
+  topperId: string;
+  floralPalette: string;
+  totalPrice: number;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 export function LeadForm({
   guestCount,
-  tierCount,
+  structure,
   tierConfigs,
+  finishId,
+  decorationId,
+  topperId,
+  floralPalette,
+  totalPrice,
   onClose,
   onSuccess,
 }: LeadFormProps) {
@@ -52,13 +67,13 @@ export function LeadForm({
     eventType: "",
     additionalNotes: "",
     requiresSavoryBites: false,
+    allergyAcknowledged: false,
   });
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const minDate = getMinEventDate();
-  const estimatedQuote = calculateEstimate(guestCount, tierCount);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -102,16 +117,32 @@ export function LeadForm({
       },
       project: {
         guestCount,
-        calculatedTiers: tierCount,
-        estimatedQuote,
-        tiersConfiguration: tierConfigs.map((config, index) => ({
-          tierLevel: index + 1,
-          flavorID: config.flavorId,
-          flavorName: flavorDetails[config.flavorId]?.name || "",
-          fillingID: config.fillingId,
-          fillingName: fillingDetails[config.fillingId]?.name || "",
-          dietary: config.dietaryId,
-        })),
+        structure: {
+          id: structure.id,
+          name: structure.name,
+          tierCount: structure.tierCount,
+          totalServings: structure.totalServings,
+        },
+        estimatedQuote: totalPrice,
+        tiersConfiguration: tierConfigs.map((config, index) => {
+          const tierInfo = structure.tiers[index];
+          const sponge = spongeOptions.find((s) => s.id === config.spongeId);
+          const dietary = dietaryUpgrades.find((d) => d.id === config.dietaryId);
+          const filling = fillingOptions.find((f) => f.id === config.fillingId);
+          return {
+            tierLevel: tierInfo?.tierLevel || index + 1,
+            tierLabel: getTierLabel(tierInfo?.tierLevel || index + 1, structure.tierCount),
+            sizeInches: tierInfo?.sizeInches,
+            servings: tierInfo?.servings,
+            sponge: sponge?.name || config.spongeId,
+            dietary: dietary?.label || config.dietaryId,
+            filling: filling?.name || config.fillingId,
+          };
+        }),
+        finish: outerFinishes.find((f) => f.id === finishId)?.name || finishId,
+        decoration: decorationOptions.find((d) => d.id === decorationId)?.name || decorationId,
+        floralPalette: floralPalette || null,
+        topper: topperOptions.find((t) => t.id === topperId)?.name || topperId,
       },
       blindSpotCheck: {
         requiresSavoryBites: formData.requiresSavoryBites,
@@ -139,7 +170,8 @@ export function LeadForm({
     formData.email &&
     formData.phone &&
     formData.eventDate &&
-    formData.eventType;
+    formData.eventType &&
+    formData.allergyAcknowledged;
 
   return (
     <motion.div
@@ -171,21 +203,21 @@ export function LeadForm({
         </div>
 
         {/* Summary */}
-        <div className="mb-8 flex items-center justify-center gap-8 border-y border-border py-4">
+        <div className="mb-8 flex items-center justify-center gap-6 border-y border-border py-4 flex-wrap">
           <div className="text-center">
-            <span className="text-sketch text-muted-foreground">Guests</span>
-            <p className="font-display text-2xl">{guestCount}</p>
+            <span className="text-sketch text-muted-foreground">Structure</span>
+            <p className="font-display text-lg">{structure.name}</p>
           </div>
-          <div className="h-8 w-px bg-border" />
+          <div className="h-8 w-px bg-border hidden sm:block" />
           <div className="text-center">
-            <span className="text-sketch text-muted-foreground">Tiers</span>
-            <p className="font-display text-2xl">{tierCount}</p>
+            <span className="text-sketch text-muted-foreground">Servings</span>
+            <p className="font-display text-lg">{structure.totalServings}</p>
           </div>
-          <div className="h-8 w-px bg-border" />
+          <div className="h-8 w-px bg-border hidden sm:block" />
           <div className="text-center">
             <span className="text-sketch text-muted-foreground">Estimate</span>
             <p className="font-display text-2xl text-secondary">
-              ${estimatedQuote.toFixed(0)}
+              ${totalPrice.toFixed(0)}
             </p>
           </div>
         </div>
@@ -264,12 +296,12 @@ export function LeadForm({
             </div>
           </div>
 
-          {/* Event Date with 30-day restriction */}
+          {/* Event Date with 28-day restriction */}
           <div>
             <label className="text-sketch text-muted-foreground">
               Event Date *{" "}
               <span className="text-xs normal-case">
-                (minimum 30 days lead time)
+                (minimum 28 days lead time)
               </span>
             </label>
             <Popover>
@@ -314,7 +346,7 @@ export function LeadForm({
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               className={cn(
-                "dropzone-blueprint mt-2 transition-all",
+                "dropzone-blueprint mt-2 transition-all relative",
                 isDragging && "border-secondary bg-secondary/10"
               )}
             >
@@ -358,7 +390,7 @@ export function LeadForm({
             )}
           </div>
 
-          {/* Blind Spot Check */}
+          {/* Blind Spot Check & Allergy Warning */}
           <div className="space-y-4 border-t border-border pt-6">
             <div className="flex items-start gap-3">
               <Checkbox
@@ -379,6 +411,31 @@ export function LeadForm({
                 <span className="mt-1 block text-muted-foreground">
                   Let us know if you'd like to elevate your event with
                   additional catering
+                </span>
+              </label>
+            </div>
+
+            {/* Allergy Warning - Required */}
+            <div className="flex items-start gap-3 bg-muted/30 p-4 rounded">
+              <Checkbox
+                id="allergy"
+                checked={formData.allergyAcknowledged}
+                onCheckedChange={(checked) =>
+                  setFormData({
+                    ...formData,
+                    allergyAcknowledged: checked as boolean,
+                  })
+                }
+                className="mt-1"
+              />
+              <label htmlFor="allergy" className="cursor-pointer text-sm">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-secondary" />
+                  <span className="font-medium">Allergy Acknowledgment *</span>
+                </div>
+                <span className="mt-1 block text-muted-foreground text-xs">
+                  I understand that while strict protocols are followed, products 
+                  are made in a facility that handles nuts, dairy, and other allergens.
                 </span>
               </label>
             </div>
