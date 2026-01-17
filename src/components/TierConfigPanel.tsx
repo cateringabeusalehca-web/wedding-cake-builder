@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { Check, Sparkles, Copy, DollarSign } from "lucide-react";
+import { motion } from "framer-motion";
+import { Check, Copy, DollarSign, Cake, Layers, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,13 +10,17 @@ import {
 } from "@/components/ui/select";
 import {
   spongeOptions,
-  dietaryUpgrades,
+  dietaryOptions,
   fillingOptions,
   TierConfiguration,
   calculateTierPrice,
   getTierLabel,
   TierStructure,
+  getAllowedFillings,
+  getSpongesForDietary,
+  getFillingsForDietary,
 } from "@/data/menuDatabase";
+import { useMemo } from "react";
 
 interface TierConfigPanelProps {
   tierNumber: number;
@@ -45,9 +49,78 @@ export function TierConfigPanel({
     config.fillingId
   );
 
+  // Filter sponges based on dietary selection
+  const availableSponges = useMemo(() => {
+    return getSpongesForDietary(config.dietaryId);
+  }, [config.dietaryId]);
+
+  // Filter fillings based on sponge selection AND dietary
+  const availableFillings = useMemo(() => {
+    const spongeFillings = getAllowedFillings(config.spongeId);
+    const dietaryFillings = getFillingsForDietary(config.dietaryId);
+    
+    // Intersection of both
+    if (config.dietaryId && config.dietaryId !== "none") {
+      return spongeFillings.filter((f) => 
+        dietaryFillings.some((df) => df.id === f.id)
+      );
+    }
+    return spongeFillings;
+  }, [config.spongeId, config.dietaryId]);
+
   const selectedSponge = spongeOptions.find((s) => s.id === config.spongeId);
-  const selectedDietary = dietaryUpgrades.find((d) => d.id === config.dietaryId);
+  const selectedDietary = dietaryOptions.find((d) => d.id === config.dietaryId);
   const selectedFilling = fillingOptions.find((f) => f.id === config.fillingId);
+
+  // Handle dietary change - reset sponge and filling if not compatible
+  const handleDietaryChange = (dietaryId: string) => {
+    const newSponges = getSpongesForDietary(dietaryId);
+    const currentSpongeValid = newSponges.some((s) => s.id === config.spongeId);
+    
+    let newSpongeId = config.spongeId;
+    if (!currentSpongeValid && newSponges.length > 0) {
+      newSpongeId = newSponges[0].id;
+    }
+
+    const newFillings = getAllowedFillings(newSpongeId);
+    const dietaryFillings = getFillingsForDietary(dietaryId);
+    const compatibleFillings = dietaryId && dietaryId !== "none"
+      ? newFillings.filter((f) => dietaryFillings.some((df) => df.id === f.id))
+      : newFillings;
+
+    const currentFillingValid = compatibleFillings.some((f) => f.id === config.fillingId);
+    let newFillingId = config.fillingId;
+    if (!currentFillingValid && compatibleFillings.length > 0) {
+      newFillingId = compatibleFillings[0].id;
+    }
+
+    onConfigChange({
+      ...config,
+      dietaryId,
+      spongeId: newSpongeId,
+      fillingId: newFillingId,
+    });
+  };
+
+  // Handle sponge change - reset filling if not compatible
+  const handleSpongeChange = (spongeId: string) => {
+    const newFillings = getAllowedFillings(spongeId);
+    const dietaryFillings = getFillingsForDietary(config.dietaryId);
+    const compatibleFillings = config.dietaryId && config.dietaryId !== "none"
+      ? newFillings.filter((f) => dietaryFillings.some((df) => df.id === f.id))
+      : newFillings;
+
+    const currentFillingValid = compatibleFillings.some((f) => f.id === config.fillingId);
+    const newFillingId = currentFillingValid
+      ? config.fillingId
+      : compatibleFillings[0]?.id || config.fillingId;
+
+    onConfigChange({
+      ...config,
+      spongeId,
+      fillingId: newFillingId,
+    });
+  };
 
   return (
     <motion.div
@@ -59,7 +132,7 @@ export function TierConfigPanel({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Sparkles className="h-4 w-4 text-secondary" />
+          <Cake className="h-4 w-4 text-secondary" />
           <div>
             <h3 className="heading-editorial text-xl">{tierLabel}</h3>
             <p className="text-xs text-muted-foreground">
@@ -92,63 +165,23 @@ export function TierConfigPanel({
       </div>
 
       <div className="space-y-5">
-        {/* Sponge Selection */}
+        {/* Dietary Selection */}
         <div className="space-y-2">
-          <label className="text-sketch text-muted-foreground">
-            Choose Sponge
-          </label>
-          <Select
-            value={config.spongeId}
-            onValueChange={(spongeId) =>
-              onConfigChange({ ...config, spongeId })
-            }
-          >
-            <SelectTrigger className="input-sketch border-0 border-b">
-              <SelectValue placeholder="Select sponge" />
-            </SelectTrigger>
-            <SelectContent>
-              {spongeOptions.map((sponge) => (
-                <SelectItem key={sponge.id} value={sponge.id}>
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <span className="font-medium">{sponge.name}</span>
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {sponge.description}
-                      </span>
-                    </div>
-                    {sponge.pricePerServing > 0 && (
-                      <span className="text-xs text-secondary font-medium">
-                        +${sponge.pricePerServing.toFixed(2)}/srv
-                      </span>
-                    )}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {selectedSponge && selectedSponge.pricePerServing > 0 && (
-            <p className="text-xs text-secondary">
-              +${(selectedSponge.pricePerServing * tierInfo.servings).toFixed(0)} for this tier
-            </p>
-          )}
-        </div>
-
-        {/* Dietary Upgrade */}
-        <div className="space-y-2">
-          <label className="text-sketch text-muted-foreground">
-            Dietary Upgrade (Optional)
-          </label>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
+              Dietary
+            </span>
+            <span className="text-xs text-muted-foreground">(Optional)</span>
+          </div>
           <Select
             value={config.dietaryId}
-            onValueChange={(dietaryId) =>
-              onConfigChange({ ...config, dietaryId })
-            }
+            onValueChange={handleDietaryChange}
           >
             <SelectTrigger className="input-sketch border-0 border-b">
               <SelectValue placeholder="Select dietary option" />
             </SelectTrigger>
             <SelectContent>
-              {dietaryUpgrades.map((dietary) => (
+              {dietaryOptions.map((dietary) => (
                 <SelectItem key={dietary.id} value={dietary.id}>
                   <div className="flex items-center justify-between gap-4">
                     <div>
@@ -157,9 +190,9 @@ export function TierConfigPanel({
                         {dietary.description}
                       </span>
                     </div>
-                    {dietary.pricePerServing > 0 && (
+                    {dietary.surcharge > 0 && (
                       <span className="text-xs text-secondary font-medium">
-                        +${dietary.pricePerServing.toFixed(2)}/srv
+                        +${dietary.surcharge.toFixed(2)}/srv
                       </span>
                     )}
                   </div>
@@ -167,18 +200,68 @@ export function TierConfigPanel({
               ))}
             </SelectContent>
           </Select>
-          {selectedDietary && selectedDietary.pricePerServing > 0 && (
+          {selectedDietary && selectedDietary.surcharge > 0 && (
             <p className="text-xs text-secondary">
-              +${(selectedDietary.pricePerServing * tierInfo.servings).toFixed(0)} for this tier
+              +${(selectedDietary.surcharge * tierInfo.servings).toFixed(0)} for this tier
+            </p>
+          )}
+        </div>
+
+        {/* Sponge Selection */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Layers className="h-3 w-3 text-secondary" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
+              Sponge
+            </span>
+          </div>
+          <Select
+            value={config.spongeId}
+            onValueChange={handleSpongeChange}
+          >
+            <SelectTrigger className="input-sketch border-0 border-b">
+              <SelectValue placeholder="Select sponge" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableSponges.map((sponge) => (
+                <SelectItem key={sponge.id} value={sponge.id}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <span className="font-medium">{sponge.name}</span>
+                      {sponge.category === "Premium" && (
+                        <span className="ml-2 text-[10px] text-secondary/80 uppercase">
+                          Premium
+                        </span>
+                      )}
+                      <span className="block text-xs text-muted-foreground">
+                        {sponge.description}
+                      </span>
+                    </div>
+                    {sponge.priceExtra > 0 && (
+                      <span className="text-xs text-secondary font-medium">
+                        +${sponge.priceExtra.toFixed(2)}/srv
+                      </span>
+                    )}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {selectedSponge && selectedSponge.priceExtra > 0 && (
+            <p className="text-xs text-secondary">
+              +${(selectedSponge.priceExtra * tierInfo.servings).toFixed(0)} for this tier
             </p>
           )}
         </div>
 
         {/* Filling Selection */}
         <div className="space-y-2">
-          <label className="text-sketch text-muted-foreground">
-            Choose Filling
-          </label>
+          <div className="flex items-center gap-2">
+            <Palette className="h-3 w-3 text-secondary" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
+              Filling
+            </span>
+          </div>
           <Select
             value={config.fillingId}
             onValueChange={(fillingId) =>
@@ -189,18 +272,13 @@ export function TierConfigPanel({
               <SelectValue placeholder="Select filling" />
             </SelectTrigger>
             <SelectContent>
-              {fillingOptions.map((filling) => (
+              {availableFillings.map((filling) => (
                 <SelectItem key={filling.id} value={filling.id}>
                   <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <span className="font-medium">{filling.name}</span>
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {filling.description}
-                      </span>
-                    </div>
-                    {filling.pricePerServing > 0 && (
+                    <span className="font-medium">{filling.name}</span>
+                    {filling.priceExtra > 0 && (
                       <span className="text-xs text-secondary font-medium">
-                        +${filling.pricePerServing.toFixed(2)}/srv
+                        +${filling.priceExtra.toFixed(2)}/srv
                       </span>
                     )}
                   </div>
@@ -208,9 +286,9 @@ export function TierConfigPanel({
               ))}
             </SelectContent>
           </Select>
-          {selectedFilling && selectedFilling.pricePerServing > 0 && (
+          {selectedFilling && selectedFilling.priceExtra > 0 && (
             <p className="text-xs text-secondary">
-              +${(selectedFilling.pricePerServing * tierInfo.servings).toFixed(0)} for this tier
+              +${(selectedFilling.priceExtra * tierInfo.servings).toFixed(0)} for this tier
             </p>
           )}
         </div>
@@ -237,5 +315,4 @@ export function TierConfigPanel({
   );
 }
 
-// Export for compatibility
 export type TierConfig = TierConfiguration;

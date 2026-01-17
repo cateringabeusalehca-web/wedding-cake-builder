@@ -1,12 +1,22 @@
+// Menu Database - Single Source of Truth
+// Custom Cake / Wedding Cake Builder
+
 export const appConfig = {
   leadTimeDays: 28,
   pricingBase: {
     currency: "CAD",
-    basePricePerServing: 8.5,
+    basePricePerServing: 6.0,
   },
+  dietarySurcharges: {
+    GF: 0.5,   // Gluten-Free
+    SF: 0.5,   // Sugar-Free
+    V: 0.75,  // Vegan
+    K: 1.0,   // Keto
+    DF: 0.5,  // Dairy-Free
+  } as Record<string, number>,
 };
 
-// Cake structure options based on guest count
+// ============= CAKE STRUCTURES =============
 export interface CakeStructure {
   id: string;
   name: string;
@@ -21,7 +31,7 @@ export interface TierStructure {
   tierLevel: number;
   sizeInches: number;
   servings: number;
-  height: number; // visual height for SVG
+  height: number;
 }
 
 export const cakeStructures: CakeStructure[] = [
@@ -35,7 +45,7 @@ export const cakeStructures: CakeStructure[] = [
       { tierLevel: 2, sizeInches: 6, servings: 11, height: 50 },
     ],
     totalServings: 35,
-    basePrice: 295,
+    basePrice: 210, // 35 * $6.00
   },
   {
     id: "classic",
@@ -47,7 +57,7 @@ export const cakeStructures: CakeStructure[] = [
       { tierLevel: 2, sizeInches: 7, servings: 17, height: 55 },
     ],
     totalServings: 55,
-    basePrice: 465,
+    basePrice: 330, // 55 * $6.00
   },
   {
     id: "grand",
@@ -59,8 +69,8 @@ export const cakeStructures: CakeStructure[] = [
       { tierLevel: 2, sizeInches: 8, servings: 24, height: 50 },
       { tierLevel: 3, sizeInches: 6, servings: 11, height: 45 },
     ],
-    totalServings: 75,
-    basePrice: 635,
+    totalServings: 73,
+    basePrice: 438, // 73 * $6.00
   },
   {
     id: "gala",
@@ -74,76 +84,196 @@ export const cakeStructures: CakeStructure[] = [
       { tierLevel: 4, sizeInches: 6, servings: 11, height: 40 },
     ],
     totalServings: 129,
-    basePrice: 850,
+    basePrice: 774, // 129 * $6.00
   },
 ];
 
-// Sponge flavors with optional premium pricing
+// ============= SPONGE OPTIONS =============
 export interface SpongeOption {
   id: string;
   name: string;
   description: string;
-  pricePerServing: number; // 0 = included, > 0 = premium
+  category: "Standard" | "Premium";
+  priceExtra: number;
+  dietary: string[]; // Diets this sponge CAN be made in
+  allowedFillings: string[]; // "all" or specific IDs
+  structureSafeVegan: boolean;
 }
 
 export const spongeOptions: SpongeOption[] = [
-  { id: "vanilla", name: "Signature Vanilla", description: "Classic & timeless", pricePerServing: 0 },
-  { id: "chocolate", name: "Rich Chocolate", description: "Belgian cocoa perfection", pricePerServing: 0 },
-  { id: "red_velvet", name: "Red Velvet", description: "Southern classic", pricePerServing: 0 },
-  { id: "almond", name: "Almond Sponge", description: "Delicate & nutty", pricePerServing: 1.0 },
-  { id: "coconut", name: "Coconut Sponge", description: "Tropical bliss", pricePerServing: 1.0 },
-  { id: "carrot", name: "Carrot Spice", description: "Warmly spiced", pricePerServing: 1.0 },
+  {
+    id: "sp_van_classic",
+    name: "Classic Vanilla Sponge",
+    description: "Fluffy vanilla sponge soaked in light simple syrup.",
+    category: "Standard",
+    priceExtra: 0,
+    dietary: ["GF", "SF", "K"],
+    allowedFillings: ["all"],
+    structureSafeVegan: false,
+  },
+  {
+    id: "sp_van_rum",
+    name: "Vanilla Rum Sponge",
+    description: "Vanilla sponge lightly soaked in aged Venezuelan rum.",
+    category: "Standard",
+    priceExtra: 0,
+    dietary: ["GF", "SF", "K"],
+    allowedFillings: ["fil_mousseline", "fil_van_bc", "fil_dulce", "fil_coconut_bc", "fil_nutella"],
+    structureSafeVegan: false,
+  },
+  {
+    id: "sp_van_oreo",
+    name: "Cookies & Cream Sponge",
+    description: "Vanilla sponge baked with Oreo cookie pieces.",
+    category: "Standard",
+    priceExtra: 0,
+    dietary: [],
+    allowedFillings: ["fil_van_bc", "fil_choc_ganache", "fil_cream_cheese"],
+    structureSafeVegan: false,
+  },
+  {
+    id: "sp_choc_classic",
+    name: "Classic Chocolate Sponge",
+    description: "Intense, moist chocolate sponge.",
+    category: "Standard",
+    priceExtra: 0,
+    dietary: ["GF", "SF", "V", "K", "DF"],
+    allowedFillings: [
+      "fil_choc_ganache", "fil_cocoa_bc", "fil_mint", "fil_salt_caramel",
+      "fil_van_bc", "fil_berry", "fil_coffee", "fil_nutella", "fil_orange", "fil_cream_cheese"
+    ],
+    structureSafeVegan: true,
+  },
+  {
+    id: "sp_choc_coffee",
+    name: "Moka Sponge (Coffee Infused)",
+    description: "Chocolate cake enriched with Colombian coffee.",
+    category: "Standard",
+    priceExtra: 0,
+    dietary: ["GF", "SF", "K"],
+    allowedFillings: ["fil_cocoa_bc", "fil_coffee", "fil_choc_ganache", "fil_salt_caramel", "fil_van_bc"],
+    structureSafeVegan: false,
+  },
+  {
+    id: "sp_red_velvet",
+    name: "Red Velvet Sponge",
+    description: "Soft red velvet cake with a subtle hint of cocoa.",
+    category: "Standard",
+    priceExtra: 0,
+    dietary: ["GF", "SF", "K"],
+    allowedFillings: ["fil_cream_cheese", "fil_van_bc", "fil_wht_choc"],
+    structureSafeVegan: false,
+  },
+  {
+    id: "sp_lemon_lime",
+    name: "Lemon & Lime Sponge",
+    description: "Zesty citrus infused sponge.",
+    category: "Premium",
+    priceExtra: 1.0,
+    dietary: ["GF", "SF", "V", "K", "DF"],
+    allowedFillings: ["fil_wht_choc", "fil_lemon_curd", "fil_berry", "fil_van_bc"],
+    structureSafeVegan: true,
+  },
+  {
+    id: "sp_almond",
+    name: "Almond & Amaretto Sponge",
+    description: "Almond flour cake with a touch of Amaretto.",
+    category: "Premium",
+    priceExtra: 1.5,
+    dietary: ["GF", "SF", "V", "K", "DF"],
+    allowedFillings: ["fil_almond", "fil_wht_choc", "fil_van_bc", "fil_apricot"],
+    structureSafeVegan: true,
+  },
+  {
+    id: "sp_carrot",
+    name: "Spiced Carrot Sponge",
+    description: "Moist carrot cake with warm spices.",
+    category: "Premium",
+    priceExtra: 1.0,
+    dietary: ["GF", "SF"],
+    allowedFillings: ["fil_cream_cheese", "fil_van_bc", "fil_salt_caramel"],
+    structureSafeVegan: false,
+  },
+  {
+    id: "sp_coconut",
+    name: "Coconut Sponge",
+    description: "Tropical fluffy coconut cake.",
+    category: "Premium",
+    priceExtra: 1.0,
+    dietary: ["GF", "SF", "K"],
+    allowedFillings: ["fil_coconut_bc", "fil_pineapple", "fil_choc_ganache", "fil_dulce", "fil_van_bc", "fil_lime"],
+    structureSafeVegan: false,
+  },
+  {
+    id: "sp_pumpkin",
+    name: "Pumpkin Spice Sponge",
+    description: "Moist pumpkin cake with autumn spices.",
+    category: "Premium",
+    priceExtra: 1.0,
+    dietary: ["GF", "SF"],
+    allowedFillings: ["fil_cream_cheese", "fil_choc_ganache", "fil_salt_caramel", "fil_van_bc"],
+    structureSafeVegan: false,
+  },
+  {
+    id: "sp_orange",
+    name: "Orange Sponge",
+    description: "Fluffy cake infused with orange zest and juice.",
+    category: "Premium",
+    priceExtra: 1.0,
+    dietary: ["GF", "SF"],
+    allowedFillings: ["fil_orange", "fil_choc_ganache", "fil_van_bc"],
+    structureSafeVegan: false,
+  },
 ];
 
-// Dietary upgrades with per-serving pricing
-export interface DietaryUpgrade {
-  id: string;
-  label: string;
-  description: string;
-  pricePerServing: number;
-}
-
-export const dietaryUpgrades: DietaryUpgrade[] = [
-  { id: "none", label: "Classic", description: "Traditional recipe", pricePerServing: 0 },
-  { id: "gluten_free", label: "Gluten-Free", description: "Wheat-free perfection", pricePerServing: 2.0 },
-  { id: "sugar_free", label: "Sugar-Free", description: "Natural sweeteners", pricePerServing: 2.0 },
-  { id: "keto", label: "Keto", description: "GF + Sugar-Free", pricePerServing: 3.5 },
-  { id: "vegan", label: "Vegan", description: "Dairy-free & Egg-free", pricePerServing: 3.5 },
-];
-
-// Filling options
+// ============= FILLING OPTIONS =============
 export interface FillingOption {
   id: string;
   name: string;
-  description: string;
-  pricePerServing: number;
+  dietary: string[];
+  priceExtra: number;
 }
 
 export const fillingOptions: FillingOption[] = [
-  { id: "vanilla_mousseline", name: "Vanilla Bean Mousseline", description: "Light & silky", pricePerServing: 0 },
-  { id: "dark_ganache", name: "Dark Chocolate Ganache", description: "Rich & decadent", pricePerServing: 0 },
-  { id: "dulce_de_leche", name: "Dulce de Leche", description: "Caramel heaven", pricePerServing: 0 },
-  { id: "cream_cheese", name: "Cream Cheese Frosting", description: "Tangy & smooth", pricePerServing: 0 },
-  { id: "fruit_buttercream", name: "Fruit Infused Buttercream", description: "Seasonal berries", pricePerServing: 0 },
-  { id: "nutella", name: "Nutella / Ferrero", description: "Hazelnut indulgence", pricePerServing: 1.5 },
+  { id: "fil_van_bc", name: "Vanilla Buttercream", dietary: ["GF", "SF", "K"], priceExtra: 0 },
+  { id: "fil_choc_ganache", name: "Dark Chocolate Ganache", dietary: ["GF", "SF", "V", "K", "DF"], priceExtra: 0 },
+  { id: "fil_wht_choc", name: "White Chocolate Cream", dietary: ["GF", "SF", "K"], priceExtra: 0 },
+  { id: "fil_cream_cheese", name: "Cream Cheese Frosting", dietary: ["GF", "SF", "K"], priceExtra: 0 },
+  { id: "fil_mousseline", name: "Classic Mousseline", dietary: ["GF", "SF", "K"], priceExtra: 0 },
+  { id: "fil_cocoa_bc", name: "Cocoa Buttercream", dietary: ["GF", "SF", "K"], priceExtra: 0 },
+  { id: "fil_mint", name: "Mint Buttercream", dietary: ["GF", "SF", "K"], priceExtra: 0 },
+  { id: "fil_salt_caramel", name: "Salted Caramel Buttercream", dietary: ["GF"], priceExtra: 0 },
+  { id: "fil_coffee", name: "Coffee Buttercream", dietary: ["GF", "SF", "K"], priceExtra: 0 },
+  { id: "fil_berry", name: "Mixed Berry Infusion", dietary: ["GF", "SF", "K"], priceExtra: 0 },
+  { id: "fil_lemon_curd", name: "Lemon Mousseline/Curd", dietary: ["GF", "SF"], priceExtra: 0 },
+  { id: "fil_pineapple", name: "Pineapple Cream", dietary: ["GF", "SF"], priceExtra: 0 },
+  { id: "fil_coconut_bc", name: "Coconut Buttercream", dietary: ["GF", "SF", "K"], priceExtra: 0 },
+  { id: "fil_almond", name: "Almond Cream", dietary: ["GF", "SF", "V", "K", "DF"], priceExtra: 0 },
+  { id: "fil_nutella", name: "Hazelnut Chocolate (Nutella)", dietary: ["GF"], priceExtra: 1.5 },
+  { id: "fil_dulce", name: "Dulce de Leche", dietary: ["GF"], priceExtra: 0 },
+  { id: "fil_orange", name: "Orange Cream", dietary: ["GF", "SF"], priceExtra: 0 },
+  { id: "fil_lime", name: "Lime Cream", dietary: ["GF", "SF"], priceExtra: 0 },
+  { id: "fil_apricot", name: "Apricot Preserve", dietary: ["GF", "SF", "V", "DF"], priceExtra: 0 },
 ];
 
-// Global outer finish options
-export interface OuterFinish {
+// ============= FROSTING / COATING OPTIONS =============
+export interface CoatingOption {
   id: string;
   name: string;
-  description: string;
+  dietary: string[];
   flatFee: number;
 }
 
-export const outerFinishes: OuterFinish[] = [
-  { id: "vanilla_buttercream", name: "Silky Vanilla Buttercream", description: "Classic smooth finish", flatFee: 0 },
-  { id: "white_ganache", name: "White Chocolate Ganache", description: "More stability & sheen", flatFee: 45 },
-  { id: "dark_ganache", name: "Dark Chocolate Ganache", description: "Premium finish", flatFee: 45 },
-  { id: "semi_naked", name: "Semi-Naked Finish", description: "Rustic elegance", flatFee: 0 },
+export const coatingOptions: CoatingOption[] = [
+  { id: "coat_van_bc", name: "Smooth Vanilla Buttercream", dietary: ["GF", "SF", "K"], flatFee: 0 },
+  { id: "coat_rustic", name: "Rustic / Semi-Naked (Buttercream)", dietary: ["GF", "SF", "K"], flatFee: 0 },
+  { id: "coat_choc_ganache", name: "Dark Chocolate Ganache", dietary: ["GF", "SF", "V", "K", "DF"], flatFee: 45 },
+  { id: "coat_wht_choc", name: "White Chocolate Ganache", dietary: ["GF", "SF", "K"], flatFee: 45 },
+  { id: "coat_cream_cheese", name: "Cream Cheese Finish", dietary: ["GF", "SF", "K"], flatFee: 0 },
+  { id: "coat_texture_line", name: "Textured Lines Buttercream", dietary: ["GF", "SF", "K"], flatFee: 0 },
 ];
 
-// Decoration options
+// ============= DECORATION OPTIONS =============
 export interface DecorationOption {
   id: string;
   name: string;
@@ -158,7 +288,7 @@ export const decorationOptions: DecorationOption[] = [
   { id: "fondant_accents", name: "Fondant Accents", description: "Handcrafted pearls, bows, geometric", flatFee: 65 },
 ];
 
-// Topper options
+// ============= TOPPER OPTIONS =============
 export interface TopperOption {
   id: string;
   name: string;
@@ -171,6 +301,7 @@ export const topperOptions: TopperOption[] = [
   { id: "custom_names", name: "Custom 3D Print Names", description: "Two names included", price: 28 },
 ];
 
+// ============= EVENT TYPES =============
 export const eventTypes = [
   "Wedding",
   "Corporate Event",
@@ -180,7 +311,25 @@ export const eventTypes = [
   "Social Gathering",
 ];
 
-// Get structure based on guest count
+// ============= DIETARY OPTIONS FOR GLOBAL FILTER =============
+export interface DietaryOption {
+  id: string;
+  label: string;
+  description: string;
+  surcharge: number;
+}
+
+export const dietaryOptions: DietaryOption[] = [
+  { id: "none", label: "Classic", description: "Traditional recipe", surcharge: 0 },
+  { id: "GF", label: "Gluten-Free", description: "Wheat-free perfection", surcharge: 0.5 },
+  { id: "SF", label: "Sugar-Free", description: "Natural sweeteners", surcharge: 0.5 },
+  { id: "K", label: "Keto", description: "GF + Sugar-Free", surcharge: 1.0 },
+  { id: "V", label: "Vegan", description: "Dairy-free & Egg-free", surcharge: 0.75 },
+  { id: "DF", label: "Dairy-Free", description: "No dairy products", surcharge: 0.5 },
+];
+
+// ============= HELPER FUNCTIONS =============
+
 export function getRecommendedStructure(guests: number): CakeStructure {
   if (guests <= 35) return cakeStructures[0]; // intimate
   if (guests <= 55) return cakeStructures[1]; // classic
@@ -188,7 +337,50 @@ export function getRecommendedStructure(guests: number): CakeStructure {
   return cakeStructures[3]; // gala
 }
 
-// Calculate tier price based on configuration
+// Get fillings allowed for a specific sponge
+export function getAllowedFillings(spongeId: string): FillingOption[] {
+  const sponge = spongeOptions.find((s) => s.id === spongeId);
+  if (!sponge) return fillingOptions;
+  
+  if (sponge.allowedFillings.includes("all")) {
+    return fillingOptions;
+  }
+  
+  return fillingOptions.filter((f) => sponge.allowedFillings.includes(f.id));
+}
+
+// Get sponges available for a dietary restriction
+export function getSpongesForDietary(dietaryId: string): SpongeOption[] {
+  if (!dietaryId || dietaryId === "none") {
+    return spongeOptions;
+  }
+  return spongeOptions.filter((s) => s.dietary.includes(dietaryId));
+}
+
+// Get fillings available for a dietary restriction
+export function getFillingsForDietary(dietaryId: string): FillingOption[] {
+  if (!dietaryId || dietaryId === "none") {
+    return fillingOptions;
+  }
+  return fillingOptions.filter((f) => f.dietary.includes(dietaryId));
+}
+
+// Get coatings available for a dietary restriction
+export function getCoatingsForDietary(dietaryId: string): CoatingOption[] {
+  if (!dietaryId || dietaryId === "none") {
+    return coatingOptions;
+  }
+  return coatingOptions.filter((c) => c.dietary.includes(dietaryId));
+}
+
+// ============= TIER CONFIGURATION =============
+export interface TierConfiguration {
+  spongeId: string;
+  dietaryId: string;
+  fillingId: string;
+}
+
+// ============= PRICING CALCULATIONS =============
 export interface TierPricing {
   basePrice: number;
   spongeUpgrade: number;
@@ -204,13 +396,15 @@ export function calculateTierPrice(
   fillingId: string
 ): TierPricing {
   const sponge = spongeOptions.find((s) => s.id === spongeId);
-  const dietary = dietaryUpgrades.find((d) => d.id === dietaryId);
   const filling = fillingOptions.find((f) => f.id === fillingId);
+  const dietarySurcharge = dietaryId && dietaryId !== "none" 
+    ? (appConfig.dietarySurcharges[dietaryId] || 0) 
+    : 0;
 
   const basePrice = servings * appConfig.pricingBase.basePricePerServing;
-  const spongeUpgrade = servings * (sponge?.pricePerServing || 0);
-  const dietaryUpgrade = servings * (dietary?.pricePerServing || 0);
-  const fillingUpgrade = servings * (filling?.pricePerServing || 0);
+  const spongeUpgrade = servings * (sponge?.priceExtra || 0);
+  const dietaryUpgrade = servings * dietarySurcharge;
+  const fillingUpgrade = servings * (filling?.priceExtra || 0);
 
   return {
     basePrice,
@@ -221,11 +415,10 @@ export function calculateTierPrice(
   };
 }
 
-// Calculate total cake price
 export function calculateTotalPrice(
   structure: CakeStructure,
   tierConfigs: TierConfiguration[],
-  finishId: string,
+  coatingId: string,
   decorationId: string,
   topperId: string
 ): number {
@@ -245,9 +438,9 @@ export function calculateTotalPrice(
     }
   });
 
-  // Add finish fee
-  const finish = outerFinishes.find((f) => f.id === finishId);
-  total += finish?.flatFee || 0;
+  // Add coating fee
+  const coating = coatingOptions.find((c) => c.id === coatingId);
+  total += coating?.flatFee || 0;
 
   // Add decoration fee
   const decoration = decorationOptions.find((d) => d.id === decorationId);
@@ -260,19 +453,12 @@ export function calculateTotalPrice(
   return total;
 }
 
-export interface TierConfiguration {
-  spongeId: string;
-  dietaryId: string;
-  fillingId: string;
-}
-
 export function getMinEventDate(): Date {
   const date = new Date();
   date.setDate(date.getDate() + appConfig.leadTimeDays);
   return date;
 }
 
-// Get tier label by position
 export function getTierLabel(tierLevel: number, totalTiers: number): string {
   if (totalTiers === 2) {
     return tierLevel === 1 ? "Base Tier" : "Top Tier";
@@ -291,35 +477,20 @@ export function getTierLabel(tierLevel: number, totalTiers: number): string {
   return `Tier ${tierLevel}`;
 }
 
-// Legacy exports for compatibility
-export const dietaryCategories = [
-  {
-    id: "classic",
-    label: "Signature Classics",
-    description: "Our timeless gourmet selection.",
-    allowedFlavors: ["vanilla", "chocolate", "red_velvet"],
-    allowedFillings: ["vanilla_mousseline", "dark_ganache", "cream_cheese"],
-  },
-];
+// ============= LEGACY EXPORTS FOR COMPATIBILITY =============
+export const dietaryUpgrades = dietaryOptions;
+export const outerFinishes = coatingOptions.map((c) => ({
+  id: c.id,
+  name: c.name,
+  description: "",
+  flatFee: c.flatFee,
+}));
 
-export const flavorDetails: Record<string, { id: string; name: string; description: string }> = {
-  vanilla: { id: "vanilla", name: "Signature Vanilla", description: "Classic & timeless" },
-  chocolate: { id: "chocolate", name: "Rich Chocolate", description: "Belgian cocoa" },
-  red_velvet: { id: "red_velvet", name: "Red Velvet", description: "Southern classic" },
-};
-
-export const fillingDetails: Record<string, { id: string; name: string; description: string }> = {
-  vanilla_mousseline: { id: "vanilla_mousseline", name: "Vanilla Bean Mousseline", description: "Light & silky" },
-  dark_ganache: { id: "dark_ganache", name: "Dark Chocolate Ganache", description: "Rich & decadent" },
-  cream_cheese: { id: "cream_cheese", name: "Cream Cheese Frosting", description: "Tangy & smooth" },
-};
-
-// Legacy function
 export function calculateTiers(guests: number): number {
   return getRecommendedStructure(guests).tierCount;
 }
 
-export function calculateEstimate(guests: number, tiers: number): number {
+export function calculateEstimate(guests: number): number {
   const structure = getRecommendedStructure(guests);
   return structure.basePrice;
 }

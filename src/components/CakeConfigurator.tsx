@@ -9,15 +9,13 @@ import { LeadForm } from "./LeadForm";
 import { SuccessScreen } from "./SuccessScreen";
 import { GlobalOptionsPanel } from "./GlobalOptionsPanel";
 import {
-  cakeStructures,
   getRecommendedStructure,
   TierConfiguration,
   calculateTotalPrice,
-  outerFinishes,
+  coatingOptions,
   decorationOptions,
   topperOptions,
   spongeOptions,
-  dietaryUpgrades,
   fillingOptions,
   getTierLabel,
 } from "@/data/menuDatabase";
@@ -26,7 +24,7 @@ type View = "configurator" | "form" | "success";
 
 const defaultTierConfig: TierConfiguration = {
   spongeId: spongeOptions[0].id,
-  dietaryId: dietaryUpgrades[0].id,
+  dietaryId: "none",
   fillingId: fillingOptions[0].id,
 };
 
@@ -39,7 +37,7 @@ export function CakeConfigurator() {
     { ...defaultTierConfig },
     { ...defaultTierConfig },
   ]);
-  const [finishId, setFinishId] = useState(outerFinishes[0].id);
+  const [coatingId, setCoatingId] = useState(coatingOptions[0].id);
   const [decorationId, setDecorationId] = useState(decorationOptions[0].id);
   const [topperId, setTopperId] = useState(topperOptions[0].id);
   const [floralPalette, setFloralPalette] = useState("");
@@ -52,11 +50,11 @@ export function CakeConfigurator() {
       calculateTotalPrice(
         structure,
         tierConfigs.slice(0, structure.tierCount),
-        finishId,
+        coatingId,
         decorationId,
         topperId
       ),
-    [structure, tierConfigs, finishId, decorationId, topperId]
+    [structure, tierConfigs, coatingId, decorationId, topperId]
   );
 
   const handleTierSelect = useCallback((tier: number) => {
@@ -68,7 +66,6 @@ export function CakeConfigurator() {
       if (selectedTier === null) return;
       setTierConfigs((prev) => {
         const next = [...prev];
-        // Find the index based on tier level
         const tierIndex = structure.tiers.findIndex(t => t.tierLevel === selectedTier);
         if (tierIndex !== -1) {
           next[tierIndex] = config;
@@ -97,14 +94,13 @@ export function CakeConfigurator() {
       { ...defaultTierConfig },
       { ...defaultTierConfig },
     ]);
-    setFinishId(outerFinishes[0].id);
+    setCoatingId(coatingOptions[0].id);
     setDecorationId(decorationOptions[0].id);
     setTopperId(topperOptions[0].id);
     setFloralPalette("");
     setCurrentView("configurator");
   }, []);
 
-  // Get selected tier info
   const selectedTierInfo = selectedTier
     ? structure.tiers.find((t) => t.tierLevel === selectedTier)
     : null;
@@ -112,7 +108,6 @@ export function CakeConfigurator() {
     ? structure.tiers.findIndex((t) => t.tierLevel === selectedTier)
     : -1;
 
-  // Success screen
   if (currentView === "success") {
     return <SuccessScreen onReset={handleReset} />;
   }
@@ -126,7 +121,7 @@ export function CakeConfigurator() {
             guestCount={guestCount}
             structure={structure}
             tierConfigs={tierConfigs.slice(0, structure.tierCount)}
-            finishId={finishId}
+            coatingId={coatingId}
             decorationId={decorationId}
             topperId={topperId}
             floralPalette={floralPalette}
@@ -228,7 +223,7 @@ export function CakeConfigurator() {
               transition={{ delay: 1.5 }}
               className="mt-4 text-center text-xs text-muted-foreground"
             >
-              Click on a tier to customize flavors & pricing
+              Click on a tier to customize Sponge, Filling & Dietary options
             </motion.p>
           </motion.div>
 
@@ -273,6 +268,9 @@ export function CakeConfigurator() {
                       const sponge = spongeOptions.find(
                         (s) => s.id === config?.spongeId
                       );
+                      const filling = fillingOptions.find(
+                        (f) => f.id === config?.fillingId
+                      );
                       return (
                         <button
                           key={tier.tierLevel}
@@ -287,9 +285,16 @@ export function CakeConfigurator() {
                               {tier.sizeInches}" • {tier.servings} servings
                             </span>
                           </div>
-                          <span className="text-sm">
-                            {sponge?.name || "Configure →"}
-                          </span>
+                          <div className="text-right">
+                            <span className="text-sm block">
+                              {sponge?.name || "Configure →"}
+                            </span>
+                            {filling && (
+                              <span className="text-xs text-muted-foreground">
+                                {filling.name}
+                              </span>
+                            )}
+                          </div>
                         </button>
                       );
                     })}
@@ -300,8 +305,8 @@ export function CakeConfigurator() {
 
             {/* Global Options */}
             <GlobalOptionsPanel
-              finishId={finishId}
-              onFinishChange={setFinishId}
+              coatingId={coatingId}
+              onCoatingChange={setCoatingId}
               decorationId={decorationId}
               onDecorationChange={setDecorationId}
               topperId={topperId}
