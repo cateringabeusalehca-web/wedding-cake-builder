@@ -338,10 +338,39 @@ export function CakeConfigurator() {
               className="space-y-4 pt-4"
             >
               <Button
-                onClick={() => setCurrentView("form")}
-                className="btn-gold w-full"
+                onClick={() => {
+                  // WooCommerce product ID for "Torta de Boda Personalizada"
+                  // Replace PRODUCT_ID with your actual WooCommerce product ID
+                  const productId = "PRODUCT_ID"; // TODO: Replace with actual product ID
+                  const checkoutUrl = `https://cateringabeusaleh.ca/?add-to-cart=${productId}&custom_price=${totalPrice.toFixed(2)}`;
+                  
+                  // Log the configuration for CRM ingestion
+                  const configData = {
+                    guests: guestCount,
+                    tiers: structure.tiers.map((tier, index) => {
+                      const config = tierConfigs[index];
+                      return {
+                        tier: tier.tierLevel,
+                        size: tier.sizeInches,
+                        servings: tier.servings,
+                        sponge: spongeOptions.find(s => s.id === config?.spongeId)?.name,
+                        filling: fillingOptions.find(f => f.id === config?.fillingId)?.name,
+                      };
+                    }),
+                    coating: coatingOptions.find(c => c.id === coatingId)?.name,
+                    decoration: decorationOptions.find(d => d.id === decorationId)?.name,
+                    topper: topperOptions.find(t => t.id === topperId)?.name,
+                    topperNames: topperNames || null,
+                    floralPalette: floralPalette || null,
+                    totalPrice: totalPrice,
+                  };
+                  console.log("Wedding Cake Configuration:", JSON.stringify(configData, null, 2));
+                  
+                  window.open(checkoutUrl, "_blank");
+                }}
+                className="btn-gold w-full text-base md:text-lg py-6 animate-pulse hover:animate-none"
               >
-                Confirm Design & Request Quote
+                🎂 ¡CREASTE TU WEDDING CAKE DE ENSUEÑO! → ORDENAR
               </Button>
 
               <a
