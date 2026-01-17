@@ -207,12 +207,12 @@ export function CakeConfigurator() {
 
         {/* Configurator Grid */}
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-          {/* Left: SVG Cake */}
+          {/* Left: SVG Cake - Sticky */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="relative order-2 lg:order-1"
+            className="relative order-2 lg:order-1 lg:sticky lg:top-4 lg:self-start"
           >
             <CakeSVG
               structure={structure}
@@ -370,7 +370,7 @@ export function CakeConfigurator() {
                 }}
                 className="btn-gold w-full text-base md:text-lg py-6 animate-pulse hover:animate-none"
               >
-                🎂 ¡CREASTE TU WEDDING CAKE DE ENSUEÑO! → ORDENAR
+                ✨ ¡CONSTRUISTE TU WEDDING CAKE DE TUS SUEÑOS! ✨
               </Button>
 
               <a
