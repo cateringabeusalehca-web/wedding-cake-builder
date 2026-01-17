@@ -10,6 +10,7 @@ import { SuccessScreen } from "./SuccessScreen";
 import { GlobalOptionsPanel } from "./GlobalOptionsPanel";
 import { ConfettiCelebration } from "./ConfettiCelebration";
 import { BrandLogoShape, BrandCornerDecor, BrandAccent } from "./BrandLogoShape";
+import logoAbeusaleh from "@/assets/logo-abeusaleh.png";
 import {
   getRecommendedStructure,
   TierConfiguration,
@@ -465,29 +466,77 @@ export function CakeConfigurator() {
                     ))}
 
                     <div className="relative z-10 p-8 md:p-12 text-center space-y-6">
-                      {/* Brand Logo Icon */}
+                      {/* Full Brand Logo with golden effect */}
                       <motion.div
-                        initial={{ opacity: 0, scale: 0, rotate: -20 }}
-                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                        transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                        initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ delay: 0.3, type: "spring", stiffness: 150 }}
                         className="flex justify-center"
                       >
                         <div className="relative">
-                          <BrandLogoShape 
-                            size={100} 
-                            color="hsl(43, 74%, 49%)" 
-                            animate={true}
-                          />
+                          {/* Glowing backdrop */}
                           <motion.div
-                            animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }}
-                            transition={{ duration: 2, repeat: Infinity }}
+                            animate={{ 
+                              opacity: [0.4, 0.7, 0.4],
+                              scale: [1, 1.1, 1],
+                            }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                             className="absolute inset-0 flex justify-center items-center -z-10"
                           >
                             <div 
-                              className="w-32 h-32 rounded-full blur-2xl" 
-                              style={{ background: "hsl(43, 74%, 49%, 0.4)" }}
+                              className="w-48 h-48 md:w-64 md:h-64 rounded-full blur-3xl" 
+                              style={{ background: "radial-gradient(circle, hsl(43, 74%, 49%, 0.5) 0%, hsl(43, 74%, 49%, 0.2) 50%, transparent 70%)" }}
                             />
                           </motion.div>
+
+                          {/* Sparkle effects around logo */}
+                          {[0, 60, 120, 180, 240, 300].map((angle, i) => (
+                            <motion.div
+                              key={angle}
+                              initial={{ opacity: 0 }}
+                              animate={{ 
+                                opacity: [0, 1, 0],
+                                scale: [0.5, 1.2, 0.5],
+                              }}
+                              transition={{ 
+                                duration: 2, 
+                                delay: 0.5 + i * 0.3, 
+                                repeat: Infinity,
+                                repeatDelay: 1.5,
+                              }}
+                              className="absolute w-2 h-2"
+                              style={{
+                                left: `calc(50% + ${Math.cos(angle * Math.PI / 180) * 80}px)`,
+                                top: `calc(50% + ${Math.sin(angle * Math.PI / 180) * 60}px)`,
+                              }}
+                            >
+                              <svg viewBox="0 0 24 24" className="w-full h-full">
+                                <path
+                                  d="M12 0L13 9L22 10L13 11L12 20L11 11L2 10L11 9L12 0Z"
+                                  fill="hsl(43, 74%, 70%)"
+                                  style={{ filter: "drop-shadow(0 0 3px hsl(43, 74%, 60%))" }}
+                                />
+                              </svg>
+                            </motion.div>
+                          ))}
+
+                          {/* Logo image with golden filter */}
+                          <motion.img 
+                            src={logoAbeusaleh} 
+                            alt="Abeu-Saleh Catering" 
+                            className="w-40 h-auto md:w-56 relative z-10"
+                            style={{ 
+                              filter: "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 20px hsl(43, 74%, 49%, 0.6))",
+                            }}
+                            animate={{
+                              filter: [
+                                "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 20px hsl(43, 74%, 49%, 0.6))",
+                                "brightness(1.4) sepia(1) saturate(3.5) hue-rotate(10deg) drop-shadow(0 0 35px hsl(43, 74%, 49%, 0.8))",
+                                "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 20px hsl(43, 74%, 49%, 0.6))",
+                              ]
+                            }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                          />
                         </div>
                       </motion.div>
 
