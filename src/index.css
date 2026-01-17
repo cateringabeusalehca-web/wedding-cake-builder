@@ -178,7 +178,18 @@
   }
 
   .card-architectural {
-    @apply bg-card/50 backdrop-blur-sm border border-border/50 p-6;
+    @apply relative overflow-hidden bg-card/50 backdrop-blur-sm border border-border/50 p-6 rounded-md;
+    box-shadow: 0 2px 12px hsl(var(--charcoal) / 0.05);
+  }
+
+  .card-architectural::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.4), transparent);
   }
 
   .dropzone-blueprint {

@@ -160,7 +160,11 @@ export function CakeConfigurator() {
           className="mb-8 text-center"
         >
           <h1 className="heading-display mb-2 text-3xl md:text-5xl lg:text-6xl">
-            Custom Cake / Wedding Cake Builder
+            <span className="bg-gradient-to-r from-secondary via-[hsl(43,70%,60%)] to-secondary bg-clip-text text-transparent">
+              Wedding Cake
+            </span>
+            {" "}
+            <span className="text-foreground">Builder</span>
           </h1>
           <p className="text-muted-foreground">
             Build your perfect celebration cake, tier by tier
@@ -259,10 +263,18 @@ export function CakeConfigurator() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="card-architectural space-y-4"
+                  className="relative overflow-hidden rounded-lg border-2 border-secondary/30 bg-gradient-to-br from-card via-card to-secondary/5 p-6 shadow-lg"
                 >
-                  <h3 className="heading-editorial text-xl">Your Tiers</h3>
-                  <div className="space-y-2">
+                  {/* Decorative corner accents */}
+                  <div className="absolute top-0 left-0 h-4 w-4 border-t-2 border-l-2 border-secondary/50" />
+                  <div className="absolute top-0 right-0 h-4 w-4 border-t-2 border-r-2 border-secondary/50" />
+                  <div className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-secondary/50" />
+                  <div className="absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-secondary/50" />
+                  
+                  <h3 className="font-display text-2xl md:text-3xl font-medium text-secondary mb-4 tracking-wide">
+                    Your Tiers
+                  </h3>
+                  <div className="space-y-1">
                     {structure.tiers.map((tier, index) => {
                       const config = tierConfigs[index];
                       const sponge = spongeOptions.find(
@@ -275,10 +287,10 @@ export function CakeConfigurator() {
                         <button
                           key={tier.tierLevel}
                           onClick={() => handleTierSelect(tier.tierLevel)}
-                          className="flex w-full items-center justify-between border-b border-border/50 py-3 text-left transition-colors hover:bg-muted/30"
+                          className="group flex w-full items-center justify-between rounded-md border border-transparent bg-background/50 px-4 py-3 text-left transition-all duration-300 hover:border-secondary/40 hover:bg-secondary/10 hover:shadow-md"
                         >
                           <div>
-                            <span className="text-sketch text-muted-foreground block">
+                            <span className="text-sketch text-foreground block group-hover:text-secondary transition-colors">
                               {getTierLabel(tier.tierLevel, structure.tierCount)}
                             </span>
                             <span className="text-xs text-muted-foreground">
@@ -286,7 +298,7 @@ export function CakeConfigurator() {
                             </span>
                           </div>
                           <div className="text-right">
-                            <span className="text-sm block">
+                            <span className="text-sm block text-foreground group-hover:text-secondary transition-colors">
                               {sponge?.name || "Configure →"}
                             </span>
                             {filling && (
