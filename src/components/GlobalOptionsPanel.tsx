@@ -89,7 +89,7 @@ export function GlobalOptionsPanel({
       </div>
 
       {/* Decoration */}
-      <div className="space-y-2">
+      <div className="space-y-2 mt-8">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-muted-foreground" />
           <label className="text-xs font-semibold uppercase tracking-wider text-secondary">
@@ -146,7 +146,7 @@ export function GlobalOptionsPanel({
       </div>
 
       {/* Topper */}
-      <div className="space-y-2">
+      <div className="space-y-2 mt-8">
         <div className="flex items-center gap-2">
           <Crown className="h-4 w-4 text-muted-foreground" />
           <label className="text-xs font-semibold uppercase tracking-wider text-secondary">
