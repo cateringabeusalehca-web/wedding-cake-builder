@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cake, ExternalLink } from "lucide-react";
+import { Cake, ExternalLink, Crown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CakeSVG } from "./CakeSVG";
 import { GuestSlider } from "./GuestSlider";
@@ -8,6 +8,7 @@ import { TierConfigPanel } from "./TierConfigPanel";
 import { LeadForm } from "./LeadForm";
 import { SuccessScreen } from "./SuccessScreen";
 import { GlobalOptionsPanel } from "./GlobalOptionsPanel";
+import { ConfettiCelebration } from "./ConfettiCelebration";
 import {
   getRecommendedStructure,
   TierConfiguration,
@@ -366,111 +367,261 @@ export function CakeConfigurator() {
               )}
             </AnimatePresence>
 
-            {/* Celebration Checkout Section */}
+            {/* Celebration Checkout Section - Royal Awards Ceremony */}
             <AnimatePresence>
               {isReadyToOrder && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  className="relative mt-6 overflow-hidden rounded-2xl border-2 border-secondary bg-gradient-to-br from-secondary/20 via-secondary/10 to-background p-8 shadow-2xl"
-                >
-                  {/* Decorative sparkles */}
-                  <div className="absolute top-4 left-4 h-2 w-2 rounded-full bg-secondary animate-pulse" />
-                  <div className="absolute top-6 right-8 h-3 w-3 rounded-full bg-secondary/60 animate-pulse" style={{ animationDelay: "0.5s" }} />
-                  <div className="absolute bottom-8 left-12 h-2 w-2 rounded-full bg-secondary/80 animate-pulse" style={{ animationDelay: "1s" }} />
-                  <div className="absolute bottom-4 right-4 h-2 w-2 rounded-full bg-secondary animate-pulse" style={{ animationDelay: "0.3s" }} />
-
-                  {/* Corner accents */}
-                  <div className="absolute top-0 left-0 h-8 w-8 border-t-4 border-l-4 border-secondary rounded-tl-xl" />
-                  <div className="absolute top-0 right-0 h-8 w-8 border-t-4 border-r-4 border-secondary rounded-tr-xl" />
-                  <div className="absolute bottom-0 left-0 h-8 w-8 border-b-4 border-l-4 border-secondary rounded-bl-xl" />
-                  <div className="absolute bottom-0 right-0 h-8 w-8 border-b-4 border-r-4 border-secondary rounded-br-xl" />
-
-                  <div className="text-center space-y-4">
-                    <motion.h2
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="font-display text-2xl md:text-3xl lg:text-4xl font-bold text-secondary tracking-wide"
-                    >
-                      YOU BUILT THE WEDDING CAKE OF YOUR DREAMS!
-                    </motion.h2>
-                    
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                      className="text-muted-foreground text-base md:text-lg"
-                    >
-                      Your design is unique and spectacular. Don't let someone else take your date.
-                    </motion.p>
-
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                      className="py-4"
-                    >
-                      <span className="text-sketch text-muted-foreground block text-sm">
-                        Your Investment:
-                      </span>
-                      <span className="font-display text-4xl md:text-5xl text-secondary">
-                        ${totalPrice.toFixed(0)}
-                      </span>
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 }}
-                    >
-                      <Button
-                        onClick={() => {
-                          const productId = "PRODUCT_ID";
-                          const checkoutUrl = `https://cateringabeusaleh.ca/?add-to-cart=${productId}&custom_price=${totalPrice.toFixed(2)}`;
-                          
-                          const configData = {
-                            guests: guestCount,
-                            tiers: structure.tiers.map((tier, index) => {
-                              const config = tierConfigs[index];
-                              return {
-                                tier: tier.tierLevel,
-                                size: tier.sizeInches,
-                                servings: tier.servings,
-                                sponge: spongeOptions.find(s => s.id === config?.spongeId)?.name,
-                                filling: fillingOptions.find(f => f.id === config?.fillingId)?.name,
-                              };
-                            }),
-                            coating: coatingOptions.find(c => c.id === coatingId)?.name,
-                            decoration: decorationOptions.find(d => d.id === decorationId)?.name,
-                            topper: topperOptions.find(t => t.id === topperId)?.name,
-                            topperNames: topperNames || null,
-                            floralPalette: floralPalette || null,
-                            totalPrice: totalPrice,
-                          };
-                          console.log("Wedding Cake Configuration:", JSON.stringify(configData, null, 2));
-                          
-                          window.open(checkoutUrl, "_blank");
+                <>
+                  {/* Confetti Animation */}
+                  <ConfettiCelebration />
+                  
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                    transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    className="relative mt-8 overflow-hidden rounded-3xl shadow-2xl"
+                    style={{
+                      background: "linear-gradient(135deg, hsl(20, 15%, 8%) 0%, hsl(25, 20%, 12%) 30%, hsl(30, 25%, 10%) 70%, hsl(20, 15%, 6%) 100%)",
+                    }}
+                  >
+                    {/* Golden Light Rays */}
+                    <div className="absolute inset-0 overflow-hidden">
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.4 }}
+                        transition={{ delay: 0.3, duration: 1 }}
+                        className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] h-[200%]"
+                        style={{
+                          background: "conic-gradient(from 180deg at 50% 0%, transparent 40%, hsl(43, 74%, 49%) 48%, hsl(45, 80%, 70%) 50%, hsl(43, 74%, 49%) 52%, transparent 60%)",
+                          opacity: 0.15,
                         }}
-                        className="btn-gold w-full text-base md:text-xl py-6 animate-pulse hover:animate-none"
-                      >
-                        YES, I WANT THIS CAKE! - CHECKOUT NOW 💍
-                      </Button>
-                    </motion.div>
+                      />
+                    </div>
 
-                    <motion.button
+                    {/* Spotlight effect from top */}
+                    <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ delay: 0.8 }}
-                      onClick={() => setIsReadyToOrder(false)}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-                    >
-                      ← Go back and edit my design
-                    </motion.button>
-                  </div>
-                </motion.div>
+                      transition={{ delay: 0.5, duration: 1.5 }}
+                      className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-80"
+                      style={{
+                        background: "radial-gradient(ellipse at top, hsl(43, 74%, 49%, 0.25) 0%, hsl(43, 74%, 49%, 0.1) 30%, transparent 70%)",
+                      }}
+                    />
+
+                    {/* Golden border glow */}
+                    <div className="absolute inset-0 rounded-3xl border-2 border-secondary/60" 
+                      style={{ boxShadow: "inset 0 0 60px hsl(43, 74%, 49%, 0.2), 0 0 40px hsl(43, 74%, 49%, 0.15)" }} 
+                    />
+
+                    {/* Ornate corner decorations */}
+                    <div className="absolute top-3 left-3">
+                      <svg width="40" height="40" viewBox="0 0 40 40" className="text-secondary">
+                        <path d="M0 40 L0 15 Q0 0 15 0 L40 0" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />
+                        <circle cx="15" cy="15" r="3" fill="currentColor" opacity="0.6" />
+                      </svg>
+                    </div>
+                    <div className="absolute top-3 right-3 rotate-90">
+                      <svg width="40" height="40" viewBox="0 0 40 40" className="text-secondary">
+                        <path d="M0 40 L0 15 Q0 0 15 0 L40 0" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />
+                        <circle cx="15" cy="15" r="3" fill="currentColor" opacity="0.6" />
+                      </svg>
+                    </div>
+                    <div className="absolute bottom-3 left-3 -rotate-90">
+                      <svg width="40" height="40" viewBox="0 0 40 40" className="text-secondary">
+                        <path d="M0 40 L0 15 Q0 0 15 0 L40 0" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />
+                        <circle cx="15" cy="15" r="3" fill="currentColor" opacity="0.6" />
+                      </svg>
+                    </div>
+                    <div className="absolute bottom-3 right-3 rotate-180">
+                      <svg width="40" height="40" viewBox="0 0 40 40" className="text-secondary">
+                        <path d="M0 40 L0 15 Q0 0 15 0 L40 0" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />
+                        <circle cx="15" cy="15" r="3" fill="currentColor" opacity="0.6" />
+                      </svg>
+                    </div>
+
+                    {/* Floating golden particles */}
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ 
+                          opacity: [0, 0.8, 0],
+                          y: [-10, -40, -70],
+                        }}
+                        transition={{
+                          duration: 3,
+                          delay: 1 + i * 0.2,
+                          repeat: Infinity,
+                          repeatDelay: 2,
+                        }}
+                        className="absolute w-1 h-1 rounded-full bg-secondary"
+                        style={{
+                          left: `${10 + (i * 7)}%`,
+                          bottom: "20%",
+                          boxShadow: "0 0 6px hsl(43, 74%, 49%)",
+                        }}
+                      />
+                    ))}
+
+                    <div className="relative z-10 p-8 md:p-12 text-center space-y-6">
+                      {/* Crown Icon */}
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0, rotate: -20 }}
+                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                        transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                        className="flex justify-center"
+                      >
+                        <div className="relative">
+                          <Crown className="h-16 w-16 md:h-20 md:w-20 text-secondary" 
+                            style={{ filter: "drop-shadow(0 0 20px hsl(43, 74%, 49%, 0.6))" }} 
+                          />
+                          <motion.div
+                            animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.8, 0.5] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="absolute inset-0 flex justify-center items-center"
+                          >
+                            <div className="w-24 h-24 rounded-full bg-secondary/20 blur-xl" />
+                          </motion.div>
+                        </div>
+                      </motion.div>
+
+                      {/* Title with golden glow */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        <h2 
+                          className="font-display text-2xl md:text-4xl lg:text-5xl font-bold tracking-wider"
+                          style={{ 
+                            background: "linear-gradient(180deg, hsl(45, 100%, 85%) 0%, hsl(43, 74%, 49%) 50%, hsl(35, 70%, 40%) 100%)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            textShadow: "0 0 40px hsl(43, 74%, 49%, 0.5)",
+                            filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                          }}
+                        >
+                          ✨ YOU BUILT THE WEDDING CAKE OF YOUR DREAMS! ✨
+                        </h2>
+                      </motion.div>
+                      
+                      {/* Subtitle */}
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6 }}
+                        className="text-lg md:text-xl max-w-lg mx-auto"
+                        style={{ color: "hsl(43, 30%, 75%)" }}
+                      >
+                        Your design is unique and spectacular. Don't let someone else take your date.
+                      </motion.p>
+
+                      {/* Decorative divider */}
+                      <motion.div
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ delay: 0.7, duration: 0.5 }}
+                        className="flex items-center justify-center gap-4 py-2"
+                      >
+                        <div className="h-px w-16 bg-gradient-to-r from-transparent to-secondary/60" />
+                        <Sparkles className="h-5 w-5 text-secondary" />
+                        <div className="h-px w-16 bg-gradient-to-l from-transparent to-secondary/60" />
+                      </motion.div>
+
+                      {/* Price Display */}
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.8 }}
+                        className="py-6"
+                      >
+                        <span 
+                          className="text-sketch block text-base uppercase tracking-widest mb-2"
+                          style={{ color: "hsl(43, 30%, 60%)" }}
+                        >
+                          Your Investment
+                        </span>
+                        <motion.span 
+                          initial={{ scale: 0.8 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 1, type: "spring" }}
+                          className="font-display text-5xl md:text-7xl font-bold block"
+                          style={{ 
+                            background: "linear-gradient(180deg, hsl(45, 100%, 90%) 0%, hsl(43, 74%, 49%) 40%, hsl(38, 70%, 45%) 100%)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.4))",
+                          }}
+                        >
+                          ${totalPrice.toFixed(0)}
+                        </motion.span>
+                      </motion.div>
+
+                      {/* CTA Button */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 1 }}
+                      >
+                        <Button
+                          onClick={() => {
+                            const productId = "PRODUCT_ID";
+                            const checkoutUrl = `https://cateringabeusaleh.ca/?add-to-cart=${productId}&custom_price=${totalPrice.toFixed(2)}`;
+                            
+                            const configData = {
+                              guests: guestCount,
+                              tiers: structure.tiers.map((tier, index) => {
+                                const config = tierConfigs[index];
+                                return {
+                                  tier: tier.tierLevel,
+                                  size: tier.sizeInches,
+                                  servings: tier.servings,
+                                  sponge: spongeOptions.find(s => s.id === config?.spongeId)?.name,
+                                  filling: fillingOptions.find(f => f.id === config?.fillingId)?.name,
+                                };
+                              }),
+                              coating: coatingOptions.find(c => c.id === coatingId)?.name,
+                              decoration: decorationOptions.find(d => d.id === decorationId)?.name,
+                              topper: topperOptions.find(t => t.id === topperId)?.name,
+                              topperNames: topperNames || null,
+                              floralPalette: floralPalette || null,
+                              totalPrice: totalPrice,
+                            };
+                            console.log("Wedding Cake Configuration:", JSON.stringify(configData, null, 2));
+                            
+                            window.open(checkoutUrl, "_blank");
+                          }}
+                          className="w-full md:w-auto md:px-16 text-lg md:text-xl py-7 font-bold tracking-wide rounded-xl transition-all duration-300 hover:scale-105"
+                          style={{
+                            background: "linear-gradient(135deg, hsl(43, 74%, 49%) 0%, hsl(38, 80%, 45%) 50%, hsl(43, 74%, 49%) 100%)",
+                            color: "hsl(20, 15%, 8%)",
+                            boxShadow: "0 0 30px hsl(43, 74%, 49%, 0.5), 0 10px 40px rgba(0,0,0,0.4), inset 0 1px 0 hsl(45, 100%, 80%)",
+                            border: "1px solid hsl(43, 74%, 60%)",
+                          }}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            💍 YES, I WANT THIS CAKE! - CHECKOUT NOW
+                          </span>
+                        </Button>
+                      </motion.div>
+
+                      {/* Back button */}
+                      <motion.button
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1.2 }}
+                        onClick={() => setIsReadyToOrder(false)}
+                        className="text-sm transition-colors underline underline-offset-4 mt-4"
+                        style={{ color: "hsl(43, 20%, 50%)" }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = "hsl(43, 30%, 70%)"}
+                        onMouseLeave={(e) => e.currentTarget.style.color = "hsl(43, 20%, 50%)"}
+                      >
+                        ← Go back and edit my design
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </>
               )}
             </AnimatePresence>
           </div>
