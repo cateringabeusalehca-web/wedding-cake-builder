@@ -43,6 +43,7 @@ export function CakeConfigurator() {
   const [floralPalette, setFloralPalette] = useState("");
   const [topperNames, setTopperNames] = useState("");
   const [currentView, setCurrentView] = useState<View>("configurator");
+  const [isReadyToOrder, setIsReadyToOrder] = useState(false);
 
   const structure = useMemo(() => getRecommendedStructure(guestCount), [guestCount]);
 
@@ -330,64 +331,148 @@ export function CakeConfigurator() {
               onTopperNamesChange={setTopperNames}
             />
 
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="space-y-4 pt-4"
-            >
-              <Button
-                onClick={() => {
-                  // WooCommerce product ID for "Torta de Boda Personalizada"
-                  // Replace PRODUCT_ID with your actual WooCommerce product ID
-                  const productId = "PRODUCT_ID"; // TODO: Replace with actual product ID
-                  const checkoutUrl = `https://cateringabeusaleh.ca/?add-to-cart=${productId}&custom_price=${totalPrice.toFixed(2)}`;
-                  
-                  // Log the configuration for CRM ingestion
-                  const configData = {
-                    guests: guestCount,
-                    tiers: structure.tiers.map((tier, index) => {
-                      const config = tierConfigs[index];
-                      return {
-                        tier: tier.tierLevel,
-                        size: tier.sizeInches,
-                        servings: tier.servings,
-                        sponge: spongeOptions.find(s => s.id === config?.spongeId)?.name,
-                        filling: fillingOptions.find(f => f.id === config?.fillingId)?.name,
-                      };
-                    }),
-                    coating: coatingOptions.find(c => c.id === coatingId)?.name,
-                    decoration: decorationOptions.find(d => d.id === decorationId)?.name,
-                    topper: topperOptions.find(t => t.id === topperId)?.name,
-                    topperNames: topperNames || null,
-                    floralPalette: floralPalette || null,
-                    totalPrice: totalPrice,
-                  };
-                  console.log("Wedding Cake Configuration:", JSON.stringify(configData, null, 2));
-                  
-                  window.open(checkoutUrl, "_blank");
-                }}
-                className="btn-gold w-full text-base md:text-lg py-6 animate-pulse hover:animate-none"
-              >
-                ✨ ¡CONSTRUISTE TU WEDDING CAKE DE TUS SUEÑOS! ✨
-              </Button>
-
-              <a
-                href="https://cateringabeusaleh.ca/product/cake-taster-box/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-              >
-                <Button
-                  variant="outline"
-                  className="btn-architectural w-full gap-2"
+            {/* Ready to Order Button */}
+            <AnimatePresence>
+              {!isReadyToOrder && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ delay: 0.5 }}
+                  className="space-y-4 pt-4"
                 >
-                  <span>Not sure? Order a Cake Taster Box</span>
-                  <ExternalLink className="h-3 w-3" />
-                </Button>
-              </a>
-            </motion.div>
+                  <Button
+                    onClick={() => setIsReadyToOrder(true)}
+                    className="btn-gold w-full text-base md:text-lg py-6"
+                  >
+                    ✨ I'm Ready to Order My Cake! ✨
+                  </Button>
+
+                  <a
+                    href="https://cateringabeusaleh.ca/product/cake-taster-box/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <Button
+                      variant="outline"
+                      className="btn-architectural w-full gap-2"
+                    >
+                      <span>Not sure? Order a Cake Taster Box</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </Button>
+                  </a>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Celebration Checkout Section */}
+            <AnimatePresence>
+              {isReadyToOrder && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  className="relative mt-6 overflow-hidden rounded-2xl border-2 border-secondary bg-gradient-to-br from-secondary/20 via-secondary/10 to-background p-8 shadow-2xl"
+                >
+                  {/* Decorative sparkles */}
+                  <div className="absolute top-4 left-4 h-2 w-2 rounded-full bg-secondary animate-pulse" />
+                  <div className="absolute top-6 right-8 h-3 w-3 rounded-full bg-secondary/60 animate-pulse" style={{ animationDelay: "0.5s" }} />
+                  <div className="absolute bottom-8 left-12 h-2 w-2 rounded-full bg-secondary/80 animate-pulse" style={{ animationDelay: "1s" }} />
+                  <div className="absolute bottom-4 right-4 h-2 w-2 rounded-full bg-secondary animate-pulse" style={{ animationDelay: "0.3s" }} />
+
+                  {/* Corner accents */}
+                  <div className="absolute top-0 left-0 h-8 w-8 border-t-4 border-l-4 border-secondary rounded-tl-xl" />
+                  <div className="absolute top-0 right-0 h-8 w-8 border-t-4 border-r-4 border-secondary rounded-tr-xl" />
+                  <div className="absolute bottom-0 left-0 h-8 w-8 border-b-4 border-l-4 border-secondary rounded-bl-xl" />
+                  <div className="absolute bottom-0 right-0 h-8 w-8 border-b-4 border-r-4 border-secondary rounded-br-xl" />
+
+                  <div className="text-center space-y-4">
+                    <motion.h2
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="font-display text-2xl md:text-3xl lg:text-4xl font-bold text-secondary tracking-wide"
+                    >
+                      YOU BUILT THE WEDDING CAKE OF YOUR DREAMS!
+                    </motion.h2>
+                    
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                      className="text-muted-foreground text-base md:text-lg"
+                    >
+                      Your design is unique and spectacular. Don't let someone else take your date.
+                    </motion.p>
+
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                      className="py-4"
+                    >
+                      <span className="text-sketch text-muted-foreground block text-sm">
+                        Your Investment:
+                      </span>
+                      <span className="font-display text-4xl md:text-5xl text-secondary">
+                        ${totalPrice.toFixed(0)}
+                      </span>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                    >
+                      <Button
+                        onClick={() => {
+                          const productId = "PRODUCT_ID";
+                          const checkoutUrl = `https://cateringabeusaleh.ca/?add-to-cart=${productId}&custom_price=${totalPrice.toFixed(2)}`;
+                          
+                          const configData = {
+                            guests: guestCount,
+                            tiers: structure.tiers.map((tier, index) => {
+                              const config = tierConfigs[index];
+                              return {
+                                tier: tier.tierLevel,
+                                size: tier.sizeInches,
+                                servings: tier.servings,
+                                sponge: spongeOptions.find(s => s.id === config?.spongeId)?.name,
+                                filling: fillingOptions.find(f => f.id === config?.fillingId)?.name,
+                              };
+                            }),
+                            coating: coatingOptions.find(c => c.id === coatingId)?.name,
+                            decoration: decorationOptions.find(d => d.id === decorationId)?.name,
+                            topper: topperOptions.find(t => t.id === topperId)?.name,
+                            topperNames: topperNames || null,
+                            floralPalette: floralPalette || null,
+                            totalPrice: totalPrice,
+                          };
+                          console.log("Wedding Cake Configuration:", JSON.stringify(configData, null, 2));
+                          
+                          window.open(checkoutUrl, "_blank");
+                        }}
+                        className="btn-gold w-full text-base md:text-xl py-6 animate-pulse hover:animate-none"
+                      >
+                        YES, I WANT THIS CAKE! - CHECKOUT NOW 💍
+                      </Button>
+                    </motion.div>
+
+                    <motion.button
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.8 }}
+                      onClick={() => setIsReadyToOrder(false)}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
+                    >
+                      ← Go back and edit my design
+                    </motion.button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </main>
