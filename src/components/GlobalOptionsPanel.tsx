@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
-  outerFinishes,
+  coatingOptions,
   decorationOptions,
   topperOptions,
 } from "@/data/menuDatabase";
 
 interface GlobalOptionsPanelProps {
-  finishId: string;
-  onFinishChange: (id: string) => void;
+  coatingId: string;
+  onCoatingChange: (id: string) => void;
   decorationId: string;
   onDecorationChange: (id: string) => void;
   topperId: string;
@@ -26,8 +26,8 @@ interface GlobalOptionsPanelProps {
 }
 
 export function GlobalOptionsPanel({
-  finishId,
-  onFinishChange,
+  coatingId,
+  onCoatingChange,
   decorationId,
   onDecorationChange,
   topperId,
@@ -44,33 +44,28 @@ export function GlobalOptionsPanel({
       transition={{ delay: 0.4 }}
       className="card-architectural space-y-5"
     >
-      <h3 className="heading-editorial text-xl">Finish & Decoration</h3>
+      <h3 className="heading-editorial text-xl">Frosting & Decoration</h3>
 
-      {/* Outer Finish */}
+      {/* Frosting / Coating */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Palette className="h-4 w-4 text-muted-foreground" />
-          <label className="text-sketch text-muted-foreground">
-            Outer Finish
+          <label className="text-xs font-semibold uppercase tracking-wider text-secondary">
+            Frosting (Outer Coating)
           </label>
         </div>
-        <Select value={finishId} onValueChange={onFinishChange}>
+        <Select value={coatingId} onValueChange={onCoatingChange}>
           <SelectTrigger className="input-sketch border-0 border-b">
-            <SelectValue placeholder="Select finish" />
+            <SelectValue placeholder="Select frosting" />
           </SelectTrigger>
           <SelectContent>
-            {outerFinishes.map((finish) => (
-              <SelectItem key={finish.id} value={finish.id}>
+            {coatingOptions.map((coating) => (
+              <SelectItem key={coating.id} value={coating.id}>
                 <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <span className="font-medium">{finish.name}</span>
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {finish.description}
-                    </span>
-                  </div>
-                  {finish.flatFee > 0 && (
+                  <span className="font-medium">{coating.name}</span>
+                  {coating.flatFee > 0 && (
                     <span className="text-xs text-secondary font-medium">
-                      +${finish.flatFee}
+                      +${coating.flatFee}
                     </span>
                   )}
                 </div>
@@ -84,7 +79,7 @@ export function GlobalOptionsPanel({
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-muted-foreground" />
-          <label className="text-sketch text-muted-foreground">
+          <label className="text-xs font-semibold uppercase tracking-wider text-secondary">
             Decoration & Florals
           </label>
         </div>
@@ -141,7 +136,7 @@ export function GlobalOptionsPanel({
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Crown className="h-4 w-4 text-muted-foreground" />
-          <label className="text-sketch text-muted-foreground">
+          <label className="text-xs font-semibold uppercase tracking-wider text-secondary">
             Cake Topper
           </label>
         </div>

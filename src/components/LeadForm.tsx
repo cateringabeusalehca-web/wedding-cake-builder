@@ -26,9 +26,9 @@ import {
   CakeStructure,
   TierConfiguration,
   spongeOptions,
-  dietaryUpgrades,
+  dietaryOptions,
   fillingOptions,
-  outerFinishes,
+  coatingOptions,
   decorationOptions,
   topperOptions,
   getTierLabel,
@@ -38,7 +38,7 @@ interface LeadFormProps {
   guestCount: number;
   structure: CakeStructure;
   tierConfigs: TierConfiguration[];
-  finishId: string;
+  coatingId: string;
   decorationId: string;
   topperId: string;
   floralPalette: string;
@@ -51,7 +51,7 @@ export function LeadForm({
   guestCount,
   structure,
   tierConfigs,
-  finishId,
+  coatingId,
   decorationId,
   topperId,
   floralPalette,
@@ -127,7 +127,7 @@ export function LeadForm({
         tiersConfiguration: tierConfigs.map((config, index) => {
           const tierInfo = structure.tiers[index];
           const sponge = spongeOptions.find((s) => s.id === config.spongeId);
-          const dietary = dietaryUpgrades.find((d) => d.id === config.dietaryId);
+          const dietary = dietaryOptions.find((d) => d.id === config.dietaryId);
           const filling = fillingOptions.find((f) => f.id === config.fillingId);
           return {
             tierLevel: tierInfo?.tierLevel || index + 1,
@@ -139,7 +139,7 @@ export function LeadForm({
             filling: filling?.name || config.fillingId,
           };
         }),
-        finish: outerFinishes.find((f) => f.id === finishId)?.name || finishId,
+        frosting: coatingOptions.find((c) => c.id === coatingId)?.name || coatingId,
         decoration: decorationOptions.find((d) => d.id === decorationId)?.name || decorationId,
         floralPalette: floralPalette || null,
         topper: topperOptions.find((t) => t.id === topperId)?.name || topperId,
