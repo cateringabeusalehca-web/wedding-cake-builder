@@ -132,10 +132,12 @@ export function TierConfigPanel({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Cake className="h-4 w-4 text-secondary" />
+          <Cake className="h-5 w-5 text-secondary" />
           <div>
-            <h3 className="heading-editorial text-xl">{tierLabel}</h3>
-            <p className="text-xs text-muted-foreground">
+            <h3 className="font-display text-2xl font-bold uppercase tracking-wide text-foreground">
+              {tierLabel}
+            </h3>
+            <p className="text-sm text-muted-foreground">
               {tierInfo.sizeInches}" • {tierInfo.servings} servings
             </p>
           </div>
@@ -167,11 +169,16 @@ export function TierConfigPanel({
       <div className="space-y-5">
         {/* Dietary Selection */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
-              Dietary
-            </span>
-            <span className="text-xs text-muted-foreground">(Optional)</span>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
+                Dietary
+              </span>
+              <span className="text-xs text-muted-foreground">(Optional)</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Special dietary requirements for this tier
+            </p>
           </div>
           <Select
             value={config.dietaryId}
@@ -209,11 +216,16 @@ export function TierConfigPanel({
 
         {/* Sponge Selection */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Layers className="h-3 w-3 text-secondary" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
-              Sponge
-            </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <Layers className="h-4 w-4 text-secondary" />
+              <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
+                Sponge
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Choose the cake base flavor for this tier
+            </p>
           </div>
           <Select
             value={config.spongeId}
@@ -256,11 +268,16 @@ export function TierConfigPanel({
 
         {/* Filling Selection */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Palette className="h-3 w-3 text-secondary" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
-              Filling
-            </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <Palette className="h-4 w-4 text-secondary" />
+              <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
+                Filling
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Select the cream between your cake layers
+            </p>
           </div>
           <Select
             value={config.fillingId}
