@@ -43,7 +43,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs }: 
     <div className="relative flex items-center justify-center">
       <svg
         viewBox="0 0 400 420"
-        className="h-[400px] w-full max-w-[400px] md:h-[500px]"
+        className="h-[480px] w-full max-w-[480px] md:h-[580px] md:max-w-[520px]"
         style={{ overflow: "visible" }}
       >
         {/* Blueprint grid lines */}
