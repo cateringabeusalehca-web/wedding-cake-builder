@@ -23,6 +23,8 @@ interface GlobalOptionsPanelProps {
   onTopperChange: (id: string) => void;
   floralPalette: string;
   onFloralPaletteChange: (palette: string) => void;
+  topperNames: string;
+  onTopperNamesChange: (names: string) => void;
 }
 
 export function GlobalOptionsPanel({
@@ -34,8 +36,11 @@ export function GlobalOptionsPanel({
   onTopperChange,
   floralPalette,
   onFloralPaletteChange,
+  topperNames,
+  onTopperNamesChange,
 }: GlobalOptionsPanelProps) {
   const selectedDecoration = decorationOptions.find((d) => d.id === decorationId);
+  const selectedTopper = topperOptions.find((t) => t.id === topperId);
 
   return (
     <motion.div
@@ -174,6 +179,26 @@ export function GlobalOptionsPanel({
             ))}
           </SelectContent>
         </Select>
+
+        {/* Custom names input */}
+        {selectedTopper?.hasNameInput && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="pt-2"
+          >
+            <Input
+              value={topperNames}
+              onChange={(e) => onTopperNamesChange(e.target.value)}
+              placeholder="e.g., Jennifer & Matthew"
+              className="input-sketch"
+              maxLength={50}
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              Enter both names as you'd like them printed
+            </p>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

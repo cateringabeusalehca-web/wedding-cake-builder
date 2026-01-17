@@ -41,6 +41,7 @@ export function CakeConfigurator() {
   const [decorationId, setDecorationId] = useState(decorationOptions[0].id);
   const [topperId, setTopperId] = useState(topperOptions[0].id);
   const [floralPalette, setFloralPalette] = useState("");
+  const [topperNames, setTopperNames] = useState("");
   const [currentView, setCurrentView] = useState<View>("configurator");
 
   const structure = useMemo(() => getRecommendedStructure(guestCount), [guestCount]);
@@ -325,6 +326,8 @@ export function CakeConfigurator() {
               onTopperChange={setTopperId}
               floralPalette={floralPalette}
               onFloralPaletteChange={setFloralPalette}
+              topperNames={topperNames}
+              onTopperNamesChange={setTopperNames}
             />
 
             {/* CTA Buttons */}
