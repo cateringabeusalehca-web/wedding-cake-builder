@@ -144,12 +144,22 @@ export function CakeConfigurator() {
         className="border-b border-border bg-background/80 backdrop-blur-sm"
       >
         <div className="container flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <Cake className="h-5 w-5 text-secondary" />
-            <span className="font-display text-lg tracking-wide">
-              Abeu-Saleh
-            </span>
-          </div>
+          <motion.img 
+            src={logoAbeusaleh} 
+            alt="Abeu-Saleh Catering" 
+            className="h-10 w-auto"
+            style={{ 
+              filter: "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 8px hsl(43, 74%, 49%, 0.4))",
+            }}
+            animate={{
+              filter: [
+                "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 8px hsl(43, 74%, 49%, 0.4))",
+                "brightness(1.3) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 12px hsl(43, 74%, 49%, 0.6))",
+                "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 8px hsl(43, 74%, 49%, 0.4))",
+              ]
+            }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          />
           <span className="text-sketch text-muted-foreground hidden sm:block">
             Cake Design Studio
           </span>
