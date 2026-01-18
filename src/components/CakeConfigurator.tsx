@@ -11,6 +11,7 @@ import { GlobalOptionsPanel } from "./GlobalOptionsPanel";
 import { ConfettiCelebration } from "./ConfettiCelebration";
 import { BrandLogoShape, BrandCornerDecor, BrandAccent } from "./BrandLogoShape";
 import logoAbeusaleh from "@/assets/logo-abeusaleh.png";
+import logoHorizontal from "@/assets/logo-horizontal.png";
 import {
   getRecommendedStructure,
   TierConfiguration,
@@ -727,24 +728,17 @@ export function CakeConfigurator() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-border py-8">
-        <div className="container px-4 flex flex-col items-center gap-4">
+      <footer className="mt-auto border-t border-border py-4">
+        <div className="container px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <motion.img 
-            src={logoAbeusaleh} 
-            alt="Abeu-Saleh Catering" 
-            className="h-12 w-auto opacity-80"
-            style={{ 
-              filter: "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 6px hsl(43, 74%, 49%, 0.3))",
-            }}
-            whileHover={{
-              scale: 1.05,
-              filter: "brightness(1.3) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 12px hsl(43, 74%, 49%, 0.5))",
-            }}
+            src={logoHorizontal} 
+            alt="Abeu-Saleh Catering & Events" 
+            className="h-8 w-auto"
+            whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
           />
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Catering Abeu-Saleh. All designs
-            require minimum 28 days lead time.
+          <p className="text-xs text-muted-foreground text-center sm:text-right">
+            © {new Date().getFullYear()} All designs require minimum 28 days lead time.
           </p>
         </div>
       </footer>
