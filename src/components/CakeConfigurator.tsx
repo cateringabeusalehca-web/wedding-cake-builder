@@ -728,7 +728,20 @@ export function CakeConfigurator() {
 
       {/* Footer */}
       <footer className="mt-auto border-t border-border py-8">
-        <div className="container px-4 text-center">
+        <div className="container px-4 flex flex-col items-center gap-4">
+          <motion.img 
+            src={logoAbeusaleh} 
+            alt="Abeu-Saleh Catering" 
+            className="h-12 w-auto opacity-80"
+            style={{ 
+              filter: "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 6px hsl(43, 74%, 49%, 0.3))",
+            }}
+            whileHover={{
+              scale: 1.05,
+              filter: "brightness(1.3) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 12px hsl(43, 74%, 49%, 0.5))",
+            }}
+            transition={{ duration: 0.3 }}
+          />
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Catering Abeu-Saleh. All designs
             require minimum 28 days lead time.
