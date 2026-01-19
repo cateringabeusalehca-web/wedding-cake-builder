@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cake, ExternalLink, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { LeadForm } from "./LeadForm";
 import { SuccessScreen } from "./SuccessScreen";
 import { GlobalOptionsPanel } from "./GlobalOptionsPanel";
 import { ConfettiCelebration } from "./ConfettiCelebration";
+import { StickyPriceBar } from "./StickyPriceBar";
 import { BrandLogoShape, BrandCornerDecor, BrandAccent } from "./BrandLogoShape";
 import logoAbeusaleh from "@/assets/logo-abeusaleh.png";
 import logoHorizontal from "@/assets/logo-horizontal.png";
@@ -48,6 +49,8 @@ export function CakeConfigurator() {
   const [topperNames, setTopperNames] = useState("");
   const [currentView, setCurrentView] = useState<View>("configurator");
   const [isReadyToOrder, setIsReadyToOrder] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const priceDisplayRef = useRef<HTMLDivElement>(null);
 
   const structure = useMemo(() => getRecommendedStructure(guestCount), [guestCount]);
 
@@ -107,6 +110,22 @@ export function CakeConfigurator() {
     setCurrentView("configurator");
   }, []);
 
+  // Intersection observer to show sticky bar when price display scrolls out of view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowStickyBar(!entry.isIntersecting);
+      },
+      { threshold: 0, rootMargin: "-80px 0px 0px 0px" }
+    );
+
+    if (priceDisplayRef.current) {
+      observer.observe(priceDisplayRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   const selectedTierInfo = selectedTier
     ? structure.tiers.find((t) => t.tierLevel === selectedTier)
     : null;
@@ -120,6 +139,14 @@ export function CakeConfigurator() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Sticky Price Bar */}
+      <StickyPriceBar
+        guestCount={guestCount}
+        eventName={structure.name}
+        totalServings={structure.totalServings}
+        totalPrice={totalPrice}
+        isVisible={showStickyBar}
+      />
       {/* Lead Form Modal */}
       <AnimatePresence>
         {currentView === "form" && (
@@ -189,6 +216,7 @@ export function CakeConfigurator() {
 
         {/* Price Display */}
         <motion.div
+          ref={priceDisplayRef}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
