@@ -531,19 +531,16 @@ export function CakeConfigurator() {
                             </motion.div>
                           ))}
 
-                          {/* Logo image with golden filter */}
+                          {/* Logo image - using horizontal gold logo */}
                           <motion.img 
-                            src={logoAbeusaleh} 
+                            src={logoHorizontal} 
                             alt="Abeu-Saleh Catering" 
-                            className="w-40 h-auto md:w-56 relative z-10"
-                            style={{ 
-                              filter: "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 20px hsl(43, 74%, 49%, 0.6))",
-                            }}
+                            className="w-48 h-auto md:w-72 relative z-10"
                             animate={{
                               filter: [
-                                "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 20px hsl(43, 74%, 49%, 0.6))",
-                                "brightness(1.4) sepia(1) saturate(3.5) hue-rotate(10deg) drop-shadow(0 0 35px hsl(43, 74%, 49%, 0.8))",
-                                "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 20px hsl(43, 74%, 49%, 0.6))",
+                                "drop-shadow(0 0 20px hsl(43, 74%, 49%, 0.6))",
+                                "drop-shadow(0 0 35px hsl(43, 74%, 49%, 0.9))",
+                                "drop-shadow(0 0 20px hsl(43, 74%, 49%, 0.6))",
                               ]
                             }}
                             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -557,17 +554,30 @@ export function CakeConfigurator() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
                       >
-                        <h2 
-                          className="font-display text-2xl md:text-4xl lg:text-5xl font-bold tracking-wider"
-                          style={{ 
-                            background: "linear-gradient(180deg, hsl(45, 100%, 85%) 0%, hsl(43, 74%, 49%) 50%, hsl(35, 70%, 40%) 100%)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                            textShadow: "0 0 40px hsl(43, 74%, 49%, 0.5)",
-                            filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
-                          }}
-                        >
-                          ✨ YOU BUILT THE WEDDING CAKE OF YOUR DREAMS! ✨
+                        <h2 className="font-display font-bold tracking-wider text-center">
+                          <span 
+                            className="block text-lg md:text-2xl lg:text-3xl mb-1"
+                            style={{ 
+                              background: "linear-gradient(180deg, hsl(45, 100%, 85%) 0%, hsl(43, 74%, 49%) 50%, hsl(35, 70%, 40%) 100%)",
+                              WebkitBackgroundClip: "text",
+                              WebkitTextFillColor: "transparent",
+                              filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                            }}
+                          >
+                            YOU BUILT THE WEDDING CAKE OF
+                          </span>
+                          <span 
+                            className="block text-4xl md:text-6xl lg:text-7xl"
+                            style={{ 
+                              background: "linear-gradient(180deg, hsl(45, 100%, 90%) 0%, hsl(43, 74%, 49%) 40%, hsl(35, 70%, 40%) 100%)",
+                              WebkitBackgroundClip: "text",
+                              WebkitTextFillColor: "transparent",
+                              textShadow: "0 0 50px hsl(43, 74%, 49%, 0.6)",
+                              filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.4))",
+                            }}
+                          >
+                            YOUR DREAMS!
+                          </span>
                         </h2>
                       </motion.div>
                       
@@ -590,7 +600,7 @@ export function CakeConfigurator() {
                         className="flex items-center justify-center gap-4 py-2"
                       >
                         <div className="h-px w-16 bg-gradient-to-r from-transparent to-secondary/60" />
-                        <Sparkles className="h-5 w-5 text-secondary" />
+                        <BrandLogoShape size={24} color="hsl(43, 74%, 49%)" />
                         <div className="h-px w-16 bg-gradient-to-l from-transparent to-secondary/60" />
                       </motion.div>
 
@@ -673,7 +683,7 @@ export function CakeConfigurator() {
                               
                               window.open(checkoutUrl, "_blank");
                             }}
-                            className="w-full md:w-auto md:px-20 py-8 font-bold tracking-wide rounded-xl transition-all duration-300 hover:scale-105"
+                            className="w-full py-6 font-bold tracking-wide rounded-xl transition-all duration-300 hover:scale-105"
                             style={{
                               background: "linear-gradient(135deg, hsl(43, 74%, 49%) 0%, hsl(38, 80%, 45%) 50%, hsl(43, 74%, 49%) 100%)",
                               color: "hsl(20, 15%, 8%)",
@@ -681,7 +691,7 @@ export function CakeConfigurator() {
                             }}
                           >
                             <motion.span 
-                              className="flex flex-col items-center justify-center"
+                              className="flex items-center justify-center gap-3"
                               animate={{ 
                                 textShadow: [
                                   "0 0 0px transparent",
@@ -691,14 +701,8 @@ export function CakeConfigurator() {
                               }}
                               transition={{ duration: 1.5, repeat: Infinity }}
                             >
-                              <span className="flex items-center gap-2 text-3xl md:text-5xl font-extrabold">
-                                💍 YES!
-                              </span>
-                              <span className="text-base md:text-xl font-bold mt-2">
-                                I WANT THIS CAKE!
-                              </span>
-                              <span className="text-xs font-medium mt-2 opacity-80 tracking-widest uppercase">
-                                Checkout
+                              <span className="text-2xl md:text-3xl font-extrabold">
+                                YES! I WANT THIS CAKE!
                               </span>
                             </motion.span>
                           </Button>
