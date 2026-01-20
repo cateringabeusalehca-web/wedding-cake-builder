@@ -13,6 +13,7 @@ import { StickyPriceBar } from "./StickyPriceBar";
 import { BrandLogoShape, BrandCornerDecor, BrandAccent } from "./BrandLogoShape";
 import logoAbeusaleh from "@/assets/logo-abeusaleh.png";
 import logoHorizontal from "@/assets/logo-horizontal.png";
+import logoAmarillo from "@/assets/logo-amarillo.png";
 import {
   getRecommendedStructure,
   TierConfiguration,
@@ -173,20 +174,11 @@ export function CakeConfigurator() {
       >
         <div className="container flex h-16 items-center justify-between px-4">
           <motion.img 
-            src={logoAbeusaleh} 
-            alt="Abeu-Saleh Catering" 
-            className="h-10 w-auto"
-            style={{ 
-              filter: "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 8px hsl(43, 74%, 49%, 0.4))",
-            }}
-            animate={{
-              filter: [
-                "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 8px hsl(43, 74%, 49%, 0.4))",
-                "brightness(1.3) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 12px hsl(43, 74%, 49%, 0.6))",
-                "brightness(1.2) sepia(1) saturate(3) hue-rotate(10deg) drop-shadow(0 0 8px hsl(43, 74%, 49%, 0.4))",
-              ]
-            }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            src={logoAmarillo} 
+            alt="Abeu-Saleh Catering & Events" 
+            className="h-14 md:h-16 w-auto"
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.3 }}
           />
           <span className="text-sketch text-muted-foreground hidden sm:block">
             Cake Design Studio
