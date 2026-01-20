@@ -176,7 +176,8 @@ export function CakeConfigurator() {
           <motion.img 
             src={logoAmarillo} 
             alt="Abeu-Saleh Catering & Events" 
-            className="h-14 md:h-16 w-auto"
+            className="h-14 md:h-16 w-auto mix-blend-multiply dark:mix-blend-screen dark:invert"
+            style={{ background: 'transparent' }}
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
           />
