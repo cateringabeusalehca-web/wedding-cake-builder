@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cake, ExternalLink, Sparkles } from "lucide-react";
+import { Cake, ExternalLink, Sparkles, Instagram, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CakeSVG } from "./CakeSVG";
 import { GuestSlider } from "./GuestSlider";
@@ -761,7 +761,7 @@ export function CakeConfigurator() {
 
       {/* Footer */}
       <footer className="mt-auto border-t border-border py-4">
-        <div className="container px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="container px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <motion.img 
             src={logoHorizontal} 
             alt="Abeu-Saleh Catering & Events" 
@@ -769,9 +769,29 @@ export function CakeConfigurator() {
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
           />
-          <p className="text-xs text-muted-foreground text-center sm:text-right">
+          <p className="text-xs text-muted-foreground text-center">
             © {new Date().getFullYear()} All designs require minimum 28 days lead time.
           </p>
+          <div className="flex items-center gap-3">
+            <a 
+              href="https://www.instagram.com/abeusalehcatering/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors"
+              aria-label="Instagram"
+            >
+              <Instagram className="h-5 w-5" />
+            </a>
+            <a 
+              href="https://www.facebook.com/abeusalehcatering/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors"
+              aria-label="Facebook"
+            >
+              <Facebook className="h-5 w-5" />
+            </a>
+          </div>
         </div>
       </footer>
     </div>
