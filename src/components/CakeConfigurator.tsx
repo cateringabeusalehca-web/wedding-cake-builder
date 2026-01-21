@@ -620,9 +620,9 @@ export function CakeConfigurator() {
                         transition={{ delay: 0.7, duration: 0.5 }}
                         className="flex items-center justify-center gap-4 py-2"
                       >
-                        <div className="h-px w-16 bg-gradient-to-r from-transparent to-secondary/60" />
-                        <BrandLogoShape size={24} color="hsl(43, 74%, 49%)" />
-                        <div className="h-px w-16 bg-gradient-to-l from-transparent to-secondary/60" />
+                        <div className="h-px w-24 bg-gradient-to-r from-transparent to-secondary/60" />
+                        <div className="w-2 h-2 rounded-full bg-secondary/60" />
+                        <div className="h-px w-24 bg-gradient-to-l from-transparent to-secondary/60" />
                       </motion.div>
 
                       {/* Price Display */}
