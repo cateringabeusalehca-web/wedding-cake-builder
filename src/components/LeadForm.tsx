@@ -52,6 +52,8 @@ interface LeadFormProps {
   selectedDecorations?: string[];
   decorationCustomInputs?: Record<string, string>;
   selectedColorPalette?: string | null;
+  eventTheme?: string;
+  eventStyle?: string;
 }
 
 export function LeadForm({
@@ -69,6 +71,8 @@ export function LeadForm({
   selectedDecorations = [],
   decorationCustomInputs = {},
   selectedColorPalette = null,
+  eventTheme = "",
+  eventStyle = "",
 }: LeadFormProps) {
   const [formData, setFormData] = useState({
     fullName: "",
@@ -161,6 +165,8 @@ export function LeadForm({
         topper: topperOptions.find((t) => t.id === topperId)?.name || topperId,
         // Advanced customization data
         colorPalette: colorPaletteInfo?.name || null,
+        eventTheme: eventTheme || null,
+        eventStyle: eventStyle || null,
         advancedDecorations: decorationDetails.map(d => ({
           name: d.item.name,
           price: d.item.price,

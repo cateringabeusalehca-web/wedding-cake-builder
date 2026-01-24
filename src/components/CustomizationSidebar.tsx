@@ -16,6 +16,10 @@ interface CustomizationSidebarProps {
   onCustomInputChange: (decorationId: string, value: string) => void;
   selectedColorPalette: string | null;
   onColorPaletteChange: (paletteId: string | null) => void;
+  eventTheme: string;
+  onEventThemeChange: (theme: string) => void;
+  eventStyle: string;
+  onEventStyleChange: (style: string) => void;
   tierCount: number;
   basePrice: number;
 }
@@ -31,6 +35,10 @@ export function CustomizationSidebar({
   onCustomInputChange,
   selectedColorPalette,
   onColorPaletteChange,
+  eventTheme,
+  onEventThemeChange,
+  eventStyle,
+  onEventStyleChange,
   tierCount,
   basePrice,
 }: CustomizationSidebarProps) {
@@ -89,11 +97,11 @@ export function CustomizationSidebar({
                 <div className="flex items-center gap-2 mb-3">
                   <Camera className="h-4 w-4 text-secondary" />
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-secondary">
-                    Reference Photos
+                    Fotos de Referencia
                   </h3>
                 </div>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Upload up to 5 Pinterest or inspiration photos to help us understand your vision.
+                  Sube hasta 5 fotos de Pinterest o inspiración para ayudarnos a entender tu visión.
                 </p>
                 <ReferencePhotoUpload
                   images={referenceImages}
@@ -109,7 +117,7 @@ export function CustomizationSidebar({
                 <div className="flex-1 h-px bg-border" />
               </div>
 
-              {/* Decorations Section */}
+              {/* Decorations Section - Now only toppers + theme/style */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -118,11 +126,11 @@ export function CustomizationSidebar({
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="h-4 w-4 text-secondary" />
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-secondary">
-                    Decoraciones Adicionales
+                    Detalles del Evento
                   </h3>
                 </div>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Personaliza cada detalle de tu torta. Selecciona todos los elementos que desees.
+                  Cuéntanos sobre tu evento y selecciona un topper personalizado.
                 </p>
                 <AdvancedDecorationPanel
                   selectedDecorations={selectedDecorations}
@@ -131,6 +139,10 @@ export function CustomizationSidebar({
                   onCustomInputChange={onCustomInputChange}
                   selectedColorPalette={selectedColorPalette}
                   onColorPaletteChange={onColorPaletteChange}
+                  eventTheme={eventTheme}
+                  onEventThemeChange={onEventThemeChange}
+                  eventStyle={eventStyle}
+                  onEventStyleChange={onEventStyleChange}
                   tierCount={tierCount}
                 />
               </motion.div>
@@ -141,7 +153,7 @@ export function CustomizationSidebar({
               {/* Price Breakdown */}
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Base cake price</span>
+                  <span>Precio base de la torta</span>
                   <span>${basePrice.toFixed(0)}</span>
                 </div>
                 {decorationTotal > 0 && (
@@ -150,12 +162,12 @@ export function CustomizationSidebar({
                     animate={{ opacity: 1, x: 0 }}
                     className="flex justify-between text-muted-foreground"
                   >
-                    <span>Custom decorations ({selectedDecorations.length})</span>
+                    <span>Toppers personalizados ({selectedDecorations.length})</span>
                     <span className="text-secondary">+${decorationTotal.toFixed(0)}</span>
                   </motion.div>
                 )}
                 <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
-                  <span>Updated Total</span>
+                  <span>Total Actualizado</span>
                   <motion.span
                     key={grandTotal}
                     initial={{ scale: 1.1 }}
@@ -172,7 +184,7 @@ export function CustomizationSidebar({
                 onClick={onClose}
                 className="btn-gold w-full"
               >
-                Apply Customizations
+                Aplicar Personalizaciones
               </Button>
             </div>
           </motion.div>

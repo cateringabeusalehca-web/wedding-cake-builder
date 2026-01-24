@@ -241,7 +241,7 @@ export const decorationCategories: DecorationCategory[] = [
   },
 ];
 
-// Helper to calculate decoration total
+// Helper to calculate decoration total (now only toppers)
 export function calculateDecorationTotal(
   selectedDecorations: string[],
   customInputs: Record<string, string>,
@@ -249,12 +249,8 @@ export function calculateDecorationTotal(
 ): number {
   let total = 0;
   
-  const allOptions = [
-    ...floralOptions,
-    ...fondantOptions,
-    ...metallicOptions,
-    ...topperOptions3D,
-  ];
+  // Only use topper options now
+  const allOptions = [...topperOptions3D];
   
   selectedDecorations.forEach((decorationId) => {
     const option = allOptions.find((o) => o.id === decorationId);
@@ -270,17 +266,13 @@ export function calculateDecorationTotal(
   return total;
 }
 
-// Get all selected decorations with details
+// Get all selected decorations with details (now only toppers)
 export function getSelectedDecorationDetails(
   selectedDecorations: string[],
   customInputs: Record<string, string>
 ): Array<{ item: DecorationItem; customValue?: string }> {
-  const allOptions = [
-    ...floralOptions,
-    ...fondantOptions,
-    ...metallicOptions,
-    ...topperOptions3D,
-  ];
+  // Only use topper options now
+  const allOptions = [...topperOptions3D];
   
   const results: Array<{ item: DecorationItem; customValue?: string }> = [];
   

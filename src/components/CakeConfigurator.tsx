@@ -61,6 +61,8 @@ export function CakeConfigurator() {
   const [selectedDecorations, setSelectedDecorations] = useState<string[]>([]);
   const [decorationCustomInputs, setDecorationCustomInputs] = useState<Record<string, string>>({});
   const [selectedColorPalette, setSelectedColorPalette] = useState<string | null>(null);
+  const [eventTheme, setEventTheme] = useState("");
+  const [eventStyle, setEventStyle] = useState("");
 
   const structure = useMemo(() => getRecommendedStructure(guestCount), [guestCount]);
 
@@ -136,6 +138,8 @@ export function CakeConfigurator() {
     setSelectedDecorations([]);
     setDecorationCustomInputs({});
     setSelectedColorPalette(null);
+    setEventTheme("");
+    setEventStyle("");
     setShowCustomizationSidebar(false);
   }, []);
 
@@ -180,6 +184,10 @@ export function CakeConfigurator() {
         onCustomInputChange={handleDecorationCustomInputChange}
         selectedColorPalette={selectedColorPalette}
         onColorPaletteChange={setSelectedColorPalette}
+        eventTheme={eventTheme}
+        onEventThemeChange={setEventTheme}
+        eventStyle={eventStyle}
+        onEventStyleChange={setEventStyle}
         tierCount={structure.tierCount}
         basePrice={basePrice}
       />
@@ -210,6 +218,8 @@ export function CakeConfigurator() {
             selectedDecorations={selectedDecorations}
             decorationCustomInputs={decorationCustomInputs}
             selectedColorPalette={selectedColorPalette}
+            eventTheme={eventTheme}
+            eventStyle={eventStyle}
           />
         )}
       </AnimatePresence>
