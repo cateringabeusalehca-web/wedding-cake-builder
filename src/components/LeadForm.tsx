@@ -154,8 +154,7 @@ export function LeadForm({
     };
 
     try {
-      console.log("=== SENDING CAKE ORDER EMAIL ===");
-      console.log(JSON.stringify(payload, null, 2));
+      // Removed console.log statements that exposed PII
 
       const { data, error } = await supabase.functions.invoke("send-order-email", {
         body: payload,
