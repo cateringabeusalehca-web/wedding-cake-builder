@@ -296,85 +296,6 @@ export function CelebrationCheckout({
           <div className="h-px w-16 bg-gradient-to-l from-transparent to-secondary/60" />
         </motion.div>
 
-        {/* Cake Configuration Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.75 }}
-          className="max-w-md mx-auto rounded-xl p-4 text-left"
-          style={{
-            background: "linear-gradient(135deg, hsl(20, 15%, 12%) 0%, hsl(25, 20%, 15%) 100%)",
-            border: "1px solid hsl(43, 74%, 49%, 0.3)",
-          }}
-        >
-          <h4 
-            className="text-xs uppercase tracking-widest mb-3 text-center font-semibold"
-            style={{ color: "hsl(43, 74%, 60%)" }}
-          >
-            Your Cake Summary
-          </h4>
-          <div className="space-y-2 text-xs" style={{ color: "hsl(43, 30%, 70%)" }}>
-            {/* Structure Info */}
-            <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: "hsl(43, 74%, 49%, 0.2)" }}>
-              <span style={{ color: "hsl(43, 30%, 55%)" }}>Event Size</span>
-              <span className="font-medium" style={{ color: "hsl(43, 30%, 85%)" }}>
-                {structure.name} • {guestCount} guests
-              </span>
-            </div>
-
-            {/* Tiers Info */}
-            <div className="space-y-1 pb-2 border-b" style={{ borderColor: "hsl(43, 74%, 49%, 0.2)" }}>
-              <span className="block mb-1" style={{ color: "hsl(43, 30%, 55%)" }}>Tiers ({structure.tierCount})</span>
-              {structure.tiers.map((tier, index) => {
-                const config = tierConfigs[index];
-                const sponge = spongeOptions.find(s => s.id === config?.spongeId);
-                const filling = fillingOptions.find(f => f.id === config?.fillingId);
-                return (
-                  <div key={tier.tierLevel} className="flex justify-between pl-2">
-                    <span>{tier.sizeInches}" ({tier.servings} servings)</span>
-                    <span style={{ color: "hsl(43, 30%, 85%)" }}>
-                      {sponge?.name || "—"} + {filling?.name || "—"}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Coating & Decoration */}
-            <div className="flex justify-between pb-2 border-b" style={{ borderColor: "hsl(43, 74%, 49%, 0.2)" }}>
-              <span style={{ color: "hsl(43, 30%, 55%)" }}>Frosting</span>
-              <span style={{ color: "hsl(43, 30%, 85%)" }}>
-                {coatingOptions.find(c => c.id === coatingId)?.name || "—"}
-              </span>
-            </div>
-            <div className="flex justify-between pb-2 border-b" style={{ borderColor: "hsl(43, 74%, 49%, 0.2)" }}>
-              <span style={{ color: "hsl(43, 30%, 55%)" }}>Decoration</span>
-              <span style={{ color: "hsl(43, 30%, 85%)" }}>
-                {decorationOptions.find(d => d.id === decorationId)?.name || "—"}
-              </span>
-            </div>
-
-            {/* Topper */}
-            {topperId && topperId !== "none" && (
-              <div className="flex justify-between">
-                <span style={{ color: "hsl(43, 30%, 55%)" }}>Topper</span>
-                <span style={{ color: "hsl(43, 30%, 85%)" }}>
-                  {topperOptions.find(t => t.id === topperId)?.name || "—"}
-                  {topperNames && ` (${topperNames})`}
-                </span>
-              </div>
-            )}
-
-            {/* Floral Palette if specified */}
-            {floralPalette && (
-              <div className="flex justify-between">
-                <span style={{ color: "hsl(43, 30%, 55%)" }}>Floral Palette</span>
-                <span style={{ color: "hsl(43, 30%, 85%)" }}>{floralPalette}</span>
-              </div>
-            )}
-          </div>
-        </motion.div>
-
         {/* Price Display */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -428,6 +349,9 @@ export function CelebrationCheckout({
           >
             <Button
               onClick={() => {
+                const productId = "PRODUCT_ID";
+                const checkoutUrl = `https://cateringabeusaleh.ca/?add-to-cart=${productId}&custom_price=${totalPrice.toFixed(2)}`;
+                
                 const configData = {
                   guests: guestCount,
                   tiers: structure.tiers.map((tier, index) => {
@@ -449,8 +373,7 @@ export function CelebrationCheckout({
                 };
                 console.log("Wedding Cake Configuration:", JSON.stringify(configData, null, 2));
                 
-                // Navigate in same tab
-                window.location.href = "https://www.google.com/search?q=https://cateringabeusaleh.ca/get-a-quote/";
+                window.open(checkoutUrl, "_blank");
               }}
               className="w-full py-5 font-bold tracking-wide rounded-xl transition-all duration-300 hover:scale-105"
               style={{
@@ -471,7 +394,7 @@ export function CelebrationCheckout({
                 transition={{ duration: 1.5, repeat: Infinity }}
               >
                 <span className="text-lg md:text-xl font-extrabold">
-                  💍 YES! I WANT THIS CAKE!
+                  YES! I WANT THIS CAKE!
                 </span>
               </motion.span>
             </Button>
