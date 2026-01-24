@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "resend";
+import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -8,6 +8,55 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+// Simple in-memory rate limiting (resets on function cold start)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 5;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  
+  if (record.count >= MAX_REQUESTS_PER_WINDOW) {
+    return true;
+  }
+  
+  record.count++;
+  return false;
+}
+
+// Input validation helpers
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 255;
+}
+
+function isValidPhone(phone: string): boolean {
+  // Allow digits, spaces, dashes, parentheses, plus sign
+  const phoneRegex = /^[\d\s\-()+ ]{7,20}$/;
+  return phoneRegex.test(phone);
+}
+
+function sanitizeString(str: string, maxLength: number): string {
+  if (typeof str !== 'string') return '';
+  return str.trim().slice(0, maxLength);
+}
+
+function escapeHtml(str: string): string {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 interface TierConfig {
   tierLevel: number;
@@ -48,6 +97,146 @@ interface OrderEmailRequest {
   };
   assets: {
     inspirationUrls: string[];
+  };
+}
+
+interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+}
+
+function validateOrderData(data: unknown): ValidationResult {
+  const errors: string[] = [];
+  
+  if (!data || typeof data !== 'object') {
+    return { valid: false, errors: ['Invalid request body'] };
+  }
+  
+  const order = data as OrderEmailRequest;
+  
+  // Validate client info
+  if (!order.client || typeof order.client !== 'object') {
+    errors.push('Missing client information');
+  } else {
+    if (!order.client.fullName || typeof order.client.fullName !== 'string') {
+      errors.push('Full name is required');
+    } else if (order.client.fullName.length > 100) {
+      errors.push('Full name must be less than 100 characters');
+    }
+    
+    if (!order.client.email || !isValidEmail(order.client.email)) {
+      errors.push('Valid email address is required');
+    }
+    
+    if (!order.client.phone || !isValidPhone(order.client.phone)) {
+      errors.push('Valid phone number is required');
+    }
+    
+    if (!order.client.eventDate || typeof order.client.eventDate !== 'string') {
+      errors.push('Event date is required');
+    } else {
+      const eventDate = new Date(order.client.eventDate);
+      const now = new Date();
+      const minDate = new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000); // 28 days from now
+      const maxDate = new Date(now.getTime() + 2 * 365 * 24 * 60 * 60 * 1000); // 2 years from now
+      
+      if (isNaN(eventDate.getTime()) || eventDate < minDate || eventDate > maxDate) {
+        errors.push('Event date must be between 28 days and 2 years from now');
+      }
+    }
+    
+    if (!order.client.eventType || typeof order.client.eventType !== 'string') {
+      errors.push('Event type is required');
+    } else if (order.client.eventType.length > 100) {
+      errors.push('Event type must be less than 100 characters');
+    }
+  }
+  
+  // Validate project info
+  if (!order.project || typeof order.project !== 'object') {
+    errors.push('Missing project information');
+  } else {
+    if (typeof order.project.guestCount !== 'number' || order.project.guestCount < 1 || order.project.guestCount > 1000) {
+      errors.push('Guest count must be between 1 and 1000');
+    }
+    
+    if (typeof order.project.estimatedQuote !== 'number' || order.project.estimatedQuote < 0 || order.project.estimatedQuote > 100000) {
+      errors.push('Invalid estimated quote');
+    }
+    
+    if (!order.project.structure || typeof order.project.structure !== 'object') {
+      errors.push('Missing cake structure');
+    }
+    
+    if (!Array.isArray(order.project.tiersConfiguration) || order.project.tiersConfiguration.length === 0) {
+      errors.push('At least one tier configuration is required');
+    } else if (order.project.tiersConfiguration.length > 10) {
+      errors.push('Maximum 10 tiers allowed');
+    }
+  }
+  
+  // Validate blindSpotCheck
+  if (order.blindSpotCheck && typeof order.blindSpotCheck.additionalNotes === 'string') {
+    if (order.blindSpotCheck.additionalNotes.length > 1000) {
+      errors.push('Additional notes must be less than 1000 characters');
+    }
+  }
+  
+  // Validate assets
+  if (order.assets && Array.isArray(order.assets.inspirationUrls)) {
+    if (order.assets.inspirationUrls.length > 10) {
+      errors.push('Maximum 10 inspiration URLs allowed');
+    }
+    for (const url of order.assets.inspirationUrls) {
+      if (typeof url !== 'string' || url.length > 500) {
+        errors.push('Invalid inspiration URL');
+        break;
+      }
+    }
+  }
+  
+  return { valid: errors.length === 0, errors };
+}
+
+function sanitizeOrderData(order: OrderEmailRequest): OrderEmailRequest {
+  return {
+    client: {
+      fullName: escapeHtml(sanitizeString(order.client.fullName, 100)),
+      email: sanitizeString(order.client.email, 255),
+      phone: sanitizeString(order.client.phone, 20),
+      eventDate: order.client.eventDate,
+      eventType: escapeHtml(sanitizeString(order.client.eventType, 100)),
+    },
+    project: {
+      guestCount: Math.min(Math.max(1, Math.floor(order.project.guestCount)), 1000),
+      structure: {
+        id: sanitizeString(order.project.structure?.id || '', 50),
+        name: escapeHtml(sanitizeString(order.project.structure?.name || '', 100)),
+        tierCount: Math.min(Math.max(1, Math.floor(order.project.structure?.tierCount || 1)), 10),
+        totalServings: Math.min(Math.max(1, Math.floor(order.project.structure?.totalServings || 1)), 2000),
+      },
+      estimatedQuote: Math.min(Math.max(0, order.project.estimatedQuote), 100000),
+      tiersConfiguration: (order.project.tiersConfiguration || []).slice(0, 10).map(tier => ({
+        tierLevel: Math.floor(tier.tierLevel || 1),
+        tierLabel: escapeHtml(sanitizeString(tier.tierLabel || '', 50)),
+        sizeInches: Math.floor(tier.sizeInches || 6),
+        servings: Math.floor(tier.servings || 10),
+        sponge: escapeHtml(sanitizeString(tier.sponge || '', 100)),
+        dietary: escapeHtml(sanitizeString(tier.dietary || '', 100)),
+        filling: escapeHtml(sanitizeString(tier.filling || '', 100)),
+      })),
+      frosting: escapeHtml(sanitizeString(order.project.frosting || '', 100)),
+      decoration: escapeHtml(sanitizeString(order.project.decoration || '', 100)),
+      floralPalette: order.project.floralPalette ? escapeHtml(sanitizeString(order.project.floralPalette, 100)) : null,
+      topper: escapeHtml(sanitizeString(order.project.topper || '', 100)),
+    },
+    blindSpotCheck: {
+      requiresSavoryBites: Boolean(order.blindSpotCheck?.requiresSavoryBites),
+      additionalNotes: escapeHtml(sanitizeString(order.blindSpotCheck?.additionalNotes || '', 1000)),
+    },
+    assets: {
+      inspirationUrls: (order.assets?.inspirationUrls || []).slice(0, 10).map(url => sanitizeString(url, 500)),
+    },
   };
 }
 
@@ -267,8 +456,55 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const orderData: OrderEmailRequest = await req.json();
-    console.log("Order received:", JSON.stringify(orderData, null, 2));
+    // Get client IP for rate limiting
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
+                     req.headers.get("x-real-ip") || 
+                     "unknown";
+    
+    console.log(`Request from IP: ${clientIp}`);
+    
+    // Check rate limit
+    if (isRateLimited(clientIp)) {
+      console.warn(`Rate limit exceeded for IP: ${clientIp}`);
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Please try again later." }),
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Parse and validate request body
+    let rawData: unknown;
+    try {
+      rawData = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid request format" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Validate input
+    const validation = validateOrderData(rawData);
+    if (!validation.valid) {
+      console.warn("Validation failed:", validation.errors);
+      return new Response(
+        JSON.stringify({ error: "Invalid order data", details: validation.errors }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Sanitize data
+    const orderData = sanitizeOrderData(rawData as OrderEmailRequest);
+    console.log("Order validated and sanitized for:", orderData.client.email);
 
     const htmlContent = generateEmailHtml(orderData);
 
@@ -281,7 +517,7 @@ const handler = async (req: Request): Promise<Response> => {
       html: htmlContent,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Email sent successfully");
 
     // Also send confirmation to client
     const clientConfirmationHtml = `
@@ -341,7 +577,7 @@ const handler = async (req: Request): Promise<Response> => {
       html: clientConfirmationHtml,
     });
 
-    console.log("Client confirmation sent:", clientEmailResponse);
+    console.log("Client confirmation sent");
 
     return new Response(
       JSON.stringify({ 
@@ -354,10 +590,12 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    // Log full error for debugging, but return generic message to client
     console.error("Error in send-order-email function:", error);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Failed to process order. Please try again later." }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
