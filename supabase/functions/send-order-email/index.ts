@@ -112,7 +112,13 @@ function validateOrderData(data: unknown): ValidationResult {
     return { valid: false, errors: ['Invalid request body'] };
   }
   
-  const order = data as OrderEmailRequest;
+  const order = data as OrderEmailRequest & { honeypot?: string };
+  
+  // Honeypot check - if filled, it's a bot
+  if (order.honeypot && order.honeypot.trim() !== '') {
+    console.warn("Honeypot triggered - rejecting as bot");
+    return { valid: false, errors: ['Invalid request'] };
+  }
   
   // Validate client info
   if (!order.client || typeof order.client !== 'object') {

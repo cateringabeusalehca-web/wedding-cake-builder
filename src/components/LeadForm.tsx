@@ -83,6 +83,7 @@ export function LeadForm({
     additionalNotes: "",
     requiresSavoryBites: false,
     allergyAcknowledged: false,
+    honeypot: "", // Anti-bot honeypot field
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -99,6 +100,7 @@ export function LeadForm({
       : null;
 
     const payload = {
+      honeypot: formData.honeypot, // Anti-bot field - should be empty
       client: {
         fullName: formData.fullName,
         email: formData.email,
@@ -234,6 +236,22 @@ export function LeadForm({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Honeypot field - hidden from users, visible to bots */}
+          <div className="absolute -left-[9999px] opacity-0 pointer-events-none" aria-hidden="true">
+            <label htmlFor="website" className="sr-only">Website</label>
+            <input
+              type="text"
+              id="website"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              value={formData.honeypot}
+              onChange={(e) =>
+                setFormData({ ...formData, honeypot: e.target.value })
+              }
+            />
+          </div>
+          
           {/* Contact Info */}
           <div className="grid gap-4 md:grid-cols-2">
             <div>
