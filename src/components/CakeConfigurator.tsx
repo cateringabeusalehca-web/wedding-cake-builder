@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cake, ExternalLink, Sparkles, Instagram, Facebook } from "lucide-react";
+import { Cake, ExternalLink, Sparkles, Instagram, Facebook, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CakeSVG } from "./CakeSVG";
 import { GuestSlider } from "./GuestSlider";
@@ -11,6 +11,7 @@ import { GlobalOptionsPanel } from "./GlobalOptionsPanel";
 import { ConfettiCelebration } from "./ConfettiCelebration";
 import { StickyPriceBar } from "./StickyPriceBar";
 import { BrandLogoShape, BrandCornerDecor, BrandAccent } from "./BrandLogoShape";
+import { CustomizationSidebar } from "./CustomizationSidebar";
 import logoAbeusaleh from "@/assets/logo-abeusaleh.png";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoAmarillo from "@/assets/logo-amarillo.png";
@@ -25,6 +26,7 @@ import {
   fillingOptions,
   getTierLabel,
 } from "@/data/menuDatabase";
+import { calculateDecorationTotal, getSelectedDecorationDetails, colorPalettes } from "@/data/decorationOptions";
 
 type View = "configurator" | "form" | "success";
 
@@ -52,10 +54,17 @@ export function CakeConfigurator() {
   const [isReadyToOrder, setIsReadyToOrder] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const priceDisplayRef = useRef<HTMLDivElement>(null);
+  
+  // Advanced customization state
+  const [showCustomizationSidebar, setShowCustomizationSidebar] = useState(false);
+  const [referenceImages, setReferenceImages] = useState<string[]>([]);
+  const [selectedDecorations, setSelectedDecorations] = useState<string[]>([]);
+  const [decorationCustomInputs, setDecorationCustomInputs] = useState<Record<string, string>>({});
+  const [selectedColorPalette, setSelectedColorPalette] = useState<string | null>(null);
 
   const structure = useMemo(() => getRecommendedStructure(guestCount), [guestCount]);
 
-  const totalPrice = useMemo(
+  const basePrice = useMemo(
     () =>
       calculateTotalPrice(
         structure,
@@ -66,6 +75,17 @@ export function CakeConfigurator() {
       ),
     [structure, tierConfigs, coatingId, decorationId, topperId]
   );
+
+  const decorationTotal = useMemo(
+    () => calculateDecorationTotal(selectedDecorations, decorationCustomInputs, structure.tierCount),
+    [selectedDecorations, decorationCustomInputs, structure.tierCount]
+  );
+
+  const totalPrice = basePrice + decorationTotal;
+
+  const handleDecorationCustomInputChange = useCallback((decorationId: string, value: string) => {
+    setDecorationCustomInputs((prev) => ({ ...prev, [decorationId]: value }));
+  }, []);
 
   const handleTierSelect = useCallback((tier: number) => {
     setSelectedTier((prev) => (prev === tier ? null : tier));
@@ -108,7 +128,15 @@ export function CakeConfigurator() {
     setDecorationId(decorationOptions[0].id);
     setTopperId(topperOptions[0].id);
     setFloralPalette("");
+    setTopperNames("");
     setCurrentView("configurator");
+    setIsReadyToOrder(false);
+    // Reset customization state
+    setReferenceImages([]);
+    setSelectedDecorations([]);
+    setDecorationCustomInputs({});
+    setSelectedColorPalette(null);
+    setShowCustomizationSidebar(false);
   }, []);
 
   // Intersection observer to show sticky bar when price display scrolls out of view
@@ -140,6 +168,22 @@ export function CakeConfigurator() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Customization Sidebar */}
+      <CustomizationSidebar
+        isOpen={showCustomizationSidebar}
+        onClose={() => setShowCustomizationSidebar(false)}
+        referenceImages={referenceImages}
+        onReferenceImagesChange={setReferenceImages}
+        selectedDecorations={selectedDecorations}
+        onDecorationsChange={setSelectedDecorations}
+        customInputs={decorationCustomInputs}
+        onCustomInputChange={handleDecorationCustomInputChange}
+        selectedColorPalette={selectedColorPalette}
+        onColorPaletteChange={setSelectedColorPalette}
+        tierCount={structure.tierCount}
+        basePrice={basePrice}
+      />
+      
       {/* Sticky Price Bar */}
       <StickyPriceBar
         guestCount={guestCount}
@@ -162,6 +206,10 @@ export function CakeConfigurator() {
             totalPrice={totalPrice}
             onClose={() => setCurrentView("configurator")}
             onSuccess={() => setCurrentView("success")}
+            referenceImages={referenceImages}
+            selectedDecorations={selectedDecorations}
+            decorationCustomInputs={decorationCustomInputs}
+            selectedColorPalette={selectedColorPalette}
           />
         )}
       </AnimatePresence>
@@ -366,6 +414,37 @@ export function CakeConfigurator() {
               onTopperNamesChange={setTopperNames}
             />
 
+            {/* Advanced Customization Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Button
+                onClick={() => setShowCustomizationSidebar(true)}
+                variant="outline"
+                className="w-full py-5 gap-3 border-secondary/50 hover:border-secondary hover:bg-secondary/10 transition-all duration-300"
+              >
+                <Palette className="h-5 w-5 text-secondary" />
+                <span className="font-medium">
+                  Personalize Design
+                  {(referenceImages.length > 0 || selectedDecorations.length > 0) && (
+                    <span className="ml-2 px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs">
+                      {referenceImages.length + selectedDecorations.length}
+                    </span>
+                  )}
+                </span>
+                {decorationTotal > 0 && (
+                  <span className="ml-auto text-secondary font-bold">
+                    +${decorationTotal.toFixed(0)}
+                  </span>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Upload reference photos & add extra decorations
+              </p>
+            </motion.div>
+
             {/* Ready to Order Button */}
             <AnimatePresence>
               {!isReadyToOrder && (
@@ -373,7 +452,7 @@ export function CakeConfigurator() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  transition={{ delay: 0.5 }}
+                  transition={{ delay: 0.6 }}
                   className="space-y-4 pt-4"
                 >
                   <Button
