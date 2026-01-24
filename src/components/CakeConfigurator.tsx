@@ -428,7 +428,7 @@ export function CakeConfigurator() {
                 >
                   <Button
                     onClick={() => setIsReadyToOrder(true)}
-                    className="btn-gold w-full text-base md:text-lg py-6"
+                    className="w-full text-base md:text-lg py-6 bg-foreground text-background hover:bg-foreground/90 font-semibold tracking-wide"
                   >
                     ✨ I'm Ready to Order My Cake! ✨
                   </Button>
