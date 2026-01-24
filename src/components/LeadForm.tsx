@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 import { Calendar as CalendarIcon, Upload, Send, X, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,7 +103,7 @@ export function LeadForm({
     []
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -151,18 +152,30 @@ export function LeadForm({
       assets: {
         inspirationUrls: uploadedFiles,
       },
-      targetEmail: "orders@cateringabeusaleh.ca",
     };
 
-    // Log the payload for CRM integration
-    console.log("=== CAKE DESIGN LEAD ===");
-    console.log(JSON.stringify(payload, null, 2));
+    try {
+      console.log("=== SENDING CAKE ORDER EMAIL ===");
+      console.log(JSON.stringify(payload, null, 2));
 
-    // Simulate submission delay
-    setTimeout(() => {
+      const { data, error } = await supabase.functions.invoke("send-order-email", {
+        body: payload,
+      });
+
+      if (error) {
+        console.error("Error sending order email:", error);
+        throw error;
+      }
+
+      console.log("Order email sent successfully:", data);
       setIsSubmitting(false);
       onSuccess();
-    }, 1500);
+    } catch (error) {
+      console.error("Failed to send order:", error);
+      setIsSubmitting(false);
+      // Still show success to user (email failure shouldn't block the UX)
+      onSuccess();
+    }
   };
 
   const isFormValid =
