@@ -38,11 +38,15 @@ export function CelebrationCheckout({
 }: CelebrationCheckoutProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: 30 }}
+      initial={{ opacity: 0, scale: 0.85, y: 50 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: -20 }}
-      transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="relative overflow-hidden rounded-3xl shadow-2xl h-full flex flex-col justify-center"
+      transition={{ 
+        duration: 0.8, 
+        ease: [0.16, 1, 0.3, 1],
+        scale: { type: "spring", stiffness: 100, damping: 15 }
+      }}
+      className="relative overflow-hidden rounded-3xl shadow-2xl min-h-[65vh] flex flex-col justify-center"
       style={{
         background: "linear-gradient(135deg, hsl(20, 15%, 8%) 0%, hsl(25, 20%, 12%) 30%, hsl(30, 25%, 10%) 70%, hsl(20, 15%, 6%) 100%)",
       }}
@@ -102,28 +106,66 @@ export function CelebrationCheckout({
         <BrandAccent size={18} color="hsl(43, 74%, 49%)" />
       </div>
 
-      {/* Floating golden particles */}
-      {Array.from({ length: 12 }).map((_, i) => (
+      {/* Floating golden particles - more particles for excitement */}
+      {Array.from({ length: 20 }).map((_, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 20, scale: 0 }}
           animate={{ 
-            opacity: [0, 0.8, 0],
-            y: [-10, -40, -70],
+            opacity: [0, 1, 0.8, 0],
+            y: [-10, -60, -120],
+            scale: [0, 1.2, 0.8, 0],
+            x: [0, Math.sin(i) * 20, Math.sin(i) * 40],
+          }}
+          transition={{
+            duration: 4,
+            delay: 0.5 + i * 0.15,
+            repeat: Infinity,
+            repeatDelay: 1.5,
+            ease: "easeOut",
+          }}
+          className="absolute rounded-full"
+          style={{
+            width: `${3 + (i % 4)}px`,
+            height: `${3 + (i % 4)}px`,
+            background: `radial-gradient(circle, hsl(43, 74%, ${70 + (i % 20)}%) 0%, hsl(43, 74%, 49%) 100%)`,
+            left: `${5 + (i * 4.5)}%`,
+            bottom: "15%",
+            boxShadow: `0 0 ${6 + (i % 4)}px hsl(43, 74%, 49%)`,
+          }}
+        />
+      ))}
+
+      {/* Extra sparkle stars floating */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <motion.div
+          key={`star-${i}`}
+          initial={{ opacity: 0, scale: 0, rotate: 0 }}
+          animate={{ 
+            opacity: [0, 1, 0],
+            scale: [0, 1, 0],
+            rotate: [0, 180, 360],
           }}
           transition={{
             duration: 3,
-            delay: 1 + i * 0.2,
+            delay: 1 + i * 0.4,
             repeat: Infinity,
             repeatDelay: 2,
           }}
-          className="absolute w-1 h-1 rounded-full bg-secondary"
+          className="absolute"
           style={{
-            left: `${10 + (i * 7)}%`,
-            bottom: "20%",
-            boxShadow: "0 0 6px hsl(43, 74%, 49%)",
+            left: `${10 + (i * 11)}%`,
+            top: `${20 + (i % 3) * 20}%`,
           }}
-        />
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24">
+            <path
+              d="M12 0L13 9L22 10L13 11L12 20L11 11L2 10L11 9L12 0Z"
+              fill="hsl(43, 74%, 70%)"
+              style={{ filter: "drop-shadow(0 0 4px hsl(43, 74%, 60%))" }}
+            />
+          </svg>
+        </motion.div>
       ))}
 
       <div className="relative z-10 p-6 md:p-8 text-center space-y-4">

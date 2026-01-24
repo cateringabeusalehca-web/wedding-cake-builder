@@ -305,157 +305,168 @@ export function CakeConfigurator() {
             </motion.p>
           </motion.div>
 
-          {/* Right: Controls */}
           <div className="order-1 space-y-6 lg:order-2">
-            {/* Guest Slider */}
-            <GuestSlider
-              value={guestCount}
-              onChange={setGuestCount}
-              tierCount={structure.tierCount}
-            />
-
-            {/* Tier Config Panel */}
+            {/* Configuration Panels - Hidden when ready to order */}
             <AnimatePresence mode="wait">
-              {selectedTier && selectedTierInfo && selectedTierIndex !== -1 && (
-                <TierConfigPanel
-                  key={selectedTier}
-                  tierNumber={selectedTier}
-                  tierInfo={selectedTierInfo}
-                  config={tierConfigs[selectedTierIndex]}
-                  onConfigChange={handleTierConfigChange}
-                  onApplyToAll={handleApplyToAll}
-                  onClose={() => setSelectedTier(null)}
-                  totalTiers={structure.tierCount}
-                />
+              {!isReadyToOrder && (
+                <motion.div
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  {/* Guest Slider */}
+                  <GuestSlider
+                    value={guestCount}
+                    onChange={setGuestCount}
+                    tierCount={structure.tierCount}
+                  />
+
+                  {/* Tier Config Panel */}
+                  <AnimatePresence mode="wait">
+                    {selectedTier && selectedTierInfo && selectedTierIndex !== -1 && (
+                      <TierConfigPanel
+                        key={selectedTier}
+                        tierNumber={selectedTier}
+                        tierInfo={selectedTierInfo}
+                        config={tierConfigs[selectedTierIndex]}
+                        onConfigChange={handleTierConfigChange}
+                        onApplyToAll={handleApplyToAll}
+                        onClose={() => setSelectedTier(null)}
+                        totalTiers={structure.tierCount}
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  {/* No tier selected - show tier summary */}
+                  <AnimatePresence>
+                    {!selectedTier && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="relative overflow-hidden rounded-lg border-2 border-secondary/30 bg-gradient-to-br from-card via-card to-secondary/5 p-6 shadow-lg"
+                      >
+                        {/* Decorative corner accents */}
+                        <div className="absolute top-0 left-0 h-4 w-4 border-t-2 border-l-2 border-secondary/50" />
+                        <div className="absolute top-0 right-0 h-4 w-4 border-t-2 border-r-2 border-secondary/50" />
+                        <div className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-secondary/50" />
+                        <div className="absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-secondary/50" />
+                        
+                        <h3 className="font-display text-2xl md:text-3xl font-medium text-secondary mb-4 tracking-wide flex items-center gap-2">
+                          <Layers className="h-6 w-6" />
+                          Your Tiers
+                        </h3>
+                        <div className="space-y-1">
+                          {structure.tiers.map((tier, index) => {
+                            const config = tierConfigs[index];
+                            const sponge = spongeOptions.find(
+                              (s) => s.id === config?.spongeId
+                            );
+                            const filling = fillingOptions.find(
+                              (f) => f.id === config?.fillingId
+                            );
+                            return (
+                              <button
+                                key={tier.tierLevel}
+                                onClick={() => handleTierSelect(tier.tierLevel)}
+                                className="group flex w-full items-center justify-between rounded-md border border-transparent bg-background/50 px-4 py-3 text-left transition-all duration-300 hover:border-secondary/40 hover:bg-secondary/10 hover:shadow-md"
+                              >
+                                <div>
+                                  <span className="text-sketch text-foreground block group-hover:text-secondary transition-colors">
+                                    {getTierLabel(tier.tierLevel, structure.tierCount)}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {tier.sizeInches}" • {tier.servings} servings
+                                  </span>
+                                </div>
+                                <div className="text-right">
+                                  <span className="text-sm block text-foreground group-hover:text-secondary transition-colors">
+                                    {sponge?.name || "Configure →"}
+                                  </span>
+                                  {filling && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {filling.name}
+                                    </span>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Global Options */}
+                  <GlobalOptionsPanel
+                    coatingId={coatingId}
+                    onCoatingChange={setCoatingId}
+                    decorationId={decorationId}
+                    onDecorationChange={setDecorationId}
+                    floralPalette={floralPalette}
+                    onFloralPaletteChange={setFloralPalette}
+                  />
+
+                  {/* Personalize Design Panel - Inline */}
+                  <PersonalizeDesignPanel
+                    referenceImages={referenceImages}
+                    onReferenceImagesChange={setReferenceImages}
+                    selectedDecorations={selectedDecorations}
+                    onDecorationsChange={setSelectedDecorations}
+                    customInputs={decorationCustomInputs}
+                    onCustomInputChange={handleDecorationCustomInputChange}
+                    selectedColorPalette={selectedColorPalette}
+                    onColorPaletteChange={setSelectedColorPalette}
+                    eventTheme={eventTheme}
+                    onEventThemeChange={setEventTheme}
+                    eventStyle={eventStyle}
+                    onEventStyleChange={setEventStyle}
+                    tierCount={structure.tierCount}
+                  />
+
+                  {/* Ready to Order Button */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="space-y-4 pt-4"
+                  >
+                    <Button
+                      onClick={() => setIsReadyToOrder(true)}
+                      className="w-full text-base md:text-lg py-6 bg-foreground text-background hover:bg-foreground/90 font-semibold tracking-wide"
+                    >
+                      ✨ I'm Ready to Order My Cake! ✨
+                    </Button>
+
+                    <a
+                      href="https://cateringabeusaleh.ca/product/cake-taster-box/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <Button
+                        variant="outline"
+                        className="btn-architectural w-full gap-2"
+                      >
+                        <span>Not sure? Order a Cake Taster Box</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                    </a>
+                  </motion.div>
+                </motion.div>
               )}
             </AnimatePresence>
 
-            {/* No tier selected - show tier summary */}
+            {/* Celebration Checkout Section - Takes over full column */}
             <AnimatePresence>
-              {!selectedTier && (
+              {isReadyToOrder && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="relative overflow-hidden rounded-lg border-2 border-secondary/30 bg-gradient-to-br from-card via-card to-secondary/5 p-6 shadow-lg"
+                  className="min-h-[70vh]"
                 >
-                  {/* Decorative corner accents */}
-                  <div className="absolute top-0 left-0 h-4 w-4 border-t-2 border-l-2 border-secondary/50" />
-                  <div className="absolute top-0 right-0 h-4 w-4 border-t-2 border-r-2 border-secondary/50" />
-                  <div className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-secondary/50" />
-                  <div className="absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-secondary/50" />
-                  
-                  <h3 className="font-display text-2xl md:text-3xl font-medium text-secondary mb-4 tracking-wide flex items-center gap-2">
-                    <Layers className="h-6 w-6" />
-                    Your Tiers
-                  </h3>
-                  <div className="space-y-1">
-                    {structure.tiers.map((tier, index) => {
-                      const config = tierConfigs[index];
-                      const sponge = spongeOptions.find(
-                        (s) => s.id === config?.spongeId
-                      );
-                      const filling = fillingOptions.find(
-                        (f) => f.id === config?.fillingId
-                      );
-                      return (
-                        <button
-                          key={tier.tierLevel}
-                          onClick={() => handleTierSelect(tier.tierLevel)}
-                          className="group flex w-full items-center justify-between rounded-md border border-transparent bg-background/50 px-4 py-3 text-left transition-all duration-300 hover:border-secondary/40 hover:bg-secondary/10 hover:shadow-md"
-                        >
-                          <div>
-                            <span className="text-sketch text-foreground block group-hover:text-secondary transition-colors">
-                              {getTierLabel(tier.tierLevel, structure.tierCount)}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {tier.sizeInches}" • {tier.servings} servings
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-sm block text-foreground group-hover:text-secondary transition-colors">
-                              {sponge?.name || "Configure →"}
-                            </span>
-                            {filling && (
-                              <span className="text-xs text-muted-foreground">
-                                {filling.name}
-                              </span>
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Global Options */}
-            <GlobalOptionsPanel
-              coatingId={coatingId}
-              onCoatingChange={setCoatingId}
-              decorationId={decorationId}
-              onDecorationChange={setDecorationId}
-              floralPalette={floralPalette}
-              onFloralPaletteChange={setFloralPalette}
-            />
-
-            {/* Personalize Design Panel - Inline */}
-            <PersonalizeDesignPanel
-              referenceImages={referenceImages}
-              onReferenceImagesChange={setReferenceImages}
-              selectedDecorations={selectedDecorations}
-              onDecorationsChange={setSelectedDecorations}
-              customInputs={decorationCustomInputs}
-              onCustomInputChange={handleDecorationCustomInputChange}
-              selectedColorPalette={selectedColorPalette}
-              onColorPaletteChange={setSelectedColorPalette}
-              eventTheme={eventTheme}
-              onEventThemeChange={setEventTheme}
-              eventStyle={eventStyle}
-              onEventStyleChange={setEventStyle}
-              tierCount={structure.tierCount}
-            />
-
-            {/* Ready to Order Button */}
-            <AnimatePresence>
-              {!isReadyToOrder && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ delay: 0.6 }}
-                  className="space-y-4 pt-4"
-                >
-                  <Button
-                    onClick={() => setIsReadyToOrder(true)}
-                    className="w-full text-base md:text-lg py-6 bg-foreground text-background hover:bg-foreground/90 font-semibold tracking-wide"
-                  >
-                    ✨ I'm Ready to Order My Cake! ✨
-                  </Button>
-
-                  <a
-                    href="https://cateringabeusaleh.ca/product/cake-taster-box/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <Button
-                      variant="outline"
-                      className="btn-architectural w-full gap-2"
-                    >
-                      <span>Not sure? Order a Cake Taster Box</span>
-                      <ExternalLink className="h-3 w-3" />
-                    </Button>
-                  </a>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Celebration Checkout Section - Using Component */}
-            <AnimatePresence>
-              {isReadyToOrder && (
-                <>
                   <ConfettiCelebration />
                   <CelebrationCheckout
                     totalPrice={totalPrice}
@@ -469,7 +480,7 @@ export function CakeConfigurator() {
                     floralPalette={floralPalette}
                     onGoBack={() => setIsReadyToOrder(false)}
                   />
-                </>
+                </motion.div>
               )}
             </AnimatePresence>
           </div>
