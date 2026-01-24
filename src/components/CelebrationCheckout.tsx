@@ -1,6 +1,8 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { BrandCornerDecor, BrandAccent } from "./BrandLogoShape";
+import { LeadForm } from "./LeadForm";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import {
   coatingOptions,
@@ -22,6 +24,13 @@ interface CelebrationCheckoutProps {
   topperNames: string;
   floralPalette: string;
   onGoBack: () => void;
+  // Advanced customization props for LeadForm
+  referenceImages?: string[];
+  selectedDecorations?: string[];
+  decorationCustomInputs?: Record<string, string>;
+  selectedColorPalette?: string | null;
+  eventTheme?: string;
+  eventStyle?: string;
 }
 
 export function CelebrationCheckout({
@@ -35,9 +44,52 @@ export function CelebrationCheckout({
   topperNames,
   floralPalette,
   onGoBack,
+  referenceImages = [],
+  selectedDecorations = [],
+  decorationCustomInputs = {},
+  selectedColorPalette = null,
+  eventTheme = "",
+  eventStyle = "",
 }: CelebrationCheckoutProps) {
+  const [showLeadForm, setShowLeadForm] = useState(false);
+
+  const handleFormSuccess = () => {
+    // Build WooCommerce checkout URL with custom price
+    const checkoutUrl = `https://cateringabeusaleh.ca/product/custom-wedding-cake/?custom_price=${totalPrice.toFixed(2)}`;
+    
+    // Redirect to WooCommerce product page in new tab
+    window.open(checkoutUrl, "_blank");
+    
+    // Close the form
+    setShowLeadForm(false);
+  };
+
   return (
-    <motion.div
+    <>
+      <AnimatePresence>
+        {showLeadForm && (
+          <LeadForm
+            guestCount={guestCount}
+            structure={structure}
+            tierConfigs={tierConfigs}
+            coatingId={coatingId}
+            decorationId={decorationId}
+            topperId={topperId}
+            floralPalette={floralPalette}
+            totalPrice={totalPrice}
+            onClose={() => setShowLeadForm(false)}
+            onSuccess={handleFormSuccess}
+            referenceImages={referenceImages}
+            selectedDecorations={selectedDecorations}
+            decorationCustomInputs={decorationCustomInputs}
+            selectedColorPalette={selectedColorPalette}
+            eventTheme={eventTheme}
+            eventStyle={eventStyle}
+          />
+        )}
+      </AnimatePresence>
+      
+      <motion.div
       initial={{ opacity: 0, scale: 0.85, y: 50 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: -20 }}
@@ -348,33 +400,7 @@ export function CelebrationCheckout({
             className="rounded-xl"
           >
             <Button
-              onClick={() => {
-                const productId = "PRODUCT_ID";
-                const checkoutUrl = `https://cateringabeusaleh.ca/?add-to-cart=${productId}&custom_price=${totalPrice.toFixed(2)}`;
-                
-                const configData = {
-                  guests: guestCount,
-                  tiers: structure.tiers.map((tier, index) => {
-                    const config = tierConfigs[index];
-                    return {
-                      tier: tier.tierLevel,
-                      size: tier.sizeInches,
-                      servings: tier.servings,
-                      sponge: spongeOptions.find(s => s.id === config?.spongeId)?.name,
-                      filling: fillingOptions.find(f => f.id === config?.fillingId)?.name,
-                    };
-                  }),
-                  coating: coatingOptions.find(c => c.id === coatingId)?.name,
-                  decoration: decorationOptions.find(d => d.id === decorationId)?.name,
-                  topper: topperOptions.find(t => t.id === topperId)?.name,
-                  topperNames: topperNames || null,
-                  floralPalette: floralPalette || null,
-                  totalPrice: totalPrice,
-                };
-                console.log("Wedding Cake Configuration:", JSON.stringify(configData, null, 2));
-                
-                window.open(checkoutUrl, "_blank");
-              }}
+              onClick={() => setShowLeadForm(true)}
               className="w-full py-5 font-bold tracking-wide rounded-xl transition-all duration-300 hover:scale-105"
               style={{
                 background: "linear-gradient(135deg, hsl(43, 74%, 49%) 0%, hsl(38, 80%, 45%) 50%, hsl(43, 74%, 49%) 100%)",
@@ -416,5 +442,6 @@ export function CelebrationCheckout({
         </motion.button>
       </div>
     </motion.div>
+    </>
   );
 }
