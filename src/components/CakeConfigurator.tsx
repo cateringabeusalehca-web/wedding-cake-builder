@@ -277,8 +277,7 @@ export function CakeConfigurator() {
           </div>
         </motion.div>
 
-        {/* Configurator Grid - Hide when checkout is active */}
-        {!isReadyToOrder && (
+        {/* Configurator Grid */}
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
           {/* Left: SVG Cake - Sticky */}
           <motion.div
@@ -456,48 +455,28 @@ export function CakeConfigurator() {
               )}
             </AnimatePresence>
 
+            {/* Celebration Checkout Section - Using Component */}
+            <AnimatePresence>
+              {isReadyToOrder && (
+                <>
+                  <ConfettiCelebration />
+                  <CelebrationCheckout
+                    totalPrice={totalPrice}
+                    guestCount={guestCount}
+                    structure={structure}
+                    tierConfigs={tierConfigs}
+                    coatingId={coatingId}
+                    decorationId={decorationId}
+                    topperId={topperId}
+                    topperNames={topperNames}
+                    floralPalette={floralPalette}
+                    onGoBack={() => setIsReadyToOrder(false)}
+                  />
+                </>
+              )}
+            </AnimatePresence>
           </div>
         </div>
-        )}
-
-        {/* Celebration Checkout Section - Centered overlay */}
-        <AnimatePresence>
-          {isReadyToOrder && (
-            <>
-              <ConfettiCelebration />
-              <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 mt-8">
-                {/* Left: Cake Preview */}
-                <div className="flex items-center justify-center">
-                  <CakeSVG
-                    structure={structure}
-                    selectedTier={null}
-                    onTierSelect={() => {}}
-                    tierConfigs={tierConfigs}
-                    selectedDecorations={selectedDecorations}
-                  />
-                </div>
-                
-                {/* Right: Checkout */}
-                <div className="flex items-center justify-center">
-                  <div className="w-full max-w-md">
-                    <CelebrationCheckout
-                      totalPrice={totalPrice}
-                      guestCount={guestCount}
-                      structure={structure}
-                      tierConfigs={tierConfigs}
-                      coatingId={coatingId}
-                      decorationId={decorationId}
-                      topperId={topperId}
-                      topperNames={topperNames}
-                      floralPalette={floralPalette}
-                      onGoBack={() => setIsReadyToOrder(false)}
-                    />
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </AnimatePresence>
       </main>
 
       {/* Footer */}
