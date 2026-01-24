@@ -395,12 +395,8 @@ export function CakeConfigurator() {
               onCoatingChange={setCoatingId}
               decorationId={decorationId}
               onDecorationChange={setDecorationId}
-              topperId={topperId}
-              onTopperChange={setTopperId}
               floralPalette={floralPalette}
               onFloralPaletteChange={setFloralPalette}
-              topperNames={topperNames}
-              onTopperNamesChange={setTopperNames}
             />
 
             {/* Personalize Design Panel - Inline */}

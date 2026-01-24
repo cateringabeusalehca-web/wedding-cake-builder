@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Palette, Sparkles, Crown, AlertTriangle } from "lucide-react";
+import { Palette, Sparkles, AlertTriangle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import {
   coatingOptions,
   decorationOptions,
-  topperOptions,
 } from "@/data/menuDatabase";
 
 interface GlobalOptionsPanelProps {
@@ -19,12 +18,8 @@ interface GlobalOptionsPanelProps {
   onCoatingChange: (id: string) => void;
   decorationId: string;
   onDecorationChange: (id: string) => void;
-  topperId: string;
-  onTopperChange: (id: string) => void;
   floralPalette: string;
   onFloralPaletteChange: (palette: string) => void;
-  topperNames: string;
-  onTopperNamesChange: (names: string) => void;
 }
 
 export function GlobalOptionsPanel({
@@ -32,16 +27,10 @@ export function GlobalOptionsPanel({
   onCoatingChange,
   decorationId,
   onDecorationChange,
-  topperId,
-  onTopperChange,
   floralPalette,
   onFloralPaletteChange,
-  topperNames,
-  onTopperNamesChange,
 }: GlobalOptionsPanelProps) {
   const selectedDecoration = decorationOptions.find((d) => d.id === decorationId);
-  const selectedTopper = topperOptions.find((t) => t.id === topperId);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -141,62 +130,6 @@ export function GlobalOptionsPanel({
                 We will match your color palette, but specific varieties cannot be guaranteed.
               </p>
             </div>
-          </motion.div>
-        )}
-      </div>
-
-      {/* Topper */}
-      <div className="space-y-2 mt-8">
-        <div className="flex items-center gap-2">
-          <Crown className="h-4 w-4 text-muted-foreground" />
-          <label className="text-xs font-semibold uppercase tracking-wider text-secondary">
-            Cake Topper
-          </label>
-        </div>
-        <Select value={topperId} onValueChange={onTopperChange}>
-          <SelectTrigger className="input-sketch border-0 border-b">
-            <SelectValue placeholder="Select topper" />
-          </SelectTrigger>
-          <SelectContent>
-            {topperOptions.map((topper) => (
-              <SelectItem key={topper.id} value={topper.id}>
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <span className="font-medium">{topper.name}</span>
-                    {topper.description && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {topper.description}
-                      </span>
-                    )}
-                  </div>
-                  {topper.price > 0 && (
-                    <span className="text-xs text-secondary font-medium">
-                      +${topper.price}
-                    </span>
-                  )}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Custom names input */}
-        {selectedTopper?.hasNameInput && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="pt-2"
-          >
-            <Input
-              value={topperNames}
-              onChange={(e) => onTopperNamesChange(e.target.value)}
-              placeholder="e.g., Jennifer & Matthew"
-              className="input-sketch"
-              maxLength={50}
-            />
-            <p className="text-xs text-muted-foreground mt-2">
-              Enter both names as you'd like them printed
-            </p>
           </motion.div>
         )}
       </div>
