@@ -193,7 +193,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                   y={tier.y + tier.visualHeight / 2 + 4}
                   textAnchor="middle"
                   className="fill-muted-foreground font-ui text-[11px] font-medium"
-                  opacity={isSelected ? 1 : 0.6}
+                  opacity={isSelected ? 1 : 0.8}
                 >
                   {tier.sizeInches}"
                 </text>
@@ -233,7 +233,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                   y={tier.y + tier.visualHeight / 2 + 4}
                   textAnchor="middle"
                   className="fill-muted-foreground font-ui text-[10px]"
-                  opacity={isSelected ? 1 : 0.6}
+                  opacity={isSelected ? 1 : 0.8}
                 >
                   {tier.servings} srv
                 </text>
@@ -312,7 +312,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
         {/* Total servings label */}
         <motion.text
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.6 }}
+          animate={{ opacity: 0.8 }}
           transition={{ delay: 0.8 }}
           x={centerX}
           y={plateY + standHeight + 25}

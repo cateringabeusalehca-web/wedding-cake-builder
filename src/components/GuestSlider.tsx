@@ -50,7 +50,7 @@ export function GuestSlider({ value, onChange, tierCount }: GuestSliderProps) {
           {[20, 50, 75, 100, 125, 150].map((mark) => (
             <span
               key={mark}
-              className="text-[10px] text-muted-foreground/60"
+              className="text-[10px] text-muted-foreground"
             >
               {mark}
             </span>
@@ -65,7 +65,7 @@ export function GuestSlider({ value, onChange, tierCount }: GuestSliderProps) {
         className="flex items-center justify-center gap-2 pt-4"
       >
         <div className="h-px flex-1 bg-border" />
-        <span className="text-sketch text-secondary">
+        <span className="text-sketch text-foreground">
           {tierCount} {tierCount === 1 ? "Tier" : "Tiers"} Recommended
         </span>
         <div className="h-px flex-1 bg-border" />
