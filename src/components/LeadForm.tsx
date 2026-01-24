@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar as CalendarIcon, Upload, Send, X, AlertTriangle } from "lucide-react";
+import { Calendar as CalendarIcon, Send, X, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -84,38 +84,9 @@ export function LeadForm({
     requiresSavoryBites: false,
     allergyAcknowledged: false,
   });
-  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const minDate = getMinEventDate();
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = Array.from(e.dataTransfer.files);
-    const fileNames = files.map((f) => f.name);
-    setUploadedFiles((prev) => [...prev, ...fileNames]);
-  }, []);
-
-  const handleFileInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || []);
-      const fileNames = files.map((f) => f.name);
-      setUploadedFiles((prev) => [...prev, ...fileNames]);
-    },
-    []
-  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,8 +149,7 @@ export function LeadForm({
         additionalNotes: formData.additionalNotes,
       },
       assets: {
-        referenceImages: referenceImages,
-        inspirationUrls: uploadedFiles,
+        inspirationUrls: referenceImages,
       },
     };
 
@@ -378,59 +348,24 @@ export function LeadForm({
             </Popover>
           </div>
 
-          {/* Inspiration Upload Zone */}
-          <div>
-            <label className="text-sketch text-muted-foreground">
-              Inspiration & References
-            </label>
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={cn(
-                "dropzone-blueprint mt-2 transition-all relative",
-                isDragging && "border-secondary bg-secondary/10"
-              )}
-            >
-              <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
-              <p className="mt-3 text-sm text-muted-foreground">
-                Drag & drop Pinterest screenshots or moodboards
+          {/* Reference Images Summary (uploaded in previous step) */}
+          {referenceImages.length > 0 && (
+            <div className="bg-muted/30 p-4 rounded">
+              <p className="text-sketch text-muted-foreground mb-2">
+                Reference Images Attached ({referenceImages.length}/5)
               </p>
-              <p className="mt-1 text-xs text-muted-foreground/60">
-                or click to browse
-              </p>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleFileInput}
-                className="absolute inset-0 cursor-pointer opacity-0"
-              />
-            </div>
-            {uploadedFiles.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {uploadedFiles.map((file, i) => (
-                  <span
+              <div className="flex gap-2 flex-wrap">
+                {referenceImages.map((url, i) => (
+                  <img
                     key={i}
-                    className="inline-flex items-center gap-1 bg-muted px-2 py-1 text-xs"
-                  >
-                    {file}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setUploadedFiles((prev) =>
-                          prev.filter((_, idx) => idx !== i)
-                        )
-                      }
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      ×
-                    </button>
-                  </span>
+                    src={url}
+                    alt={`Reference ${i + 1}`}
+                    className="w-16 h-16 object-cover rounded border border-border"
+                  />
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Blind Spot Check & Allergy Warning */}
           <div className="space-y-4 border-t border-border pt-6">
