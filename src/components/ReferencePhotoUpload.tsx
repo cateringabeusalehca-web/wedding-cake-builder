@@ -18,12 +18,30 @@ export function ReferencePhotoUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Store file paths for signed URL generation
+  const [imagePaths, setImagePaths] = useState<Map<string, string>>(new Map());
+
   const uploadFile = async (file: File): Promise<string | null> => {
-    const fileExt = file.name.split(".").pop();
+    // Validate file size (max 5MB)
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      setError("File size must be less than 5MB");
+      return null;
+    }
+
+    const fileExt = file.name.split(".").pop()?.toLowerCase();
+    
+    // Validate file extension
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    if (!fileExt || !allowedExtensions.includes(fileExt)) {
+      setError("Only JPG, PNG, GIF, and WebP images are allowed");
+      return null;
+    }
+
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
     const filePath = `${fileName}`;
 
-    const { error: uploadError, data } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("reference-images")
       .upload(filePath, file, {
         cacheControl: "3600",
@@ -35,11 +53,20 @@ export function ReferencePhotoUpload({
       return null;
     }
 
-    const { data: publicUrlData } = supabase.storage
+    // Generate a signed URL for secure access (1 hour expiry)
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
       .from("reference-images")
-      .getPublicUrl(filePath);
+      .createSignedUrl(filePath, 3600);
 
-    return publicUrlData.publicUrl;
+    if (signedUrlError || !signedUrlData?.signedUrl) {
+      console.error("Signed URL error:", signedUrlError);
+      return null;
+    }
+
+    // Store the file path for later deletion
+    setImagePaths(prev => new Map(prev).set(signedUrlData.signedUrl, filePath));
+
+    return signedUrlData.signedUrl;
   };
 
   const handleFiles = useCallback(
@@ -119,15 +146,32 @@ export function ReferencePhotoUpload({
   const removeImage = useCallback(
     async (index: number) => {
       const imageUrl = images[index];
-      // Extract file path from URL
-      const urlParts = imageUrl.split("/reference-images/");
-      if (urlParts.length > 1) {
-        const filePath = urlParts[1];
-        await supabase.storage.from("reference-images").remove([filePath]);
+      
+      // Get file path from our stored map, or try to extract from URL
+      let filePath = imagePaths.get(imageUrl);
+      
+      if (!filePath) {
+        // Fallback: try to extract from signed URL path
+        const urlParts = imageUrl.split("/reference-images/");
+        if (urlParts.length > 1) {
+          // Remove query parameters from signed URL
+          filePath = urlParts[1].split("?")[0];
+        }
       }
+      
+      if (filePath) {
+        await supabase.storage.from("reference-images").remove([filePath]);
+        // Remove from our path map
+        setImagePaths(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(imageUrl);
+          return newMap;
+        });
+      }
+      
       onImagesChange(images.filter((_, i) => i !== index));
     },
-    [images, onImagesChange]
+    [images, onImagesChange, imagePaths]
   );
 
   const canAddMore = images.length < maxImages;
