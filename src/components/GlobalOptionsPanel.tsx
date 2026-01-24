@@ -58,7 +58,7 @@ export function GlobalOptionsPanel({
           </label>
         </div>
         <Select value={coatingId} onValueChange={onCoatingChange}>
-          <SelectTrigger className="input-sketch border-0 border-b">
+          <SelectTrigger className="input-sketch border-0 border-b" aria-label="Select frosting type">
             <SelectValue placeholder="Select frosting" />
           </SelectTrigger>
           <SelectContent>
@@ -87,7 +87,7 @@ export function GlobalOptionsPanel({
           </label>
         </div>
         <Select value={decorationId} onValueChange={onDecorationChange}>
-          <SelectTrigger className="input-sketch border-0 border-b">
+          <SelectTrigger className="input-sketch border-0 border-b" aria-label="Select decoration and florals">
             <SelectValue placeholder="Select decoration" />
           </SelectTrigger>
           <SelectContent>
