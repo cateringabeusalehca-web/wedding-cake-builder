@@ -41,6 +41,7 @@ export function GuestSlider({ value, onChange, tierCount }: GuestSliderProps) {
           min={20}
           max={150}
           step={5}
+          aria-label="Guest count slider"
           className="[&>span:first-child]:h-[2px] [&>span:first-child]:bg-primary/20 [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:border-2 [&_[role=slider]]:border-primary [&_[role=slider]]:bg-background [&_[role=slider]]:shadow-md [&_[role=slider]]:transition-all [&_[role=slider]]:hover:scale-110 [&_[role=slider]]:focus-visible:ring-2 [&_[role=slider]]:focus-visible:ring-secondary [&>span:first-child>span]:bg-secondary"
         />
         
