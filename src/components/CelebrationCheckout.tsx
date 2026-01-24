@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { BrandCornerDecor, BrandAccent } from "./BrandLogoShape";
 import logoHorizontal from "@/assets/logo-horizontal.png";
@@ -11,50 +10,6 @@ import {
   fillingOptions,
 } from "@/data/menuDatabase";
 import type { CakeStructure, TierConfiguration } from "@/data/menuDatabase";
-
-// Celebration sound using Web Audio API
-const playCelebrationSound = () => {
-  try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    
-    // Create a pleasant "success" chime
-    const playNote = (frequency: number, startTime: number, duration: number, volume: number = 0.3) => {
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.frequency.value = frequency;
-      oscillator.type = 'sine';
-      
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
-      gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + startTime + 0.05);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + startTime + duration);
-      
-      oscillator.start(audioContext.currentTime + startTime);
-      oscillator.stop(audioContext.currentTime + startTime + duration);
-    };
-    
-    // Celebratory ascending arpeggio (C major with sparkle)
-    playNote(523.25, 0, 0.4, 0.25);      // C5
-    playNote(659.25, 0.1, 0.4, 0.25);    // E5
-    playNote(783.99, 0.2, 0.4, 0.25);    // G5
-    playNote(1046.50, 0.3, 0.6, 0.3);    // C6 (higher, longer)
-    playNote(1318.51, 0.45, 0.5, 0.2);   // E6 (sparkle note)
-    
-  } catch (error) {
-    console.log('Audio playback not supported');
-  }
-};
-
-// Haptic feedback for mobile devices
-const triggerHapticFeedback = () => {
-  if ('vibrate' in navigator) {
-    // Pattern: short-pause-long (celebration pattern)
-    navigator.vibrate([50, 50, 100]);
-  }
-};
 
 interface CelebrationCheckoutProps {
   totalPrice: number;
@@ -81,22 +36,6 @@ export function CelebrationCheckout({
   floralPalette,
   onGoBack,
 }: CelebrationCheckoutProps) {
-  const hasPlayedRef = useRef(false);
-
-  // Play celebration effects on mount
-  useEffect(() => {
-    if (!hasPlayedRef.current) {
-      hasPlayedRef.current = true;
-      
-      // Small delay for dramatic effect after animation starts
-      const timer = setTimeout(() => {
-        playCelebrationSound();
-        triggerHapticFeedback();
-      }, 400);
-      
-      return () => clearTimeout(timer);
-    }
-  }, []);
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.85, y: 50 }}
