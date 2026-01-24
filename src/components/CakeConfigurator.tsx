@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Instagram, Facebook } from "lucide-react";
+import { ExternalLink, Instagram, Facebook, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CakeSVG } from "./CakeSVG";
 import { GuestSlider } from "./GuestSlider";
@@ -345,7 +345,8 @@ export function CakeConfigurator() {
                   <div className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-secondary/50" />
                   <div className="absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-secondary/50" />
                   
-                  <h3 className="font-display text-2xl md:text-3xl font-medium text-secondary mb-4 tracking-wide">
+                  <h3 className="font-display text-2xl md:text-3xl font-medium text-secondary mb-4 tracking-wide flex items-center gap-2">
+                    <Layers className="h-6 w-6" />
                     Your Tiers
                   </h3>
                   <div className="space-y-1">
