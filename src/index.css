@@ -27,17 +27,17 @@
     --primary: 0 0% 10%;
     --primary-foreground: 40 33% 98%;
 
-    /* Royal Gold - accents */
-    --secondary: 43 60% 52%;
-    --secondary-foreground: 0 0% 10%;
+    /* Royal Gold - accents (darkened for WCAG 4.5:1 contrast) */
+    --secondary: 43 55% 38%;
+    --secondary-foreground: 40 33% 98%;
 
-    /* Muted tones */
+    /* Muted tones (darkened for accessibility) */
     --muted: 40 20% 92%;
-    --muted-foreground: 0 0% 40%;
+    --muted-foreground: 0 0% 35%;
 
-    /* Gold accent */
-    --accent: 43 60% 52%;
-    --accent-foreground: 0 0% 10%;
+    /* Gold accent (matches secondary for consistency) */
+    --accent: 43 55% 38%;
+    --accent-foreground: 40 33% 98%;
 
     /* Destructive */
     --destructive: 0 72% 51%;
