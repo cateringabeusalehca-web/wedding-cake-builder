@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Palette, Sparkles, Check, ChevronDown, ChevronUp, PartyPopper } from "lucide-react";
+import { Camera, Palette, Sparkles, Check, ChevronDown, ChevronUp, PartyPopper, Crown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ReferencePhotoUpload } from "./ReferencePhotoUpload";
@@ -189,36 +189,45 @@ export function PersonalizeDesignPanel({
           </div>
         </div>
 
-        {/* 3D Print Toppers */}
-        <div className="rounded-lg border border-border bg-card/50 overflow-hidden">
-          <button
-            onClick={() => setShowToppers(!showToppers)}
-            className="w-full p-4 flex items-center justify-between hover:bg-muted/30 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-xl">👑</span>
-              <div className="text-left">
-                <span className="text-sm font-semibold text-foreground block">
-                  3D Print Toppers
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Custom 3D printed cake toppers
-                </span>
+        {/* Cake Toppers Section */}
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <Crown className="h-4 w-4 text-muted-foreground" />
+            <label className="text-xs font-semibold uppercase tracking-wider text-secondary">
+              Cake Toppers
+            </label>
+          </div>
+
+          {/* 3D Print Toppers */}
+          <div className="rounded-lg border border-border bg-card/50 overflow-hidden">
+            <button
+              onClick={() => setShowToppers(!showToppers)}
+              className="w-full p-4 flex items-center justify-between hover:bg-muted/30 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">👑</span>
+                <div className="text-left">
+                  <span className="text-sm font-semibold text-foreground block">
+                    3D Print Toppers
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Custom 3D printed cake toppers
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {selectedToppersCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold">
-                  {selectedToppersCount}
-                </span>
-              )}
-              {showToppers ? (
-                <ChevronUp className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              )}
-            </div>
-          </button>
+              <div className="flex items-center gap-2">
+                {selectedToppersCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold">
+                    {selectedToppersCount}
+                  </span>
+                )}
+                {showToppers ? (
+                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
+            </button>
 
           <AnimatePresence>
             {showToppers && (
@@ -307,6 +316,7 @@ export function PersonalizeDesignPanel({
               </motion.div>
             )}
           </AnimatePresence>
+          </div>
         </div>
       </div>
     </motion.div>
