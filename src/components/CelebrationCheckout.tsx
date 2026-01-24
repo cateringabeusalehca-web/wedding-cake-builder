@@ -55,7 +55,7 @@ export function CelebrationCheckout({
 
   const handleFormSuccess = () => {
     // Build WooCommerce checkout URL with custom price
-    const checkoutUrl = `https://cateringabeusaleh.ca/product/custom-wedding-cake/?custom_price=${totalPrice.toFixed(2)}`;
+    const checkoutUrl = `https://cateringabeusaleh.ca/product/custom-wedding-cake-2/?custom_price=${totalPrice.toFixed(2)}`;
     
     // Redirect to WooCommerce product page in new tab
     window.open(checkoutUrl, "_blank");
