@@ -303,6 +303,7 @@ export function CakeConfigurator() {
               selectedTier={selectedTier}
               onTierSelect={handleTierSelect}
               tierConfigs={tierConfigs}
+              selectedDecorations={selectedDecorations}
             />
 
             {/* Hint */}
