@@ -69,11 +69,11 @@ export function AdvancedDecorationPanel({
           <div className="flex items-center gap-2">
             <Palette className="h-4 w-4 text-secondary" />
             <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
-              Paleta de Colores
+              Color Palette
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Selecciona los colores que mejor representan tu evento
+            Select the colors that best represent your event
           </p>
         </div>
 
@@ -128,23 +128,23 @@ export function AdvancedDecorationPanel({
           <div className="flex items-center gap-2">
             <PartyPopper className="h-4 w-4 text-secondary" />
             <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
-              Tema y Estilo del Evento
+              Event Theme & Style
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Cuéntanos sobre la visión de tu evento
+            Tell us about your event vision
           </p>
         </div>
 
         <div className="p-4 space-y-4">
           <div>
             <label className="text-xs font-medium text-foreground mb-2 block">
-              Tema del Evento
+              Event Theme
             </label>
             <Input
               value={eventTheme}
               onChange={(e) => onEventThemeChange(e.target.value)}
-              placeholder="Ej: Jardín encantado, Playa tropical, Elegante clásico..."
+              placeholder="E.g., Enchanted garden, Tropical beach, Classic elegance..."
               className="input-sketch text-sm"
               maxLength={100}
             />
@@ -152,12 +152,12 @@ export function AdvancedDecorationPanel({
 
           <div>
             <label className="text-xs font-medium text-foreground mb-2 block">
-              Estilo / Vibes
+              Style / Vibes
             </label>
             <Textarea
               value={eventStyle}
               onChange={(e) => onEventStyleChange(e.target.value)}
-              placeholder="Describe el ambiente que deseas: romántico, moderno, rústico, minimalista, glamuroso..."
+              placeholder="Describe the atmosphere you want: romantic, modern, rustic, minimalist, glamorous..."
               className="input-sketch text-sm min-h-[80px] resize-none"
               maxLength={300}
             />
@@ -184,7 +184,7 @@ export function AdvancedDecorationPanel({
                 3D Print Toppers
               </span>
               <span className="text-xs text-muted-foreground">
-                Toppers personalizados impresos en 3D
+                Custom 3D printed cake toppers
               </span>
             </div>
           </div>
