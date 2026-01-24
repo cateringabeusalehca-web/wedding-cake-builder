@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { GoldDustParticles } from "./GoldDustParticles";
+import { CakeDecorationOverlays } from "./CakeDecorationOverlays";
 import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration } from "@/data/menuDatabase";
 
 interface CakeSVGProps {
@@ -7,9 +8,10 @@ interface CakeSVGProps {
   selectedTier: number | null;
   onTierSelect: (tier: number) => void;
   tierConfigs: TierConfiguration[];
+  selectedDecorations?: string[];
 }
 
-export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs }: CakeSVGProps) {
+export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, selectedDecorations = [] }: CakeSVGProps) {
   const centerX = 200;
   const baseY = 320;
   const standHeight = 35;
@@ -293,6 +295,19 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs }: 
             </motion.g>
           );
         })}
+
+        {/* Decoration Overlays */}
+        {selectedDecorations.length > 0 && (
+          <CakeDecorationOverlays
+            selectedDecorations={selectedDecorations}
+            centerX={centerX}
+            topTierY={tierVisuals[tierVisuals.length - 1]?.y ?? plateY - 60}
+            bottomTierY={plateY}
+            topTierWidth={tierVisuals[tierVisuals.length - 1]?.width ?? 96}
+            bottomTierWidth={tierVisuals[0]?.width ?? 192}
+            tierCount={structure.tierCount}
+          />
+        )}
 
         {/* Total servings label */}
         <motion.text
