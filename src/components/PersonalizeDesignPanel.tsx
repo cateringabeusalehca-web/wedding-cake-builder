@@ -75,10 +75,10 @@ export function PersonalizeDesignPanel({
       <div className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-secondary/50" />
       <div className="absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-secondary/50" />
 
-      <h3 className="font-display text-2xl md:text-3xl font-medium text-secondary mb-5 tracking-wide flex items-center gap-2">
+      <h2 className="font-display text-2xl md:text-3xl font-medium text-secondary mb-5 tracking-wide flex items-center gap-2">
         <Sparkles className="h-6 w-6" />
         Personalize Design
-      </h3>
+      </h2>
 
       <div className="space-y-6">
         {/* Reference Photos Section */}
