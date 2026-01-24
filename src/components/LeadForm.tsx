@@ -34,6 +34,7 @@ import {
   topperOptions,
   getTierLabel,
 } from "@/data/menuDatabase";
+import { getSelectedDecorationDetails, colorPalettes } from "@/data/decorationOptions";
 
 interface LeadFormProps {
   guestCount: number;
@@ -46,6 +47,11 @@ interface LeadFormProps {
   totalPrice: number;
   onClose: () => void;
   onSuccess: () => void;
+  // Advanced customization props
+  referenceImages?: string[];
+  selectedDecorations?: string[];
+  decorationCustomInputs?: Record<string, string>;
+  selectedColorPalette?: string | null;
 }
 
 export function LeadForm({
@@ -59,6 +65,10 @@ export function LeadForm({
   totalPrice,
   onClose,
   onSuccess,
+  referenceImages = [],
+  selectedDecorations = [],
+  decorationCustomInputs = {},
+  selectedColorPalette = null,
 }: LeadFormProps) {
   const [formData, setFormData] = useState({
     fullName: "",
@@ -108,6 +118,11 @@ export function LeadForm({
     setIsSubmitting(true);
 
     // Build the CRM payload
+    const decorationDetails = getSelectedDecorationDetails(selectedDecorations, decorationCustomInputs);
+    const colorPaletteInfo = selectedColorPalette 
+      ? colorPalettes.find(p => p.id === selectedColorPalette) 
+      : null;
+
     const payload = {
       client: {
         fullName: formData.fullName,
@@ -144,12 +159,20 @@ export function LeadForm({
         decoration: decorationOptions.find((d) => d.id === decorationId)?.name || decorationId,
         floralPalette: floralPalette || null,
         topper: topperOptions.find((t) => t.id === topperId)?.name || topperId,
+        // Advanced customization data
+        colorPalette: colorPaletteInfo?.name || null,
+        advancedDecorations: decorationDetails.map(d => ({
+          name: d.item.name,
+          price: d.item.price,
+          customValue: d.customValue || null,
+        })),
       },
       blindSpotCheck: {
         requiresSavoryBites: formData.requiresSavoryBites,
         additionalNotes: formData.additionalNotes,
       },
       assets: {
+        referenceImages: referenceImages,
         inspirationUrls: uploadedFiles,
       },
     };
