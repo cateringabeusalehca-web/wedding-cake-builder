@@ -432,15 +432,23 @@ export function CakeConfigurator() {
                     transition={{ delay: 0.6 }}
                     className="space-y-4 pt-4"
                   >
-                    <Button
-                      onClick={() => setIsReadyToOrder(true)}
-                      className="w-full text-base md:text-lg py-6 bg-foreground text-background hover:bg-foreground/90 font-semibold tracking-wide"
+                    <a
+                      href="https://www.google.com/search?q=https://cateringabeusaleh.ca/get-a-quote/"
+                      className="block"
                     >
-                      ✨ I'm Ready to Order My Cake! ✨
-                    </Button>
+                      <Button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsReadyToOrder(true);
+                        }}
+                        className="w-full text-base md:text-lg py-6 bg-foreground text-background hover:bg-foreground/90 font-semibold tracking-wide"
+                      >
+                        ✨ I'm Ready to Order My Cake! ✨
+                      </Button>
+                    </a>
 
                     <a
-                      href="https://cateringabeusaleh.ca/product/cake-taster-box/"
+                      href="https://www.google.com/search?q=https://cateringabeusaleh.ca/product/cake-taster-box/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block"
@@ -449,7 +457,7 @@ export function CakeConfigurator() {
                         variant="outline"
                         className="btn-architectural w-full gap-2"
                       >
-                        <span>Not sure? Order a Cake Taster Box</span>
+                        <span>NOT SURE? ORDER A CAKE TASTER BOX</span>
                         <ExternalLink className="h-3 w-3" />
                       </Button>
                     </a>
