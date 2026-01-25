@@ -1,6 +1,6 @@
 import { Slider } from "@/components/ui/slider";
-import { motion } from "framer-motion";
-import { Users, RotateCcw } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Users, RotateCcw, AlertTriangle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { cakeStructures, CakeStructure, getRecommendedStructure } from "@/data/menuDatabase";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect, useRef } from "react";
 
 interface GuestSliderProps {
   value: number;
@@ -31,6 +33,24 @@ export function GuestSlider({
   onResetToRecommended
 }: GuestSliderProps) {
   const recommended = getRecommendedStructure(value);
+  const { toast } = useToast();
+  const prevStructureRef = useRef(selectedStructure.id);
+  
+  const isTooSmall = selectedStructure.totalServings < value;
+  const servingsShort = value - selectedStructure.totalServings;
+
+  // Show toast when selecting a structure that's too small
+  useEffect(() => {
+    if (prevStructureRef.current !== selectedStructure.id && isTooSmall) {
+      toast({
+        variant: "destructive",
+        title: "⚠️ Structure too small",
+        description: `This cake provides ${selectedStructure.totalServings} servings but you need ${value}. You're ${servingsShort} servings short.`,
+      });
+    }
+    prevStructureRef.current = selectedStructure.id;
+  }, [selectedStructure.id, isTooSmall, toast, value, servingsShort, selectedStructure.totalServings]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -141,23 +161,38 @@ export function GuestSlider({
           </SelectContent>
         </Select>
 
+        {/* Alert when structure is too small */}
+        <AnimatePresence>
+          {isTooSmall && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30">
+                <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+                <p className="text-xs text-destructive">
+                  <span className="font-medium">Not enough servings!</span> You need {value} but this cake only provides {selectedStructure.totalServings} ({servingsShort} short).
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {isManualSelection && (
           <motion.div
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center gap-2"
           >
-            <p className="text-xs text-center text-muted-foreground">
-              Manual selection • {selectedStructure.totalServings >= value ? (
-                <span className="text-secondary">
+            {!isTooSmall && (
+              <p className="text-xs text-center text-muted-foreground">
+                Manual selection • <span className="text-secondary">
                   {selectedStructure.totalServings - value} extra servings
                 </span>
-              ) : (
-                <span className="text-destructive">
-                  {value - selectedStructure.totalServings} servings short
-                </span>
-              )}
-            </p>
+              </p>
+            )}
             
             <Button
               variant="ghost"
