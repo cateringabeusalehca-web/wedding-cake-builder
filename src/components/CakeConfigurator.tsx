@@ -411,46 +411,45 @@ export function CakeConfigurator() {
           </div>
         </motion.div>
 
-        {/* Mobile: Sticky header with Guest Slider + Cake Preview */}
-        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-4 pb-2 overflow-hidden">
-          {/* Guest Slider - Mobile Sticky */}
-          {!isReadyToOrder && (
-            <div className="pt-1">
-              <GuestSlider
-                value={guestCount}
-                onChange={(v) => {
-                  setGuestCount(v);
-                  setHasUserInteracted(true);
-                }}
-                tierCount={structure.tierCount}
-                selectedStructure={baseStructure}
-                onStructureChange={(id) => {
-                  handleStructureChange(id);
-                  setHasUserInteracted(true);
-                }}
-                isManualSelection={manualStructureId !== null}
-                onResetToRecommended={() => setManualStructureId(null)}
-                actualTotalServings={totalServings}
-                hasUserInteracted={hasUserInteracted}
-              />
+        {/* Mobile: Sticky header with Guest Slider + Cake Preview side by side */}
+        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-4 py-2 overflow-hidden">
+          <div className="flex items-start gap-2">
+            {/* Left: Cake Preview - Compact */}
+            <div className="flex-shrink-0 w-[140px] h-[180px] flex items-center justify-center overflow-hidden">
+              <div className="scale-[0.55] origin-center">
+                <CakeSVG
+                  structure={structure}
+                  selectedTier={selectedTier}
+                  onTierSelect={handleTierSelect}
+                  tierConfigs={tierConfigs}
+                  selectedDecorations={selectedDecorations}
+                  totalServings={totalServings}
+                />
+              </div>
             </div>
-          )}
-          
-          {/* Cake Preview - Mobile Sticky - Compact */}
-          <div className="flex flex-col items-center overflow-hidden">
-            <div className="h-[240px] w-full flex items-center justify-center scale-[0.85] origin-center">
-              <CakeSVG
-                structure={structure}
-                selectedTier={selectedTier}
-                onTierSelect={handleTierSelect}
-                tierConfigs={tierConfigs}
-                selectedDecorations={selectedDecorations}
-                totalServings={totalServings}
-              />
-            </div>
-            <p className="-mt-2 text-center text-xs text-muted-foreground">
-              Tap a tier to customize
-            </p>
+            
+            {/* Right: Guest Slider */}
+            {!isReadyToOrder && (
+              <div className="flex-1 min-w-0 pt-1">
+                <GuestSlider
+                  value={guestCount}
+                  onChange={(v) => {
+                    setGuestCount(v);
+                    setHasUserInteracted(true);
+                  }}
+                  tierCount={structure.tierCount}
+                  selectedStructure={baseStructure}
+                  onStructureChange={(id) => {
+                    handleStructureChange(id);
+                    setHasUserInteracted(true);
+                  }}
+                  isManualSelection={manualStructureId !== null}
+                  onResetToRecommended={() => setManualStructureId(null)}
+                  actualTotalServings={totalServings}
+                  hasUserInteracted={hasUserInteracted}
+                />
+              </div>
+            )}
           </div>
         </div>
 
