@@ -52,9 +52,13 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
     // Calculate Y position (stacked from bottom, accounting for separators)
     let y = plateY;
     for (let i = 0; i < index; i++) {
-      y -= structure.tiers[i].height;
-      // Add separator space if the tier below has a separator above
       const prevConfig = tierConfigs[i];
+      const prevShape = prevConfig?.shape || "round";
+      const prevIsRectangular = prevShape === "rectangular";
+      // Use correct height based on shape
+      const prevHeight = prevIsRectangular ? cmToPixels(RECTANGULAR_HEIGHT_CM) : structure.tiers[i].height;
+      y -= prevHeight;
+      // Add separator space if the tier below has a separator above
       if (prevConfig?.hasSeparatorAbove && prevConfig?.separatorConfig) {
         y -= cmToPixels(prevConfig.separatorConfig.heightCm);
       }
@@ -199,7 +203,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
 
           return (
             <motion.g
-              key={actualTierNumber}
+              key={`${actualTierNumber}-${tier.shape}-${tier.width}-${tier.visualHeight}`}
               initial={{ opacity: 0, y: -20 }}
               animate={{
                 opacity,
