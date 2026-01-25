@@ -361,6 +361,7 @@ export function CakeConfigurator() {
                     selectedStructure={structure}
                     onStructureChange={handleStructureChange}
                     isManualSelection={manualStructureId !== null}
+                    onResetToRecommended={() => setManualStructureId(null)}
                   />
 
                   {/* Tier Config Panel */}
