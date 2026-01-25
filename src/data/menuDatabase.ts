@@ -87,6 +87,20 @@ export const cakeStructures: CakeStructure[] = [
     basePrice: 774, // 129 * $6.00
   },
   {
+    id: "majestic",
+    name: "The Majestic Celebration",
+    description: "Impressive four-tier with grand proportions",
+    tierCount: 4,
+    tiers: [
+      { tierLevel: 1, sizeInches: 14, servings: 78, height: 55 },
+      { tierLevel: 2, sizeInches: 12, servings: 56, height: 50 },
+      { tierLevel: 3, sizeInches: 10, servings: 38, height: 45 },
+      { tierLevel: 4, sizeInches: 8, servings: 24, height: 40 },
+    ],
+    totalServings: 196,
+    basePrice: 1176, // 196 * $6.00
+  },
+  {
     id: "royal",
     name: "The Royal Affair",
     description: "Magnificent five-tier masterpiece",
@@ -347,11 +361,12 @@ export const dietaryOptions: DietaryOption[] = [
 // ============= HELPER FUNCTIONS =============
 
 export function getRecommendedStructure(guests: number): CakeStructure {
-  if (guests <= 35) return cakeStructures[0]; // intimate
-  if (guests <= 55) return cakeStructures[1]; // classic
-  if (guests <= 85) return cakeStructures[2]; // grand
-  if (guests <= 130) return cakeStructures[3]; // gala
-  return cakeStructures[4]; // royal (5 tiers)
+  if (guests <= 35) return cakeStructures[0]; // intimate (2 tiers, 35 servings)
+  if (guests <= 55) return cakeStructures[1]; // classic (2 tiers, 55 servings)
+  if (guests <= 73) return cakeStructures[2]; // grand (3 tiers, 73 servings)
+  if (guests <= 129) return cakeStructures[3]; // gala (4 tiers, 129 servings)
+  if (guests <= 196) return cakeStructures[4]; // majestic (4 tiers, 196 servings)
+  return cakeStructures[5]; // royal (5 tiers, 207 servings)
 }
 
 // Get fillings allowed for a specific sponge
