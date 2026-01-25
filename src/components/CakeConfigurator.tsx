@@ -26,6 +26,8 @@ import {
   getTierLabel,
   cakeStructures,
   CakeStructure,
+  getServingsForTier,
+  calculateTotalServings,
 } from "@/data/menuDatabase";
 import { calculateDecorationTotal } from "@/data/decorationOptions";
 
@@ -35,6 +37,8 @@ const defaultTierConfig: TierConfiguration = {
   spongeId: spongeOptions[0].id,
   dietaryId: "none",
   fillingId: fillingOptions[0].id,
+  shape: "round",
+  hasSeparatorAbove: false,
 };
 
 export function CakeConfigurator() {
@@ -362,6 +366,7 @@ export function CakeConfigurator() {
                     onStructureChange={handleStructureChange}
                     isManualSelection={manualStructureId !== null}
                     onResetToRecommended={() => setManualStructureId(null)}
+                    actualTotalServings={calculateTotalServings(structure, tierConfigs)}
                   />
 
                   {/* Tier Config Panel */}
@@ -376,6 +381,7 @@ export function CakeConfigurator() {
                         onApplyToAll={handleApplyToAll}
                         onClose={() => setSelectedTier(null)}
                         totalTiers={structure.tierCount}
+                        isTopTier={selectedTier === structure.tierCount}
                       />
                     )}
                   </AnimatePresence>
@@ -408,19 +414,27 @@ export function CakeConfigurator() {
                             const filling = fillingOptions.find(
                               (f) => f.id === config?.fillingId
                             );
+                            const actualServings = config 
+                              ? getServingsForTier(tier.sizeInches, config.shape)
+                              : tier.servings;
+                            const shapeIcon = config?.shape === "square" ? "◼" : "●";
                             return (
                               <button
                                 key={tier.tierLevel}
                                 onClick={() => handleTierSelect(tier.tierLevel)}
                                 className="group flex w-full items-center justify-between rounded-md border border-transparent bg-background/50 px-4 py-3 text-left transition-all duration-300 hover:border-secondary/40 hover:bg-secondary/10 hover:shadow-md"
                               >
-                                <div>
-                                  <span className="text-sketch text-foreground block group-hover:text-secondary transition-colors">
-                                    {getTierLabel(tier.tierLevel, structure.tierCount)}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {tier.sizeInches}" • {tier.servings} servings
-                                  </span>
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xs text-secondary">{shapeIcon}</span>
+                                  <div>
+                                    <span className="text-sketch text-foreground block group-hover:text-secondary transition-colors">
+                                      {getTierLabel(tier.tierLevel, structure.tierCount)}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {tier.sizeInches}" {config?.shape || "round"} • {actualServings} servings
+                                      {config?.hasSeparatorAbove && " • +separator"}
+                                    </span>
+                                  </div>
                                 </div>
                                 <div className="text-right">
                                   <span className="text-sm block text-foreground group-hover:text-secondary transition-colors">

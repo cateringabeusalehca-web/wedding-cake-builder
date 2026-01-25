@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Copy, DollarSign, Cake, Layers, Palette } from "lucide-react";
+import { Check, Copy, DollarSign, Cake, Layers, Palette, Circle, Square, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -8,6 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   spongeOptions,
   dietaryOptions,
@@ -19,8 +21,12 @@ import {
   getAllowedFillings,
   getSpongesForDietary,
   getFillingsForDietary,
+  CakeShape,
+  getServingsForTier,
+  getSeparatorPrice,
 } from "@/data/menuDatabase";
 import { useMemo } from "react";
+import { PortionDiagram } from "./PortionDiagram";
 
 interface TierConfigPanelProps {
   tierNumber: number;
@@ -30,6 +36,7 @@ interface TierConfigPanelProps {
   onApplyToAll: () => void;
   onClose: () => void;
   totalTiers: number;
+  isTopTier?: boolean;
 }
 
 export function TierConfigPanel({
@@ -40,14 +47,22 @@ export function TierConfigPanel({
   onApplyToAll,
   onClose,
   totalTiers,
+  isTopTier = false,
 }: TierConfigPanelProps) {
   const tierLabel = getTierLabel(tierNumber, totalTiers);
+  
+  // Get actual servings based on shape
+  const actualServings = getServingsForTier(tierInfo.sizeInches, config.shape);
+  
   const pricing = calculateTierPrice(
-    tierInfo.servings,
+    actualServings,
     config.spongeId,
     config.dietaryId,
     config.fillingId
   );
+  
+  // Calculate separator price if enabled
+  const separatorPrice = config.hasSeparatorAbove ? getSeparatorPrice(tierInfo.sizeInches) : 0;
 
   // Filter sponges based on dietary selection
   const availableSponges = useMemo(() => {
@@ -138,7 +153,7 @@ export function TierConfigPanel({
               {tierLabel}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {tierInfo.sizeInches}" • {tierInfo.servings} servings
+              {tierInfo.sizeInches}" {config.shape} • {actualServings} servings
             </p>
           </div>
         </div>
@@ -150,20 +165,95 @@ export function TierConfigPanel({
         </button>
       </div>
 
+      {/* Shape Selection & Portion Diagram */}
+      <div className="grid grid-cols-2 gap-4 border-b border-border pb-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
+              Shape
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant={config.shape === "round" ? "default" : "outline"}
+              size="sm"
+              onClick={() => onConfigChange({ ...config, shape: "round" })}
+              className={`flex-1 gap-2 ${config.shape === "round" ? "btn-gold" : ""}`}
+            >
+              <Circle className="h-4 w-4" />
+              Round
+            </Button>
+            <Button
+              variant={config.shape === "square" ? "default" : "outline"}
+              size="sm"
+              onClick={() => onConfigChange({ ...config, shape: "square" })}
+              className={`flex-1 gap-2 ${config.shape === "square" ? "btn-gold" : ""}`}
+            >
+              <Square className="h-4 w-4" />
+              Square
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Square yields more portions per size
+          </p>
+        </div>
+        
+        <PortionDiagram 
+          sizeInches={tierInfo.sizeInches} 
+          shape={config.shape} 
+        />
+      </div>
+
+      {/* Acrylic Separator Option - Not for top tier */}
+      {!isTopTier && (
+        <div className="flex items-center justify-between py-2 border-b border-border">
+          <div className="flex items-center gap-3">
+            <Minus className="h-4 w-4 text-secondary" />
+            <div>
+              <Label htmlFor="separator" className="text-sm font-medium">
+                Acrylic Separator Above
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Decorative transparent stand
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-secondary font-medium">
+              +${getSeparatorPrice(tierInfo.sizeInches)}
+            </span>
+            <Switch
+              id="separator"
+              checked={config.hasSeparatorAbove}
+              onCheckedChange={(checked) => 
+                onConfigChange({ ...config, hasSeparatorAbove: checked })
+              }
+            />
+          </div>
+        </div>
+      )}
+
       {/* Price breakdown */}
       <div className="flex items-center justify-between border-b border-border pb-4">
         <div className="flex items-center gap-2">
           <DollarSign className="h-4 w-4 text-secondary" />
           <span className="text-sketch text-muted-foreground">Tier Price</span>
         </div>
-        <motion.span
-          key={pricing.total}
-          initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="font-display text-2xl text-secondary"
-        >
-          ${pricing.total.toFixed(0)}
-        </motion.span>
+        <div className="text-right">
+          <motion.span
+            key={pricing.total + separatorPrice}
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="font-display text-2xl text-secondary"
+          >
+            ${(pricing.total + separatorPrice).toFixed(0)}
+          </motion.span>
+          {separatorPrice > 0 && (
+            <p className="text-xs text-muted-foreground">
+              (includes ${separatorPrice} separator)
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="space-y-5">

@@ -14,6 +14,37 @@ export const appConfig = {
     K: 1.0,   // Keto
     DF: 0.5,  // Dairy-Free
   } as Record<string, number>,
+  acrylicSeparatorPrices: {
+    6: 15,
+    7: 18,
+    8: 22,
+    10: 28,
+    12: 35,
+    14: 45,
+  } as Record<number, number>,
+};
+
+// ============= CAKE SHAPE & SERVINGS =============
+export type CakeShape = "round" | "square";
+
+// Servings per size based on shape (industry standard portions)
+export const servingsPerSize: Record<CakeShape, Record<number, number>> = {
+  round: {
+    6: 11,
+    7: 17,
+    8: 24,
+    10: 38,
+    12: 56,
+    14: 78,
+  },
+  square: {
+    6: 18,
+    7: 24,
+    8: 32,
+    10: 50,
+    12: 72,
+    14: 98,
+  },
 };
 
 // ============= CAKE STRUCTURES =============
@@ -30,8 +61,27 @@ export interface CakeStructure {
 export interface TierStructure {
   tierLevel: number;
   sizeInches: number;
-  servings: number;
+  servings: number; // Default servings (round)
   height: number;
+}
+
+// Enhanced tier configuration with shape and separator
+export interface TierConfiguration {
+  spongeId: string;
+  dietaryId: string;
+  fillingId: string;
+  shape: CakeShape;
+  hasSeparatorAbove: boolean; // Acrylic separator above this tier
+}
+
+// Helper to get servings for a tier based on shape
+export function getServingsForTier(sizeInches: number, shape: CakeShape): number {
+  return servingsPerSize[shape][sizeInches] || servingsPerSize.round[sizeInches] || 0;
+}
+
+// Helper to get separator price
+export function getSeparatorPrice(sizeInches: number): number {
+  return appConfig.acrylicSeparatorPrices[sizeInches] || 25;
 }
 
 export const cakeStructures: CakeStructure[] = [
@@ -456,17 +506,24 @@ export function calculateTotalPrice(
 ): number {
   let total = 0;
 
-  // Calculate each tier
+  // Calculate each tier with shape-adjusted servings
   structure.tiers.forEach((tier, index) => {
     const config = tierConfigs[index];
     if (config) {
+      // Use shape-specific servings
+      const actualServings = getServingsForTier(tier.sizeInches, config.shape);
       const tierPrice = calculateTierPrice(
-        tier.servings,
+        actualServings,
         config.spongeId,
         config.dietaryId,
         config.fillingId
       );
       total += tierPrice.total;
+      
+      // Add separator cost if enabled
+      if (config.hasSeparatorAbove) {
+        total += getSeparatorPrice(tier.sizeInches);
+      }
     }
   });
 
@@ -483,6 +540,18 @@ export function calculateTotalPrice(
   total += topper?.price || 0;
 
   return total;
+}
+
+// Calculate total servings based on tier shapes
+export function calculateTotalServings(
+  structure: CakeStructure,
+  tierConfigs: TierConfiguration[]
+): number {
+  return structure.tiers.reduce((total, tier, index) => {
+    const config = tierConfigs[index];
+    const shape = config?.shape || "round";
+    return total + getServingsForTier(tier.sizeInches, shape);
+  }, 0);
 }
 
 export function getMinEventDate(): Date {
