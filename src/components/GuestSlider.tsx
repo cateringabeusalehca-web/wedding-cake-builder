@@ -21,6 +21,7 @@ interface GuestSliderProps {
   onStructureChange: (structureId: string) => void;
   isManualSelection: boolean;
   onResetToRecommended?: () => void;
+  actualTotalServings?: number; // Dynamic servings based on shapes
 }
 
 export function GuestSlider({ 
@@ -30,14 +31,18 @@ export function GuestSlider({
   selectedStructure,
   onStructureChange,
   isManualSelection,
-  onResetToRecommended
+  onResetToRecommended,
+  actualTotalServings
 }: GuestSliderProps) {
   const recommended = getRecommendedStructure(value);
   const { toast } = useToast();
   const prevStructureRef = useRef(selectedStructure.id);
   
-  const isTooSmall = selectedStructure.totalServings < value;
-  const servingsShort = value - selectedStructure.totalServings;
+  // Use actual servings if provided, otherwise use structure default
+  const effectiveServings = actualTotalServings ?? selectedStructure.totalServings;
+  
+  const isTooSmall = effectiveServings < value;
+  const servingsShort = value - effectiveServings;
 
   // Show toast when selecting a structure that's too small
   useEffect(() => {
@@ -45,11 +50,11 @@ export function GuestSlider({
       toast({
         variant: "destructive",
         title: "⚠️ Structure too small",
-        description: `This cake provides ${selectedStructure.totalServings} servings but you need ${value}. You're ${servingsShort} servings short.`,
+        description: `This cake provides ${effectiveServings} servings but you need ${value}. You're ${servingsShort} servings short.`,
       });
     }
     prevStructureRef.current = selectedStructure.id;
-  }, [selectedStructure.id, isTooSmall, toast, value, servingsShort, selectedStructure.totalServings]);
+  }, [selectedStructure.id, isTooSmall, toast, value, servingsShort, effectiveServings]);
 
   return (
     <motion.div
