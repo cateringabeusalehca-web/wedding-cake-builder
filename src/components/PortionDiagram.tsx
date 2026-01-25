@@ -1,16 +1,26 @@
 import { motion } from "framer-motion";
-import { CakeShape, getServingsForTier, formatSizeWithUnits } from "@/data/menuDatabase";
+import { CakeShape, getServingsForTier, formatSizeWithUnits, getServingsForRectangular, RECTANGULAR_DEFAULT_WIDTH_CM } from "@/data/menuDatabase";
 
 interface PortionDiagramProps {
   sizeInches: number;
   shape: CakeShape;
+  rectangularLengthCm?: number;
+  rectangularWidthCm?: number;
 }
 
-export function PortionDiagram({ sizeInches, shape }: PortionDiagramProps) {
-  const servings = getServingsForTier(sizeInches, shape);
+export function PortionDiagram({ sizeInches, shape, rectangularLengthCm, rectangularWidthCm }: PortionDiagramProps) {
+  const servings = shape === "rectangular" && rectangularLengthCm
+    ? getServingsForRectangular(rectangularLengthCm, rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM)
+    : getServingsForTier(sizeInches, shape);
   
   // Calculate grid for portion visualization
   const getPortionLayout = () => {
+    if (shape === "rectangular" && rectangularLengthCm) {
+      const widthCm = rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM;
+      const cols = Math.floor(widthCm / 5);
+      const rows = Math.floor(rectangularLengthCm / 5);
+      return { type: "rectangular" as const, cols, rows, total: servings, widthCm, lengthCm: rectangularLengthCm };
+    }
     if (shape === "square") {
       // For square cakes, create a grid
       const gridSize = Math.ceil(Math.sqrt(servings));
@@ -55,6 +65,62 @@ export function PortionDiagram({ sizeInches, shape }: PortionDiagramProps) {
       }
     }
     return portions;
+  };
+  
+  const renderRectangularPortions = () => {
+    const { cols, rows, total, widthCm, lengthCm } = layout as { type: "rectangular"; cols: number; rows: number; total: number; widthCm: number; lengthCm: number };
+    
+    // Calculate aspect ratio for rectangular visualization
+    const aspectRatio = lengthCm / widthCm;
+    const rectViewWidth = 140;
+    const rectViewHeight = Math.min(rectViewWidth * aspectRatio, 100);
+    const rectPadding = 5;
+    
+    const cellWidth = (rectViewWidth - rectPadding * 2) / cols;
+    const cellHeight = (rectViewHeight - rectPadding * 2) / rows;
+    const portions = [];
+    
+    let count = 0;
+    for (let row = 0; row < rows && count < total; row++) {
+      for (let col = 0; col < cols && count < total; col++) {
+        portions.push(
+          <motion.rect
+            key={`${row}-${col}`}
+            x={rectPadding + col * cellWidth + 0.5}
+            y={rectPadding + row * cellHeight + 0.5}
+            width={cellWidth - 1}
+            height={cellHeight - 1}
+            fill="hsl(var(--secondary) / 0.2)"
+            stroke="hsl(var(--secondary) / 0.5)"
+            strokeWidth={0.3}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: count * 0.005 }}
+          />
+        );
+        count++;
+      }
+    }
+    
+    return (
+      <svg
+        viewBox={`0 0 ${rectViewWidth} ${rectViewHeight}`}
+        className="w-full h-24"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {/* Outer border */}
+        <rect
+          x={rectPadding}
+          y={rectPadding}
+          width={rectViewWidth - rectPadding * 2}
+          height={rectViewHeight - rectPadding * 2}
+          fill="none"
+          stroke="hsl(var(--border))"
+          strokeWidth={1}
+        />
+        {portions}
+      </svg>
+    );
   };
   
   const renderRoundPortions = () => {
@@ -124,6 +190,35 @@ export function PortionDiagram({ sizeInches, shape }: PortionDiagramProps) {
     
     return portions;
   };
+  
+  // Rectangular uses a different layout
+  if (shape === "rectangular" && rectangularLengthCm) {
+    const widthCm = rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM;
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center gap-2"
+      >
+        <p className="text-xs text-muted-foreground uppercase tracking-wider">
+          Cutting Guide
+        </p>
+        
+        <div className="w-full">
+          {renderRectangularPortions()}
+        </div>
+        
+        <div className="text-center">
+          <p className="text-sm font-medium text-foreground">
+            {servings} portions
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {widthCm}cm × {rectangularLengthCm}cm
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
   
   return (
     <motion.div

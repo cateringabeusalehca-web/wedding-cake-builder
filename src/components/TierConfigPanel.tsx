@@ -41,6 +41,8 @@ import {
   RECTANGULAR_WIDTH_CM,
   RECTANGULAR_MIN_LENGTH_CM,
   RECTANGULAR_MAX_LENGTH_CM,
+  RECTANGULAR_WIDTH_OPTIONS,
+  RECTANGULAR_DEFAULT_WIDTH_CM,
   getServingsForRectangular,
 } from "@/data/menuDatabase";
 import { useMemo, useState } from "react";
@@ -494,7 +496,7 @@ export function TierConfigPanel({
   }, [tierIndex, totalTiers, allTierConfigs, allDefaultTierSizes]);
   
   // Get actual servings based on shape and size
-  const actualServings = getServingsForTier(effectiveSize, config.shape, config.rectangularLengthCm);
+  const actualServings = getServingsForTier(effectiveSize, config.shape, config.rectangularLengthCm, config.rectangularWidthCm);
   
   // Check if rectangular is available (only for single tier cakes)
   const canBeRectangular = totalTiers === 1;
@@ -706,7 +708,7 @@ export function TierConfigPanel({
           )}
           {config.shape === "rectangular" && (
             <p className="text-xs text-muted-foreground">
-              Fixed width: {RECTANGULAR_WIDTH_CM}cm • Variable length
+              Adjustable width & length
             </p>
           )}
         </div>
@@ -717,47 +719,79 @@ export function TierConfigPanel({
             shape={config.shape} 
           />
         ) : (
-          <div className="flex flex-col items-center justify-center p-3 bg-muted/20 rounded-lg">
-            <span className="text-2xl font-bold text-secondary">{actualServings}</span>
-            <span className="text-xs text-muted-foreground">servings</span>
-          </div>
+          <PortionDiagram 
+            sizeInches={effectiveSize} 
+            shape={config.shape}
+            rectangularLengthCm={config.rectangularLengthCm || 50}
+            rectangularWidthCm={config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM}
+          />
         )}
       </div>
       
-      {/* Rectangular Length Slider */}
+      {/* Rectangular Dimensions */}
       {config.shape === "rectangular" && (
-        <div className="space-y-3 border-b border-border pb-4">
-          <div className="flex items-center justify-between">
+        <div className="space-y-4 border-b border-border pb-4">
+          {/* Width Selection */}
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Ruler className="h-4 w-4 text-secondary" />
               <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
-                Cake Length
+                Width
               </span>
             </div>
-            <span className="text-lg font-bold text-foreground">
-              {config.rectangularLengthCm || 50} cm
-            </span>
+            <div className="flex gap-2">
+              {RECTANGULAR_WIDTH_OPTIONS.map((width) => (
+                <Button
+                  key={width}
+                  variant={(config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM) === width ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => onConfigChange({ 
+                    ...config, 
+                    rectangularWidthCm: width 
+                  })}
+                  className={`flex-1 ${(config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM) === width ? "btn-gold" : ""}`}
+                >
+                  {width} cm
+                </Button>
+              ))}
+            </div>
           </div>
-          <input
-            type="range"
-            min={RECTANGULAR_MIN_LENGTH_CM}
-            max={RECTANGULAR_MAX_LENGTH_CM}
-            step={5}
-            value={config.rectangularLengthCm || 50}
-            onChange={(e) => onConfigChange({ 
-              ...config, 
-              rectangularLengthCm: parseInt(e.target.value) 
-            })}
-            className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-secondary"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{RECTANGULAR_MIN_LENGTH_CM} cm</span>
-            <span>{RECTANGULAR_MAX_LENGTH_CM} cm</span>
+          
+          {/* Length Slider */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
+                Length
+              </span>
+              <span className="text-lg font-bold text-foreground">
+                {config.rectangularLengthCm || 50} cm
+              </span>
+            </div>
+            <input
+              type="range"
+              min={RECTANGULAR_MIN_LENGTH_CM}
+              max={RECTANGULAR_MAX_LENGTH_CM}
+              step={5}
+              value={config.rectangularLengthCm || 50}
+              onChange={(e) => onConfigChange({ 
+                ...config, 
+                rectangularLengthCm: parseInt(e.target.value) 
+              })}
+              className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-secondary"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{RECTANGULAR_MIN_LENGTH_CM} cm</span>
+              <span>{RECTANGULAR_MAX_LENGTH_CM} cm</span>
+            </div>
           </div>
+          
+          {/* Summary */}
           <div className="flex items-center gap-2 p-3 bg-secondary/10 rounded-lg">
             <RectangleHorizontal className="h-5 w-5 text-secondary" />
             <div className="text-sm">
-              <span className="font-medium">{RECTANGULAR_WIDTH_CM}cm × {config.rectangularLengthCm || 50}cm</span>
+              <span className="font-medium">
+                {config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM}cm × {config.rectangularLengthCm || 50}cm
+              </span>
               <span className="text-muted-foreground ml-2">• {actualServings} servings</span>
             </div>
           </div>

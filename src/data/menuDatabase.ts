@@ -38,9 +38,13 @@ export const PORTION_WEIGHT_GRAMS = 110; // ~110g per portion (industry standard
 export const PORTION_SIZE_DESCRIPTION = "1\"×2\"×4\" (2.5×5×10 cm)"; // Standard wedding cake portion
 
 // Rectangular cake constraints
-export const RECTANGULAR_WIDTH_CM = 40; // Fixed width: 40cm (~16")
+export const RECTANGULAR_WIDTH_OPTIONS = [40, 80] as const; // Available widths in cm
+export const RECTANGULAR_DEFAULT_WIDTH_CM = 40; // Default width: 40cm
 export const RECTANGULAR_MIN_LENGTH_CM = 20; // Minimum length: 20cm
-export const RECTANGULAR_MAX_LENGTH_CM = 100; // Maximum length: 100cm
+export const RECTANGULAR_MAX_LENGTH_CM = 120; // Maximum length: 120cm
+
+// Legacy export for backwards compatibility
+export const RECTANGULAR_WIDTH_CM = RECTANGULAR_DEFAULT_WIDTH_CM;
 
 // Servings per size based on shape (even sizes only: 4, 6, 8, 10, 12, 14, 16, 18 inches)
 // Round cakes yield fewer portions due to geometry
@@ -68,13 +72,9 @@ export const servingsPerSize: Record<"round" | "square", Record<number, number>>
 };
 
 // Calculate servings for rectangular cakes
-// Based on standard portion: 2.5cm x 5cm x 10cm = 1 portion
-// Rectangular: 40cm width x lengthCm / portion area
-export function getServingsForRectangular(lengthCm: number): number {
-  // Each portion is approximately 5cm x 5cm from top view (2.5x5cm side)
-  // Width = 40cm = 8 portions wide
-  // Length = variable = lengthCm / 5 portions
-  const portionsWide = Math.floor(RECTANGULAR_WIDTH_CM / 5);
+// Based on standard portion: 5cm x 5cm from top view
+export function getServingsForRectangular(lengthCm: number, widthCm: number = RECTANGULAR_DEFAULT_WIDTH_CM): number {
+  const portionsWide = Math.floor(widthCm / 5);
   const portionsLong = Math.floor(lengthCm / 5);
   return portionsWide * portionsLong;
 }
@@ -130,7 +130,8 @@ export interface TierConfiguration {
   hasSeparatorAbove: boolean; // Acrylic separator above this tier
   separatorConfig?: SeparatorConfig; // Separator configuration if enabled
   customSizeInches?: number; // Optional custom size (allows same-size tiers)
-  rectangularLengthCm?: number; // Length in cm for rectangular cakes (width is fixed at 40cm)
+  rectangularLengthCm?: number; // Length in cm for rectangular cakes
+  rectangularWidthCm?: number; // Width in cm for rectangular cakes (40 or 80)
 }
 
 // Available tier sizes (4" to 18", even numbers only)
@@ -187,9 +188,9 @@ export function getAvailableSizesForTier(
 }
 
 // Helper to get servings for a tier based on shape
-export function getServingsForTier(sizeInches: number, shape: CakeShape, rectangularLengthCm?: number): number {
+export function getServingsForTier(sizeInches: number, shape: CakeShape, rectangularLengthCm?: number, rectangularWidthCm?: number): number {
   if (shape === "rectangular" && rectangularLengthCm) {
-    return getServingsForRectangular(rectangularLengthCm);
+    return getServingsForRectangular(rectangularLengthCm, rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM);
   }
   const shapeKey = shape === "rectangular" ? "square" : shape;
   return servingsPerSize[shapeKey][sizeInches] || servingsPerSize.round[sizeInches] || 0;
@@ -680,7 +681,7 @@ export function calculateTotalPrice(
     if (config) {
       // Use custom size if set, otherwise use default
       const effectiveSize = config.customSizeInches || tier.sizeInches;
-      const actualServings = getServingsForTier(effectiveSize, config.shape, config.rectangularLengthCm);
+      const actualServings = getServingsForTier(effectiveSize, config.shape, config.rectangularLengthCm, config.rectangularWidthCm);
       const tierPrice = calculateTierPrice(
         actualServings,
         config.spongeId,
@@ -720,7 +721,7 @@ export function calculateTotalServings(
     const config = tierConfigs[index];
     const shape = config?.shape || "round";
     const size = config?.customSizeInches || tier.sizeInches;
-    return total + getServingsForTier(size, shape, config?.rectangularLengthCm);
+    return total + getServingsForTier(size, shape, config?.rectangularLengthCm, config?.rectangularWidthCm);
   }, 0);
 }
 
