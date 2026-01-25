@@ -348,7 +348,8 @@ export const spongeOptions: SpongeOption[] = [
     dietary: ["GF", "SF", "V", "K", "DF"],
     allowedFillings: [
       "fil_choc_ganache", "fil_cocoa_bc", "fil_mint", "fil_salt_caramel",
-      "fil_van_bc", "fil_berry", "fil_coffee", "fil_nutella", "fil_orange", "fil_cream_cheese"
+      "fil_van_bc", "fil_berry", "fil_coffee", "fil_nutella", "fil_orange", "fil_cream_cheese",
+      "fil_raspberry", "fil_cherry", "fil_strawberry", "fil_passion"
     ],
     structureSafeVegan: true,
   },
@@ -459,27 +460,33 @@ export interface FillingOptionWithCategory extends FillingOption {
 export const fillingOptions: FillingOptionWithCategory[] = [
   // Creamy & Classic
   { id: "fil_van_bc", name: "Vanilla Buttercream", dietary: ["GF", "SF", "K"], priceExtra: 0, category: "creamy" },
+  { id: "fil_pastry_cream", name: "Pastry Cream (Crema Pastelera)", dietary: ["GF", "SF"], priceExtra: 0, category: "creamy" },
   { id: "fil_cream_cheese", name: "Cream Cheese Frosting", dietary: ["GF", "SF", "K"], priceExtra: 0, category: "creamy" },
   { id: "fil_mousseline", name: "Classic Mousseline", dietary: ["GF", "SF", "K"], priceExtra: 0, category: "creamy" },
   { id: "fil_salt_caramel", name: "Salted Caramel Buttercream", dietary: ["GF"], priceExtra: 0, category: "creamy" },
   { id: "fil_coffee", name: "Coffee Buttercream", dietary: ["GF", "SF", "K"], priceExtra: 0, category: "creamy" },
-  { id: "fil_mint", name: "Mint Buttercream", dietary: ["GF", "SF", "K"], priceExtra: 0, category: "creamy" },
+  { id: "fil_mint", name: "Fresh Mint Buttercream", dietary: ["GF", "SF", "K"], priceExtra: 0, category: "creamy" },
   { id: "fil_coconut_bc", name: "Coconut Buttercream", dietary: ["GF", "SF", "K"], priceExtra: 0, category: "creamy" },
   { id: "fil_dulce", name: "Dulce de Leche", dietary: ["GF"], priceExtra: 0, category: "creamy" },
   { id: "fil_almond", name: "Almond Cream", dietary: ["GF", "SF", "V", "K", "DF"], priceExtra: 0, category: "creamy" },
   
   // Fruity & Fresh
-  { id: "fil_strawberry", name: "Strawberry Cream", dietary: ["GF", "SF"], priceExtra: 0, category: "fruity" },
+  { id: "fil_strawberry", name: "Fresh Strawberry Cream", dietary: ["GF", "SF"], priceExtra: 0, category: "fruity" },
   { id: "fil_raspberry", name: "Raspberry Mousse", dietary: ["GF", "SF"], priceExtra: 0, category: "fruity" },
+  { id: "fil_blackberry", name: "Blackberry Compote (Moras)", dietary: ["GF", "SF", "V", "DF"], priceExtra: 0, category: "fruity" },
   { id: "fil_blueberry", name: "Blueberry Compote", dietary: ["GF", "SF", "V", "DF"], priceExtra: 0, category: "fruity" },
   { id: "fil_cherry", name: "Cherry Filling", dietary: ["GF", "SF", "V", "DF"], priceExtra: 0, category: "fruity" },
   { id: "fil_berry", name: "Mixed Berry Infusion", dietary: ["GF", "SF", "K"], priceExtra: 0, category: "fruity" },
+  { id: "fil_mango", name: "Fresh Mango Cream", dietary: ["GF", "SF"], priceExtra: 0, category: "fruity" },
+  { id: "fil_kiwi", name: "Kiwi Cream", dietary: ["GF", "SF", "V", "DF"], priceExtra: 0, category: "fruity" },
+  { id: "fil_peach", name: "Peach Cream (Melocotón)", dietary: ["GF", "SF"], priceExtra: 0, category: "fruity" },
   { id: "fil_banana", name: "Banana Cream", dietary: ["GF", "SF"], priceExtra: 0, category: "fruity" },
   { id: "fil_lemon_curd", name: "Lemon Mousseline/Curd", dietary: ["GF", "SF"], priceExtra: 0, category: "fruity" },
   { id: "fil_pineapple", name: "Pineapple Cream", dietary: ["GF", "SF"], priceExtra: 0, category: "fruity" },
   { id: "fil_orange", name: "Orange Cream", dietary: ["GF", "SF"], priceExtra: 0, category: "fruity" },
   { id: "fil_lime", name: "Lime Cream", dietary: ["GF", "SF"], priceExtra: 0, category: "fruity" },
   { id: "fil_apricot", name: "Apricot Preserve", dietary: ["GF", "SF", "V", "DF"], priceExtra: 0, category: "fruity" },
+  { id: "fil_passion", name: "Passion Fruit Cream", dietary: ["GF", "SF"], priceExtra: 0, category: "fruity" },
   
   // Chocolate
   { id: "fil_choc_ganache", name: "Dark Chocolate Ganache", dietary: ["GF", "SF", "V", "K", "DF"], priceExtra: 0, category: "chocolate" },
@@ -487,7 +494,8 @@ export const fillingOptions: FillingOptionWithCategory[] = [
   { id: "fil_cocoa_bc", name: "Cocoa Buttercream", dietary: ["GF", "SF", "K"], priceExtra: 0, category: "chocolate" },
   { id: "fil_nutella", name: "Hazelnut Chocolate (Nutella)", dietary: ["GF"], priceExtra: 1.5, category: "chocolate" },
   
-  // Specialty (empty for now but extensible)
+  // Specialty
+  { id: "fil_fresh_fruit_mix", name: "Fresh Seasonal Fruit Mix", dietary: ["GF", "SF", "V", "DF"], priceExtra: 1.0, category: "specialty" },
 ];
 
 // ============= FROSTING / COATING OPTIONS =============
@@ -520,10 +528,11 @@ export interface DecorationOption {
 export const decorationOptions: DecorationOption[] = [
   { id: "minimal", name: "Clean & Minimalist", description: "No flowers, pure elegance", flatFee: 0 },
   { id: "fresh_floral", name: "Fresh Floral Cascade", description: "Seasonal flowers & greenery", flatFee: 85, hasFloralPaletteInput: true },
-  { id: "fresh_fruit", name: "Fresh Fruit Decorations", description: "Seasonal berries & fruits", flatFee: 55, hasFloralPaletteInput: true },
+  { id: "fresh_fruit", name: "Fresh Fruit Decorations", description: "Berries, cherries, kiwi, mango & more", flatFee: 55, hasFloralPaletteInput: true },
   { id: "fondant_decorations", name: "Fondant Decorations", description: "Handcrafted pearls, bows, geometric shapes", flatFee: 65, hasFondantPaletteInput: true },
   { id: "gold_leaf", name: "Edible Gold/Silver Leaf", description: "Luxurious metallic accents", flatFee: 80 },
   { id: "macarons_chocolates", name: "Macarons & Chocolates", description: "Gourmet confections as decoration", flatFee: 70 },
+  { id: "chocolate_figures", name: "Decorative Chocolate Figures", description: "Handcrafted chocolate art pieces", flatFee: 90 },
 ];
 
 // ============= TOPPER OPTIONS =============
