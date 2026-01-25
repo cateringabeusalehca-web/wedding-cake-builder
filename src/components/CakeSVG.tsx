@@ -29,15 +29,16 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
     const shape = config?.shape || "round";
     const isRectangular = shape === "rectangular";
     
-    // Width calculation: rectangular cakes use fixed width, others use size in inches
-    // For rectangular: width = 40cm = ~16" = 256px, length varies
-    const width = isRectangular ? 200 : effectiveSize * 16; // Fixed visual width for rectangular
-    const rectangularLength = config?.rectangularLengthCm || 50;
+    // Width calculation: rectangular cakes use proportional width, others use size in inches
+    const rectangularWidthCm = config?.rectangularWidthCm || 40;
+    const rectangularLengthCm = config?.rectangularLengthCm || 50;
+    // For rectangular: scale based on width (40cm = 160px, 80cm = 220px)
+    const width = isRectangular ? (rectangularWidthCm === 80 ? 220 : 160) : effectiveSize * 16;
     
     const height = tier.height;
     const hasSeparatorAbove = config?.hasSeparatorAbove || false;
     const separatorConfig = config?.separatorConfig;
-    const actualServings = getServingsForTier(effectiveSize, shape, config?.rectangularLengthCm);
+    const actualServings = getServingsForTier(effectiveSize, shape, config?.rectangularLengthCm, config?.rectangularWidthCm);
     
     // Calculate separator visual height in pixels
     const separatorHeightPx = separatorConfig ? cmToPixels(separatorConfig.heightCm) : 0;
@@ -66,7 +67,8 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
       separatorHeightPx,
       actualServings,
       isRectangular,
-      rectangularLengthCm: rectangularLength,
+      rectangularLengthCm,
+      rectangularWidthCm,
     };
   });
 
@@ -477,7 +479,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                   className="fill-muted-foreground font-ui text-[10px] font-medium"
                   opacity={isSelected ? 1 : 0.8}
                 >
-                  {isRectangular ? `${RECTANGULAR_WIDTH_CM}×${tier.rectangularLengthCm}` : `${tier.sizeInches}"`}
+                  {isRectangular ? `${tier.rectangularWidthCm}×${tier.rectangularLengthCm}` : `${tier.sizeInches}"`}
                 </text>
                 <text
                   x={centerX - tier.width / 2 - 40}
