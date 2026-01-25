@@ -78,13 +78,48 @@ export function CakeConfigurator() {
   
   const recommendedStructure = useMemo(() => getRecommendedStructure(guestCount), [guestCount]);
   
-  const structure = useMemo(() => {
+  // Base structure before trimming unnecessary tiers
+  const baseStructure = useMemo(() => {
     if (manualStructureId) {
       const manual = cakeStructures.find(s => s.id === manualStructureId);
       if (manual) return manual;
     }
     return recommendedStructure;
   }, [manualStructureId, recommendedStructure]);
+  
+  // Calculate effective structure - hide upper tiers if lower tiers already have enough servings
+  const structure = useMemo(() => {
+    // Calculate servings from bottom to top and find minimum required tiers
+    let accumulatedServings = 0;
+    let requiredTiers = baseStructure.tierCount;
+    
+    for (let i = 0; i < baseStructure.tierCount; i++) {
+      const tier = baseStructure.tiers[i];
+      const config = tierConfigs[i];
+      const effectiveSize = config?.customSizeInches || tier.sizeInches;
+      const shape = config?.shape || "round";
+      const tierServings = getServingsForTier(effectiveSize, shape);
+      accumulatedServings += tierServings;
+      
+      // If we've reached enough servings, we don't need more tiers
+      if (accumulatedServings >= guestCount) {
+        requiredTiers = i + 1;
+        break;
+      }
+    }
+    
+    // If we need fewer tiers, create a trimmed structure
+    if (requiredTiers < baseStructure.tierCount) {
+      return {
+        ...baseStructure,
+        tierCount: requiredTiers,
+        tiers: baseStructure.tiers.slice(0, requiredTiers),
+        totalServings: accumulatedServings,
+      };
+    }
+    
+    return baseStructure;
+  }, [baseStructure, tierConfigs, guestCount]);
   
   const handleStructureChange = useCallback((structureId: string) => {
     const selected = cakeStructures.find(s => s.id === structureId);
@@ -412,7 +447,7 @@ export function CakeConfigurator() {
                       setHasUserInteracted(true);
                     }}
                     tierCount={structure.tierCount}
-                    selectedStructure={structure}
+                    selectedStructure={baseStructure}
                     onStructureChange={(id) => {
                       handleStructureChange(id);
                       setHasUserInteracted(true);
