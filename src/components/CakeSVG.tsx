@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { GoldDustParticles } from "./GoldDustParticles";
 import { CakeDecorationOverlays } from "./CakeDecorationOverlays";
-import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_WEIGHT_GRAMS, PORTION_SIZE_DESCRIPTION, getSeparatorPrice } from "@/data/menuDatabase";
+import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_SIZE_DESCRIPTION } from "@/data/menuDatabase";
 
 interface CakeSVGProps {
   structure: CakeStructure;
@@ -17,7 +17,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
   const baseY = 320;
   const standHeight = 35;
   const plateY = baseY;
-  const separatorHeight = 15; // Visual height for acrylic separator
+  const separatorHeight = 45; // Height similar to a tier for visual impact
 
   // Calculate tier visual properties dynamically with separators
   const tierVisuals = structure.tiers.map((tier, index) => {
@@ -53,9 +53,6 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
 
   // Reverse for rendering (bottom first)
   const visibleTiers = [...tierVisuals].reverse();
-  
-  // Calculate total weight
-  const totalWeight = totalServings * PORTION_WEIGHT_GRAMS;
 
   return (
     <div className="relative flex items-center justify-center">
@@ -190,33 +187,89 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
               className="cursor-pointer"
               style={{ transformOrigin: `${centerX}px ${tier.y + tier.visualHeight / 2}px` }}
             >
-              {/* Acrylic Separator above tier */}
+              {/* Acrylic Separator above tier - tall cylinder with texture */}
               {tier.hasSeparatorAbove && (
                 <g>
-                  {/* Separator plate - transparent acrylic look */}
-                  <ellipse
-                    cx={centerX}
-                    cy={tier.y - separatorHeight / 2}
-                    rx={tier.width / 2 + 8}
-                    ry={5}
-                    fill="hsl(200 30% 90% / 0.6)"
-                    stroke="hsl(200 20% 70%)"
-                    strokeWidth={0.8}
-                  />
-                  {/* Separator posts */}
-                  {[-1, 1].map((side) => (
-                    <rect
-                      key={side}
-                      x={centerX + side * (tier.width / 2 - 10) - 3}
-                      y={tier.y - separatorHeight + 2}
-                      width={6}
-                      height={separatorHeight - 4}
-                      fill="hsl(200 30% 85% / 0.8)"
-                      stroke="hsl(200 20% 70%)"
-                      strokeWidth={0.5}
-                      rx={2}
-                    />
-                  ))}
+                  {/* Defs for acrylic texture pattern */}
+                  <defs>
+                    <pattern id={`acrylic-pattern-${actualTierNumber}`} width="4" height="4" patternUnits="userSpaceOnUse">
+                      <rect width="4" height="4" fill="hsl(200 40% 95% / 0.3)" />
+                      <line x1="0" y1="0" x2="4" y2="4" stroke="hsl(200 30% 80% / 0.4)" strokeWidth="0.5" />
+                      <line x1="4" y1="0" x2="0" y2="4" stroke="hsl(200 30% 85% / 0.3)" strokeWidth="0.3" />
+                    </pattern>
+                    <linearGradient id={`acrylic-gradient-${actualTierNumber}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="hsl(200 40% 92% / 0.7)" />
+                      <stop offset="30%" stopColor="hsl(200 30% 96% / 0.5)" />
+                      <stop offset="70%" stopColor="hsl(200 30% 96% / 0.5)" />
+                      <stop offset="100%" stopColor="hsl(200 40% 88% / 0.7)" />
+                    </linearGradient>
+                  </defs>
+                  
+                  {/* Separator diameter is smaller than the tier below */}
+                  {(() => {
+                    const sepWidth = tier.width * 0.85; // 85% of tier width
+                    const sepY = tier.y - separatorHeight;
+                    const perspectiveSkew = 5;
+                    
+                    return (
+                      <>
+                        {/* Separator cylinder body */}
+                        <path
+                          d={`M ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
+                              L ${centerX - sepWidth / 2} ${tier.y - 2}
+                              A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX + sepWidth / 2} ${tier.y - 2}
+                              L ${centerX + sepWidth / 2} ${sepY + perspectiveSkew}
+                              A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
+                              Z`}
+                          fill={`url(#acrylic-gradient-${actualTierNumber})`}
+                          stroke="hsl(200 30% 75%)"
+                          strokeWidth={1}
+                        />
+                        
+                        {/* Texture overlay */}
+                        <path
+                          d={`M ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
+                              L ${centerX - sepWidth / 2} ${tier.y - 2}
+                              A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX + sepWidth / 2} ${tier.y - 2}
+                              L ${centerX + sepWidth / 2} ${sepY + perspectiveSkew}
+                              A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
+                              Z`}
+                          fill={`url(#acrylic-pattern-${actualTierNumber})`}
+                          opacity={0.6}
+                        />
+                        
+                        {/* Top ellipse */}
+                        <ellipse
+                          cx={centerX}
+                          cy={sepY + perspectiveSkew}
+                          rx={sepWidth / 2}
+                          ry={perspectiveSkew}
+                          fill="hsl(200 40% 96% / 0.6)"
+                          stroke="hsl(200 30% 75%)"
+                          strokeWidth={0.8}
+                        />
+                        
+                        {/* Shine effect */}
+                        <ellipse
+                          cx={centerX - sepWidth / 4}
+                          cy={sepY + separatorHeight / 2}
+                          rx={3}
+                          ry={separatorHeight / 3}
+                          fill="hsl(0 0% 100% / 0.3)"
+                        />
+                        
+                        {/* Label */}
+                        <text
+                          x={centerX}
+                          y={sepY + separatorHeight / 2 + 3}
+                          textAnchor="middle"
+                          className="fill-muted-foreground/50 font-ui text-[8px] uppercase tracking-wider"
+                        >
+                          Acrylic
+                        </text>
+                      </>
+                    );
+                  })()}
                 </g>
               )}
 
@@ -438,7 +491,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
           />
         )}
 
-        {/* Total servings + weight + portion info */}
+        {/* Total servings + portion info */}
         <motion.g
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.8 }}
@@ -456,17 +509,9 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
             x={centerX}
             y={plateY + standHeight + 38}
             textAnchor="middle"
-            className="fill-muted-foreground font-ui text-[10px] tracking-wide"
-          >
-            ~{(totalWeight / 1000).toFixed(1)} kg ({totalWeight}g)
-          </text>
-          <text
-            x={centerX}
-            y={plateY + standHeight + 52}
-            textAnchor="middle"
             className="fill-muted-foreground/70 font-ui text-[9px]"
           >
-            Portion: {PORTION_WEIGHT_GRAMS}g • {PORTION_SIZE_DESCRIPTION}
+            Portion: {PORTION_SIZE_DESCRIPTION}
           </text>
         </motion.g>
       </svg>
