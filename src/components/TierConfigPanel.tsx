@@ -24,6 +24,8 @@ import {
   CakeShape,
   getServingsForTier,
   getSeparatorPrice,
+  availableTierSizes,
+  getEffectiveTierSize,
 } from "@/data/menuDatabase";
 import { useMemo } from "react";
 import { PortionDiagram } from "./PortionDiagram";
@@ -51,8 +53,11 @@ export function TierConfigPanel({
 }: TierConfigPanelProps) {
   const tierLabel = getTierLabel(tierNumber, totalTiers);
   
-  // Get actual servings based on shape
-  const actualServings = getServingsForTier(tierInfo.sizeInches, config.shape);
+  // Get effective size (custom or default)
+  const effectiveSize = config.customSizeInches || tierInfo.sizeInches;
+  
+  // Get actual servings based on shape and size
+  const actualServings = getServingsForTier(effectiveSize, config.shape);
   
   const pricing = calculateTierPrice(
     actualServings,
@@ -62,7 +67,7 @@ export function TierConfigPanel({
   );
   
   // Calculate separator price if enabled
-  const separatorPrice = config.hasSeparatorAbove ? getSeparatorPrice(tierInfo.sizeInches) : 0;
+  const separatorPrice = config.hasSeparatorAbove ? getSeparatorPrice(effectiveSize) : 0;
 
   // Filter sponges based on dietary selection
   const availableSponges = useMemo(() => {
@@ -153,7 +158,7 @@ export function TierConfigPanel({
               {tierLabel}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {tierInfo.sizeInches}" {config.shape} • {actualServings} servings
+              {effectiveSize}" {config.shape} • {actualServings} servings
             </p>
           </div>
         </div>
@@ -163,6 +168,37 @@ export function TierConfigPanel({
         >
           ✕
         </button>
+      </div>
+
+      {/* Size Selection */}
+      <div className="space-y-2 border-b border-border pb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
+            Tier Size
+          </span>
+          <span className="text-xs text-muted-foreground">(allows same-size tiers)</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {availableTierSizes.map((size) => (
+            <Button
+              key={size}
+              variant={(config.customSizeInches || tierInfo.sizeInches) === size ? "default" : "outline"}
+              size="sm"
+              onClick={() => onConfigChange({ 
+                ...config, 
+                customSizeInches: size === tierInfo.sizeInches ? undefined : size 
+              })}
+              className={`min-w-[50px] ${(config.customSizeInches || tierInfo.sizeInches) === size ? "btn-gold" : ""}`}
+            >
+              {size}"
+            </Button>
+          ))}
+        </div>
+        {config.customSizeInches && config.customSizeInches !== tierInfo.sizeInches && (
+          <p className="text-xs text-secondary">
+            Custom size (default: {tierInfo.sizeInches}")
+          </p>
+        )}
       </div>
 
       {/* Shape Selection & Portion Diagram */}
@@ -199,7 +235,7 @@ export function TierConfigPanel({
         </div>
         
         <PortionDiagram 
-          sizeInches={tierInfo.sizeInches} 
+          sizeInches={effectiveSize} 
           shape={config.shape} 
         />
       </div>
