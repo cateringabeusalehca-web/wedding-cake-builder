@@ -1,7 +1,16 @@
 import { motion } from "framer-motion";
 import { GoldDustParticles } from "./GoldDustParticles";
 import { CakeDecorationOverlays } from "./CakeDecorationOverlays";
-import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration } from "@/data/menuDatabase";
+import { 
+  CakeStructure, 
+  calculateTierPrice, 
+  getTierLabel, 
+  TierConfiguration,
+  getServingsForTier,
+  calculateCakeWeight,
+  formatWeight,
+  calculateTotalServings
+} from "@/data/menuDatabase";
 
 interface CakeSVGProps {
   structure: CakeStructure;
@@ -17,16 +26,27 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
   const standHeight = 35;
   const plateY = baseY;
 
+  // Calculate actual total servings based on shapes
+  const actualTotalServings = calculateTotalServings(structure, tierConfigs);
+  const totalWeight = calculateCakeWeight(actualTotalServings);
+
   // Calculate tier visual properties dynamically
   const tierVisuals = structure.tiers.map((tier, index) => {
+    const config = tierConfigs[index];
+    const shape = config?.shape || "round";
     // Width based on size (inches * scale factor)
     const width = tier.sizeInches * 16;
     const height = tier.height;
+    const hasSeparatorAbove = config?.hasSeparatorAbove || false;
     
-    // Calculate Y position (stacked from bottom)
+    // Calculate Y position (stacked from bottom, add space for separators)
     let y = plateY;
     for (let i = 0; i < index; i++) {
       y -= structure.tiers[i].height;
+      // Add separator gap if the tier below has a separator above
+      if (tierConfigs[i]?.hasSeparatorAbove) {
+        y -= 15; // Separator visual gap
+      }
     }
     y -= height;
     
@@ -35,6 +55,9 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
       width,
       visualHeight: height,
       y,
+      shape,
+      hasSeparatorAbove,
+      actualServings: getServingsForTier(tier.sizeInches, shape),
     };
   });
 
@@ -263,9 +286,60 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                   className="fill-muted-foreground font-ui text-[10px]"
                   opacity={isSelected ? 1 : 0.8}
                 >
-                  {tier.servings} srv
+                  {tier.actualServings} srv
                 </text>
               </g>
+
+              {/* Shape indicator */}
+              {tier.shape === "square" && (
+                <rect
+                  x={centerX - 6}
+                  y={tier.y + tier.visualHeight - 14}
+                  width={12}
+                  height={8}
+                  fill="none"
+                  stroke="hsl(43 60% 52% / 0.6)"
+                  strokeWidth={1}
+                  rx={1}
+                />
+              )}
+
+              {/* Separator visual above tier */}
+              {tier.hasSeparatorAbove && (
+                <g>
+                  {/* Acrylic separator pillars */}
+                  <rect
+                    x={centerX - tier.width / 4 - 3}
+                    y={tier.y - 14}
+                    width={6}
+                    height={14}
+                    fill="hsl(200 30% 85% / 0.3)"
+                    stroke="hsl(200 30% 70% / 0.5)"
+                    strokeWidth={0.5}
+                    rx={1}
+                  />
+                  <rect
+                    x={centerX + tier.width / 4 - 3}
+                    y={tier.y - 14}
+                    width={6}
+                    height={14}
+                    fill="hsl(200 30% 85% / 0.3)"
+                    stroke="hsl(200 30% 70% / 0.5)"
+                    strokeWidth={0.5}
+                    rx={1}
+                  />
+                  {/* Separator plate */}
+                  <ellipse
+                    cx={centerX}
+                    cy={tier.y - 12}
+                    rx={tier.width / 2 + 5}
+                    ry={3}
+                    fill="hsl(200 30% 90% / 0.2)"
+                    stroke="hsl(200 30% 70% / 0.4)"
+                    strokeWidth={0.5}
+                  />
+                </g>
+              )}
 
               {/* Tier label (centered) */}
               <text
@@ -347,7 +421,20 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
           textAnchor="middle"
           className="fill-muted-foreground font-ui text-[11px] uppercase tracking-wider"
         >
-          {structure.totalServings} Total Servings
+          {actualTotalServings} Total Servings
+        </motion.text>
+        
+        {/* Weight label */}
+        <motion.text
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.6 }}
+          transition={{ delay: 0.9 }}
+          x={centerX}
+          y={plateY + standHeight + 40}
+          textAnchor="middle"
+          className="fill-muted-foreground font-ui text-[10px] tracking-wider"
+        >
+          ≈ {formatWeight(totalWeight)}
         </motion.text>
       </svg>
     </div>
