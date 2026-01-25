@@ -10,8 +10,6 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { cakeStructures, CakeStructure, getRecommendedStructure } from "@/data/menuDatabase";
-import { useToast } from "@/hooks/use-toast";
-import { useEffect, useRef } from "react";
 
 interface GuestSliderProps {
   value: number;
@@ -35,26 +33,12 @@ export function GuestSlider({
   actualTotalServings
 }: GuestSliderProps) {
   const recommended = getRecommendedStructure(value);
-  const { toast } = useToast();
-  const prevStructureRef = useRef(selectedStructure.id);
   
   // Use actual servings if provided, otherwise use structure default
   const effectiveServings = actualTotalServings ?? selectedStructure.totalServings;
   
   const isTooSmall = effectiveServings < value;
   const servingsShort = value - effectiveServings;
-
-  // Show toast when selecting a structure that's too small
-  useEffect(() => {
-    if (prevStructureRef.current !== selectedStructure.id && isTooSmall) {
-      toast({
-        variant: "destructive",
-        title: "⚠️ Structure too small",
-        description: `This cake provides ${effectiveServings} servings but you need ${value}. You're ${servingsShort} servings short.`,
-      });
-    }
-    prevStructureRef.current = selectedStructure.id;
-  }, [selectedStructure.id, isTooSmall, toast, value, servingsShort, effectiveServings]);
 
   return (
     <motion.div
