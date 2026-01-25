@@ -60,6 +60,7 @@ export function CakeConfigurator() {
   const [currentView, setCurrentView] = useState<View>("configurator");
   const [isReadyToOrder, setIsReadyToOrder] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [showFullscreenCake, setShowFullscreenCake] = useState(false);
   const priceDisplayRef = useRef<HTMLDivElement>(null);
   
   // Personalization state
@@ -226,13 +227,30 @@ export function CakeConfigurator() {
     [selectedTier, structure.tiers]
   );
   
-  // Force rectangular mode: switch to single tier structure
+  // Force rectangular mode: switch to single tier structure and set rectangular shape
   const handleForceRectangular = useCallback(() => {
     const singleTierStructure = cakeStructures.find(s => s.tierCount === 1);
     if (singleTierStructure) {
       setManualStructureId(singleTierStructure.id);
       // Keep the tier panel open on the first tier
       setSelectedTier(1);
+      // Also update the tier config to rectangular immediately
+      setTierConfigs(prev => {
+        const updated = [...prev];
+        updated[0] = {
+          ...updated[0],
+          shape: "rectangular",
+          rectangularLengthCm: updated[0].rectangularLengthCm || 50,
+          rectangularWidthCm: updated[0].rectangularWidthCm || 40,
+          hasSeparatorAbove: false,
+          separatorConfig: undefined,
+        };
+        // Clear other tiers
+        for (let i = 1; i < updated.length; i++) {
+          updated[i] = { ...defaultTierConfig };
+        }
+        return updated;
+      });
     }
   }, []);
 
@@ -412,11 +430,15 @@ export function CakeConfigurator() {
         </motion.div>
 
         {/* Mobile: Sticky header with Cake Preview (left 60%) + Guest Slider (right 40%) */}
-        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-2 py-2">
-          <div className="flex items-center gap-1 min-h-[380px]">
-            {/* Left 60%: Cake Preview - Larger scale */}
-            <div className="w-[60%] h-[380px] flex items-center justify-center">
-              <div className="transform scale-[0.85] origin-center">
+        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-2 py-2 shadow-md">
+          <div className="flex items-center gap-1 min-h-[340px]">
+            {/* Left 60%: Cake Preview - Tap to expand */}
+            <button
+              onClick={() => setShowFullscreenCake(true)}
+              className="w-[60%] h-[340px] flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
+              aria-label="Tap to view cake fullscreen"
+            >
+              <div className="transform scale-[0.75] origin-center pointer-events-none">
                 <CakeSVG
                   structure={structure}
                   selectedTier={selectedTier}
@@ -426,7 +448,7 @@ export function CakeConfigurator() {
                   totalServings={totalServings}
                 />
               </div>
-            </div>
+            </button>
             
             {/* Right 40%: Guest Slider + Price */}
             {!isReadyToOrder && (
@@ -464,7 +486,49 @@ export function CakeConfigurator() {
               </div>
             )}
           </div>
+          <p className="text-center text-[10px] text-muted-foreground mt-1">Tap cake to view larger</p>
         </div>
+
+        {/* Fullscreen Cake Modal - Mobile */}
+        <AnimatePresence>
+          {showFullscreenCake && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-background/98 backdrop-blur-sm flex flex-col items-center justify-center p-4 lg:hidden"
+              onClick={() => setShowFullscreenCake(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="w-full max-w-md"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <CakeSVG
+                  structure={structure}
+                  selectedTier={selectedTier}
+                  onTierSelect={(tier) => {
+                    handleTierSelect(tier);
+                    setShowFullscreenCake(false);
+                  }}
+                  tierConfigs={tierConfigs}
+                  selectedDecorations={selectedDecorations}
+                  totalServings={totalServings}
+                />
+              </motion.div>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mt-4 text-sm text-muted-foreground"
+              >
+                Tap a tier to customize • Tap outside to close
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Configurator Grid - Fixed left column, scrollable right */}
         <div className="grid gap-8 lg:grid-cols-[1fr,1fr] lg:gap-12 mt-4 lg:mt-0">
