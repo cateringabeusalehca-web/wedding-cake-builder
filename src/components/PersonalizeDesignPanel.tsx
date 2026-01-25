@@ -42,6 +42,7 @@ export function PersonalizeDesignPanel({
   tierCount,
 }: PersonalizeDesignPanelProps) {
   const [showToppers, setShowToppers] = useState(true);
+  const [showColorPalette, setShowColorPalette] = useState(false);
 
   const toggleDecoration = (decorationId: string) => {
     onDecorationsChange(
@@ -100,54 +101,86 @@ export function PersonalizeDesignPanel({
         </div>
 
         {/* Color Palette Selection */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Palette className="h-4 w-4 text-muted-foreground" />
-            <label className="text-xs font-semibold uppercase tracking-wider text-secondary">
-              Color Palette
-            </label>
-          </div>
-          <p className="text-xs text-muted-foreground mb-3">
-            Select the colors that best represent your event
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {colorPalettes.map((palette) => (
-              <button
-                key={palette.id}
-                onClick={() =>
-                  onColorPaletteChange(
-                    selectedColorPalette === palette.id ? null : palette.id
-                  )
-                }
-                className={`
-                  relative p-2 rounded-lg border transition-all duration-200 text-left
-                  ${
-                    selectedColorPalette === palette.id
-                      ? "border-secondary bg-secondary/10 ring-1 ring-secondary"
-                      : "border-border hover:border-secondary/50"
-                  }
-                `}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex -space-x-1">
-                    {palette.colors.map((color, i) => (
-                      <div
-                        key={i}
-                        className="w-4 h-4 rounded-full border border-white shadow-sm"
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                  {selectedColorPalette === palette.id && (
-                    <Check className="h-3 w-3 text-secondary ml-auto" />
-                  )}
-                </div>
-                <span className="text-xs font-medium text-foreground">
-                  {palette.name}
+        <div className="rounded-lg border border-border bg-card/50 overflow-hidden">
+          <button
+            onClick={() => setShowColorPalette(!showColorPalette)}
+            className="w-full p-4 flex items-center justify-between hover:bg-muted/30 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Palette className="h-5 w-5 text-muted-foreground" />
+              <div className="text-left">
+                <span className="text-sm font-semibold text-foreground block">
+                  Color Palette
                 </span>
-              </button>
-            ))}
-          </div>
+                <span className="text-xs text-muted-foreground">
+                  Select the colors that best represent your event
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {selectedColorPalette && (
+                <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold">
+                  1
+                </span>
+              )}
+              {showColorPalette ? (
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )}
+            </div>
+          </button>
+
+          <AnimatePresence>
+            {showColorPalette && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="border-t border-border"
+              >
+                <div className="p-3 grid grid-cols-2 gap-2">
+                  {colorPalettes.map((palette) => (
+                    <button
+                      key={palette.id}
+                      onClick={() =>
+                        onColorPaletteChange(
+                          selectedColorPalette === palette.id ? null : palette.id
+                        )
+                      }
+                      className={`
+                        relative p-2 rounded-lg border transition-all duration-200 text-left
+                        ${
+                          selectedColorPalette === palette.id
+                            ? "border-secondary bg-secondary/10 ring-1 ring-secondary"
+                            : "border-border hover:border-secondary/50"
+                        }
+                      `}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex -space-x-1">
+                          {palette.colors.map((color, i) => (
+                            <div
+                              key={i}
+                              className="w-4 h-4 rounded-full border border-white shadow-sm"
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                        </div>
+                        {selectedColorPalette === palette.id && (
+                          <Check className="h-3 w-3 text-secondary ml-auto" />
+                        )}
+                      </div>
+                      <span className="text-xs font-medium text-foreground">
+                        {palette.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Event Theme & Style */}
