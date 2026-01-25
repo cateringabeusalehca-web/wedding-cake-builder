@@ -218,7 +218,7 @@ export function CakeConfigurator() {
             transition={{ duration: 0.3 }}
           />
           <span className="text-sketch text-muted-foreground hidden sm:block">
-            Cake Design Studio
+            Wedding Cake Builder
           </span>
         </div>
       </motion.header>
@@ -502,7 +502,7 @@ export function CakeConfigurator() {
           </p>
           <div className="flex items-center gap-3">
             <a 
-              href="https://www.instagram.com/abeusalehcatering/" 
+              href="https://www.instagram.com/catering.abeusaleh/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -511,7 +511,7 @@ export function CakeConfigurator() {
               <Instagram className="h-5 w-5" />
             </a>
             <a 
-              href="https://www.facebook.com/abeusalehcatering/" 
+              href="https://www.facebook.com/Catering.AbeuSaleh"
               target="_blank" 
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
