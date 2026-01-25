@@ -116,6 +116,12 @@ export function CakeConfigurator() {
       ),
     [structure, tierConfigs, coatingId, decorationId, topperId]
   );
+  
+  // Calculate dynamic total servings based on tier shapes
+  const totalServings = useMemo(
+    () => calculateTotalServings(structure, tierConfigs.slice(0, structure.tierCount)),
+    [structure, tierConfigs]
+  );
 
   const decorationTotal = useMemo(
     () => calculateDecorationTotal(selectedDecorations, decorationCustomInputs, structure.tierCount),
@@ -299,7 +305,7 @@ export function CakeConfigurator() {
                 {structure.name}
               </span>
               <span className="text-xs text-muted-foreground">
-                {structure.totalServings} servings
+                {totalServings} servings
               </span>
             </div>
             <div className="h-10 w-px bg-border" />
@@ -334,6 +340,7 @@ export function CakeConfigurator() {
               onTierSelect={handleTierSelect}
               tierConfigs={tierConfigs}
               selectedDecorations={selectedDecorations}
+              totalServings={totalServings}
             />
 
             {/* Hint */}
@@ -366,7 +373,7 @@ export function CakeConfigurator() {
                     onStructureChange={handleStructureChange}
                     isManualSelection={manualStructureId !== null}
                     onResetToRecommended={() => setManualStructureId(null)}
-                    actualTotalServings={calculateTotalServings(structure, tierConfigs)}
+                    actualTotalServings={totalServings}
                   />
 
                   {/* Tier Config Panel */}

@@ -124,7 +124,7 @@ export function GuestSlider({
               <div className="flex items-center justify-between w-full pr-2">
                 <span className="font-medium">{selectedStructure.name}</span>
                 <span className="text-xs text-muted-foreground ml-2">
-                  {selectedStructure.tierCount} tiers • {selectedStructure.totalServings} servings
+                  {selectedStructure.tierCount} tiers • {effectiveServings} servings
                 </span>
               </div>
             </SelectValue>
@@ -178,7 +178,7 @@ export function GuestSlider({
               <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30">
                 <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
                 <p className="text-xs text-destructive">
-                  <span className="font-medium">Not enough servings!</span> You need {value} but this cake only provides {selectedStructure.totalServings} ({servingsShort} short).
+                  <span className="font-medium">Not enough servings!</span> You need {value} but this cake only provides {effectiveServings} ({servingsShort} short).
                 </p>
               </div>
             </motion.div>
@@ -194,7 +194,7 @@ export function GuestSlider({
             {!isTooSmall && (
               <p className="text-xs text-center text-muted-foreground">
                 Manual selection • <span className="text-secondary">
-                  {selectedStructure.totalServings - value} extra servings
+                  {effectiveServings - value} extra servings
                 </span>
               </p>
             )}

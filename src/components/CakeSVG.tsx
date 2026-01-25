@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { GoldDustParticles } from "./GoldDustParticles";
 import { CakeDecorationOverlays } from "./CakeDecorationOverlays";
-import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration } from "@/data/menuDatabase";
+import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_WEIGHT_GRAMS, PORTION_SIZE_DESCRIPTION, getSeparatorPrice } from "@/data/menuDatabase";
 
 interface CakeSVGProps {
   structure: CakeStructure;
@@ -9,24 +9,34 @@ interface CakeSVGProps {
   onTierSelect: (tier: number) => void;
   tierConfigs: TierConfiguration[];
   selectedDecorations?: string[];
+  totalServings: number;
 }
 
-export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, selectedDecorations = [] }: CakeSVGProps) {
+export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, selectedDecorations = [], totalServings }: CakeSVGProps) {
   const centerX = 200;
   const baseY = 320;
   const standHeight = 35;
   const plateY = baseY;
+  const separatorHeight = 15; // Visual height for acrylic separator
 
-  // Calculate tier visual properties dynamically
+  // Calculate tier visual properties dynamically with separators
   const tierVisuals = structure.tiers.map((tier, index) => {
     // Width based on size (inches * scale factor)
     const width = tier.sizeInches * 16;
     const height = tier.height;
+    const config = tierConfigs[index];
+    const shape = config?.shape || "round";
+    const hasSeparatorAbove = config?.hasSeparatorAbove || false;
+    const actualServings = getServingsForTier(tier.sizeInches, shape);
     
-    // Calculate Y position (stacked from bottom)
+    // Calculate Y position (stacked from bottom, accounting for separators)
     let y = plateY;
     for (let i = 0; i < index; i++) {
       y -= structure.tiers[i].height;
+      // Add separator space if the tier below has a separator above
+      if (tierConfigs[i]?.hasSeparatorAbove) {
+        y -= separatorHeight;
+      }
     }
     y -= height;
     
@@ -35,11 +45,17 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
       width,
       visualHeight: height,
       y,
+      shape,
+      hasSeparatorAbove,
+      actualServings,
     };
   });
 
   // Reverse for rendering (bottom first)
   const visibleTiers = [...tierVisuals].reverse();
+  
+  // Calculate total weight
+  const totalWeight = totalServings * PORTION_WEIGHT_GRAMS;
 
   return (
     <div className="relative flex items-center justify-center">
@@ -137,19 +153,24 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
           />
         </motion.g>
 
-        {/* Tiers */}
+        {/* Tiers with perspective */}
         {visibleTiers.map((tier, index) => {
           const tierIndex = structure.tiers.length - 1 - index;
           const actualTierNumber = tier.tierLevel;
           const isSelected = selectedTier === actualTierNumber;
           const hasSelection = selectedTier !== null;
           const opacity = hasSelection && !isSelected ? 0.3 : 1;
+          const isSquare = tier.shape === "square";
 
           // Calculate tier price for display
           const config = tierConfigs[tierIndex];
           const tierPrice = config
-            ? calculateTierPrice(tier.servings, config.spongeId, config.dietaryId, config.fillingId)
+            ? calculateTierPrice(tier.actualServings, config.spongeId, config.dietaryId, config.fillingId)
             : null;
+
+          // Perspective parameters
+          const perspectiveSkew = 6; // Vertical offset for 3D effect
+          const topWidth = tier.width * 0.92; // Top is slightly smaller for perspective
 
           return (
             <motion.g
@@ -169,25 +190,105 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
               className="cursor-pointer"
               style={{ transformOrigin: `${centerX}px ${tier.y + tier.visualHeight / 2}px` }}
             >
-              {/* Tier body - rounded rectangle with curved top edge */}
-              <motion.path
-                d={`M ${centerX - tier.width / 2 + 3} ${tier.y}
-                    Q ${centerX - tier.width / 2} ${tier.y} ${centerX - tier.width / 2} ${tier.y + 3}
-                    L ${centerX - tier.width / 2} ${tier.y + tier.visualHeight - 3}
-                    Q ${centerX - tier.width / 2} ${tier.y + tier.visualHeight} ${centerX - tier.width / 2 + 3} ${tier.y + tier.visualHeight}
-                    L ${centerX + tier.width / 2 - 3} ${tier.y + tier.visualHeight}
-                    Q ${centerX + tier.width / 2} ${tier.y + tier.visualHeight} ${centerX + tier.width / 2} ${tier.y + tier.visualHeight - 3}
-                    L ${centerX + tier.width / 2} ${tier.y + 3}
-                    Q ${centerX + tier.width / 2} ${tier.y} ${centerX + tier.width / 2 - 3} ${tier.y}
-                    Q ${centerX} ${tier.y - 8} ${centerX - tier.width / 2 + 3} ${tier.y}
-                    Z`}
-                className={isSelected ? "fill-secondary/15" : "fill-background"}
-                stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
-                strokeWidth={isSelected ? 2 : 1.5}
-                whileHover={{ strokeWidth: 2 }}
-              />
+              {/* Acrylic Separator above tier */}
+              {tier.hasSeparatorAbove && (
+                <g>
+                  {/* Separator plate - transparent acrylic look */}
+                  <ellipse
+                    cx={centerX}
+                    cy={tier.y - separatorHeight / 2}
+                    rx={tier.width / 2 + 8}
+                    ry={5}
+                    fill="hsl(200 30% 90% / 0.6)"
+                    stroke="hsl(200 20% 70%)"
+                    strokeWidth={0.8}
+                  />
+                  {/* Separator posts */}
+                  {[-1, 1].map((side) => (
+                    <rect
+                      key={side}
+                      x={centerX + side * (tier.width / 2 - 10) - 3}
+                      y={tier.y - separatorHeight + 2}
+                      width={6}
+                      height={separatorHeight - 4}
+                      fill="hsl(200 30% 85% / 0.8)"
+                      stroke="hsl(200 20% 70%)"
+                      strokeWidth={0.5}
+                      rx={2}
+                    />
+                  ))}
+                </g>
+              )}
 
-              {/* LEFT: Size in inches */}
+              {/* Tier body - with perspective (different for round vs square) */}
+              {isSquare ? (
+                // SQUARE TIER - 3D box with visible top
+                <g>
+                  {/* Front face */}
+                  <motion.path
+                    d={`M ${centerX - tier.width / 2} ${tier.y + perspectiveSkew}
+                        L ${centerX - tier.width / 2} ${tier.y + tier.visualHeight}
+                        L ${centerX + tier.width / 2} ${tier.y + tier.visualHeight}
+                        L ${centerX + tier.width / 2} ${tier.y + perspectiveSkew}
+                        Z`}
+                    className={isSelected ? "fill-secondary/15" : "fill-background"}
+                    stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
+                    strokeWidth={isSelected ? 2 : 1.5}
+                  />
+                  {/* Top face (showing it's square) */}
+                  <motion.path
+                    d={`M ${centerX - tier.width / 2} ${tier.y + perspectiveSkew}
+                        L ${centerX - topWidth / 2} ${tier.y}
+                        L ${centerX + topWidth / 2} ${tier.y}
+                        L ${centerX + tier.width / 2} ${tier.y + perspectiveSkew}
+                        Z`}
+                    className={isSelected ? "fill-secondary/25" : "fill-muted/10"}
+                    stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
+                    strokeWidth={isSelected ? 1.5 : 1}
+                  />
+                  {/* Square indicator on top */}
+                  <rect
+                    x={centerX - topWidth / 2 + 4}
+                    y={tier.y + 1}
+                    width={topWidth - 8}
+                    height={perspectiveSkew - 2}
+                    fill="none"
+                    stroke={isSelected ? "hsl(43 60% 52% / 0.5)" : "hsl(0 0% 10% / 0.2)"}
+                    strokeWidth={0.5}
+                    strokeDasharray="2,2"
+                  />
+                </g>
+              ) : (
+                // ROUND TIER - cylinder with elliptical top
+                <g>
+                  {/* Cylinder body */}
+                  <motion.path
+                    d={`M ${centerX - tier.width / 2} ${tier.y + perspectiveSkew}
+                        L ${centerX - tier.width / 2} ${tier.y + tier.visualHeight - 3}
+                        Q ${centerX - tier.width / 2} ${tier.y + tier.visualHeight} ${centerX - tier.width / 2 + 3} ${tier.y + tier.visualHeight}
+                        L ${centerX + tier.width / 2 - 3} ${tier.y + tier.visualHeight}
+                        Q ${centerX + tier.width / 2} ${tier.y + tier.visualHeight} ${centerX + tier.width / 2} ${tier.y + tier.visualHeight - 3}
+                        L ${centerX + tier.width / 2} ${tier.y + perspectiveSkew}
+                        A ${tier.width / 2} ${perspectiveSkew} 0 0 0 ${centerX - tier.width / 2} ${tier.y + perspectiveSkew}
+                        Z`}
+                    className={isSelected ? "fill-secondary/15" : "fill-background"}
+                    stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
+                    strokeWidth={isSelected ? 2 : 1.5}
+                  />
+                  {/* Elliptical top (showing it's round) */}
+                  <motion.ellipse
+                    cx={centerX}
+                    cy={tier.y + perspectiveSkew}
+                    rx={tier.width / 2}
+                    ry={perspectiveSkew}
+                    className={isSelected ? "fill-secondary/25" : "fill-muted/10"}
+                    stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
+                    strokeWidth={isSelected ? 1.5 : 1}
+                  />
+                </g>
+              )}
+
+              {/* LEFT: Size in inches + shape */}
               <g>
                 <line
                   x1={centerX - tier.width / 2 - 25}
@@ -223,7 +324,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                   className="fill-muted-foreground font-ui text-[11px] font-medium"
                   opacity={isSelected ? 1 : 0.8}
                 >
-                  {tier.sizeInches}"
+                  {tier.sizeInches}" {isSquare ? "□" : "○"}
                 </text>
               </g>
 
@@ -263,14 +364,14 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                   className="fill-muted-foreground font-ui text-[10px]"
                   opacity={isSelected ? 1 : 0.8}
                 >
-                  {tier.servings} srv
+                  {tier.actualServings} srv
                 </text>
               </g>
 
               {/* Tier label (centered) */}
               <text
                 x={centerX}
-                y={tier.y + tier.visualHeight / 2 + 4}
+                y={tier.y + tier.visualHeight / 2 + 8}
                 textAnchor="middle"
                 className="fill-foreground font-ui text-[10px] uppercase tracking-widest pointer-events-none"
                 opacity={isSelected ? 1 : 0.7}
@@ -287,7 +388,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                 >
                   <rect
                     x={centerX - 40}
-                    y={tier.y - 28}
+                    y={tier.y - (tier.hasSeparatorAbove ? 45 : 28)}
                     width={80}
                     height={22}
                     rx="4"
@@ -295,7 +396,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                   />
                   <text
                     x={centerX}
-                    y={tier.y - 13}
+                    y={tier.y - (tier.hasSeparatorAbove ? 30 : 13)}
                     textAnchor="middle"
                     className="fill-foreground font-ui text-[11px] font-semibold"
                   >
@@ -337,18 +438,37 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
           />
         )}
 
-        {/* Total servings label */}
-        <motion.text
+        {/* Total servings + weight + portion info */}
+        <motion.g
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.8 }}
           transition={{ delay: 0.8 }}
-          x={centerX}
-          y={plateY + standHeight + 25}
-          textAnchor="middle"
-          className="fill-muted-foreground font-ui text-[11px] uppercase tracking-wider"
         >
-          {structure.totalServings} Total Servings
-        </motion.text>
+          <text
+            x={centerX}
+            y={plateY + standHeight + 22}
+            textAnchor="middle"
+            className="fill-foreground font-ui text-[12px] font-semibold uppercase tracking-wider"
+          >
+            {totalServings} Servings
+          </text>
+          <text
+            x={centerX}
+            y={plateY + standHeight + 38}
+            textAnchor="middle"
+            className="fill-muted-foreground font-ui text-[10px] tracking-wide"
+          >
+            ~{(totalWeight / 1000).toFixed(1)} kg ({totalWeight}g)
+          </text>
+          <text
+            x={centerX}
+            y={plateY + standHeight + 52}
+            textAnchor="middle"
+            className="fill-muted-foreground/70 font-ui text-[9px]"
+          >
+            Portion: {PORTION_WEIGHT_GRAMS}g • {PORTION_SIZE_DESCRIPTION}
+          </text>
+        </motion.g>
       </svg>
     </div>
   );

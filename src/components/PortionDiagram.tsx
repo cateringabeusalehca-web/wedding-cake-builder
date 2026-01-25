@@ -63,14 +63,15 @@ export function PortionDiagram({ sizeInches, shape }: PortionDiagramProps) {
     const centerY = viewBoxSize / 2;
     const radius = cakeSize / 2;
     
-    // Determine ring structure based on total servings
+    // Determine ring structure based on total servings (adjusted for smaller round cakes)
     const getRings = (total: number) => {
-      if (total <= 8) return [total];
-      if (total <= 14) return [6, total - 6];
-      if (total <= 24) return [6, 8, total - 14];
-      if (total <= 38) return [6, 10, 12, total - 28];
-      if (total <= 56) return [6, 10, 14, 16, total - 46];
-      return [6, 10, 14, 18, 20, total - 68];
+      if (total <= 6) return [total];
+      if (total <= 10) return [4, total - 4];
+      if (total <= 16) return [4, 6, total - 10];
+      if (total <= 24) return [4, 8, 8, total - 20];
+      if (total <= 36) return [4, 8, 10, 10, total - 32];
+      if (total <= 50) return [4, 8, 10, 12, 12, total - 46];
+      return [4, 8, 10, 14, 16, total - 52];
     };
     
     const rings = getRings(total);

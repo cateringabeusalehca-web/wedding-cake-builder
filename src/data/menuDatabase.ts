@@ -27,15 +27,20 @@ export const appConfig = {
 // ============= CAKE SHAPE & SERVINGS =============
 export type CakeShape = "round" | "square";
 
-// Servings per size based on shape (industry standard portions)
+// Standard portion size for wedding cakes
+export const PORTION_WEIGHT_GRAMS = 110; // ~110g per portion (industry standard)
+export const PORTION_SIZE_DESCRIPTION = "1\"×2\"×4\" (2.5×5×10 cm)"; // Standard wedding cake portion
+
+// Servings per size based on shape (re-evaluated for round cakes - industry standard portions)
+// Round cakes yield fewer portions due to geometry
 export const servingsPerSize: Record<CakeShape, Record<number, number>> = {
   round: {
-    6: 11,
-    7: 17,
-    8: 24,
-    10: 38,
-    12: 56,
-    14: 78,
+    6: 8,    // Reduced from 11 - realistic for round
+    7: 12,   // Reduced from 17
+    8: 20,   // Reduced from 24
+    10: 30,  // Reduced from 38
+    12: 44,  // Reduced from 56
+    14: 63,  // Reduced from 78
   },
   square: {
     6: 18,
@@ -91,11 +96,11 @@ export const cakeStructures: CakeStructure[] = [
     description: "Perfect for small gatherings",
     tierCount: 2,
     tiers: [
-      { tierLevel: 1, sizeInches: 8, servings: 24, height: 55 },
-      { tierLevel: 2, sizeInches: 6, servings: 11, height: 50 },
+      { tierLevel: 1, sizeInches: 8, servings: 20, height: 55 },
+      { tierLevel: 2, sizeInches: 6, servings: 8, height: 50 },
     ],
-    totalServings: 35,
-    basePrice: 210, // 35 * $6.00
+    totalServings: 28,
+    basePrice: 168, // 28 * $6.00
   },
   {
     id: "classic",
@@ -103,11 +108,11 @@ export const cakeStructures: CakeStructure[] = [
     description: "Elegant two-tier design",
     tierCount: 2,
     tiers: [
-      { tierLevel: 1, sizeInches: 10, servings: 38, height: 60 },
-      { tierLevel: 2, sizeInches: 7, servings: 17, height: 55 },
+      { tierLevel: 1, sizeInches: 10, servings: 30, height: 60 },
+      { tierLevel: 2, sizeInches: 7, servings: 12, height: 55 },
     ],
-    totalServings: 55,
-    basePrice: 330, // 55 * $6.00
+    totalServings: 42,
+    basePrice: 252, // 42 * $6.00
   },
   {
     id: "grand",
@@ -115,12 +120,12 @@ export const cakeStructures: CakeStructure[] = [
     description: "Statement three-tier masterpiece",
     tierCount: 3,
     tiers: [
-      { tierLevel: 1, sizeInches: 10, servings: 38, height: 55 },
-      { tierLevel: 2, sizeInches: 8, servings: 24, height: 50 },
-      { tierLevel: 3, sizeInches: 6, servings: 11, height: 45 },
+      { tierLevel: 1, sizeInches: 10, servings: 30, height: 55 },
+      { tierLevel: 2, sizeInches: 8, servings: 20, height: 50 },
+      { tierLevel: 3, sizeInches: 6, servings: 8, height: 45 },
     ],
-    totalServings: 73,
-    basePrice: 438, // 73 * $6.00
+    totalServings: 58,
+    basePrice: 348, // 58 * $6.00
   },
   {
     id: "gala",
@@ -128,13 +133,13 @@ export const cakeStructures: CakeStructure[] = [
     description: "Luxurious four-tier showpiece",
     tierCount: 4,
     tiers: [
-      { tierLevel: 1, sizeInches: 12, servings: 56, height: 55 },
-      { tierLevel: 2, sizeInches: 10, servings: 38, height: 50 },
-      { tierLevel: 3, sizeInches: 8, servings: 24, height: 45 },
-      { tierLevel: 4, sizeInches: 6, servings: 11, height: 40 },
+      { tierLevel: 1, sizeInches: 12, servings: 44, height: 55 },
+      { tierLevel: 2, sizeInches: 10, servings: 30, height: 50 },
+      { tierLevel: 3, sizeInches: 8, servings: 20, height: 45 },
+      { tierLevel: 4, sizeInches: 6, servings: 8, height: 40 },
     ],
-    totalServings: 129,
-    basePrice: 774, // 129 * $6.00
+    totalServings: 102,
+    basePrice: 612, // 102 * $6.00
   },
   {
     id: "majestic",
@@ -142,13 +147,13 @@ export const cakeStructures: CakeStructure[] = [
     description: "Impressive four-tier with grand proportions",
     tierCount: 4,
     tiers: [
-      { tierLevel: 1, sizeInches: 14, servings: 78, height: 55 },
-      { tierLevel: 2, sizeInches: 12, servings: 56, height: 50 },
-      { tierLevel: 3, sizeInches: 10, servings: 38, height: 45 },
-      { tierLevel: 4, sizeInches: 8, servings: 24, height: 40 },
+      { tierLevel: 1, sizeInches: 14, servings: 63, height: 55 },
+      { tierLevel: 2, sizeInches: 12, servings: 44, height: 50 },
+      { tierLevel: 3, sizeInches: 10, servings: 30, height: 45 },
+      { tierLevel: 4, sizeInches: 8, servings: 20, height: 40 },
     ],
-    totalServings: 196,
-    basePrice: 1176, // 196 * $6.00
+    totalServings: 157,
+    basePrice: 942, // 157 * $6.00
   },
   {
     id: "royal",
@@ -156,14 +161,14 @@ export const cakeStructures: CakeStructure[] = [
     description: "Magnificent five-tier masterpiece",
     tierCount: 5,
     tiers: [
-      { tierLevel: 1, sizeInches: 14, servings: 78, height: 55 },
-      { tierLevel: 2, sizeInches: 12, servings: 56, height: 50 },
-      { tierLevel: 3, sizeInches: 10, servings: 38, height: 45 },
-      { tierLevel: 4, sizeInches: 8, servings: 24, height: 40 },
-      { tierLevel: 5, sizeInches: 6, servings: 11, height: 35 },
+      { tierLevel: 1, sizeInches: 14, servings: 63, height: 55 },
+      { tierLevel: 2, sizeInches: 12, servings: 44, height: 50 },
+      { tierLevel: 3, sizeInches: 10, servings: 30, height: 45 },
+      { tierLevel: 4, sizeInches: 8, servings: 20, height: 40 },
+      { tierLevel: 5, sizeInches: 6, servings: 8, height: 35 },
     ],
-    totalServings: 207,
-    basePrice: 1242, // 207 * $6.00
+    totalServings: 165,
+    basePrice: 990, // 165 * $6.00
   },
 ];
 
