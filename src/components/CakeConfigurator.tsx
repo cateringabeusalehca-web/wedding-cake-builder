@@ -600,7 +600,7 @@ export function CakeConfigurator() {
                     </Button>
 
                     <a
-                      href="https://cateringabeusaleh.ca/product/catering-taster-box/"
+                      href="https://cateringabeusaleh.ca/product/cake-taster-box/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block"
