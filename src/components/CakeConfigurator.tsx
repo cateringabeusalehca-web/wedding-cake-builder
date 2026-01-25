@@ -412,10 +412,10 @@ export function CakeConfigurator() {
         </motion.div>
 
         {/* Mobile: Sticky header with Guest Slider + Cake Preview */}
-        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-4 pb-4">
+        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-4 pb-2 overflow-hidden">
           {/* Guest Slider - Mobile Sticky */}
           {!isReadyToOrder && (
-            <div className="pt-2">
+            <div className="pt-1">
               <GuestSlider
                 value={guestCount}
                 onChange={(v) => {
@@ -436,13 +436,9 @@ export function CakeConfigurator() {
             </div>
           )}
           
-          {/* Cake Preview - Mobile Sticky */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center mt-2"
-          >
-            <div className="h-[320px] w-full flex items-center justify-center">
+          {/* Cake Preview - Mobile Sticky - Compact */}
+          <div className="flex flex-col items-center overflow-hidden">
+            <div className="h-[240px] w-full flex items-center justify-center scale-[0.85] origin-center">
               <CakeSVG
                 structure={structure}
                 selectedTier={selectedTier}
@@ -452,10 +448,10 @@ export function CakeConfigurator() {
                 totalServings={totalServings}
               />
             </div>
-            <p className="text-center text-xs text-muted-foreground">
+            <p className="-mt-2 text-center text-xs text-muted-foreground">
               Tap a tier to customize
             </p>
-          </motion.div>
+          </div>
         </div>
 
         {/* Configurator Grid - Fixed left column, scrollable right */}
