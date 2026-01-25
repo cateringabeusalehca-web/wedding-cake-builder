@@ -403,7 +403,8 @@ export function CakeConfigurator() {
           </div>
         </motion.div>
 
-        {/* Mobile: Sticky header with Cake Preview (left 60%) + Guest Slider (right 40%) */}
+        {/* Mobile: Sticky header with Cake Preview (left 60%) + Guest Slider (right 40%) - Hidden when checkout is active */}
+        {!isReadyToOrder && (
         <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-2 py-2 shadow-md">
           <div className="flex items-center gap-1 min-h-[340px]">
             {/* Left 60%: Cake Preview - Tiers are tappable for editing */}
@@ -471,6 +472,7 @@ export function CakeConfigurator() {
             )}
           </div>
         </div>
+        )}
 
         {/* Fullscreen Cake Modal - Mobile */}
         <AnimatePresence>
