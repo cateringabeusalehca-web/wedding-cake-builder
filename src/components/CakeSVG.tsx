@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { GoldDustParticles } from "./GoldDustParticles";
 import { CakeDecorationOverlays } from "./CakeDecorationOverlays";
-import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_SIZE_DESCRIPTION, PORTION_WEIGHT_GRAMS, inchesToCm } from "@/data/menuDatabase";
+import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_SIZE_DESCRIPTION, PORTION_WEIGHT_GRAMS, inchesToCm, RECTANGULAR_WIDTH_CM } from "@/data/menuDatabase";
 
 interface CakeSVGProps {
   structure: CakeStructure;
@@ -26,13 +26,18 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
     const config = tierConfigs[index];
     // Use custom size if set, otherwise use default
     const effectiveSize = config?.customSizeInches || tier.sizeInches;
-    // Width based on size (inches * scale factor)
-    const width = effectiveSize * 16;
-    const height = tier.height;
     const shape = config?.shape || "round";
+    const isRectangular = shape === "rectangular";
+    
+    // Width calculation: rectangular cakes use fixed width, others use size in inches
+    // For rectangular: width = 40cm = ~16" = 256px, length varies
+    const width = isRectangular ? 200 : effectiveSize * 16; // Fixed visual width for rectangular
+    const rectangularLength = config?.rectangularLengthCm || 50;
+    
+    const height = tier.height;
     const hasSeparatorAbove = config?.hasSeparatorAbove || false;
     const separatorConfig = config?.separatorConfig;
-    const actualServings = getServingsForTier(effectiveSize, shape);
+    const actualServings = getServingsForTier(effectiveSize, shape, config?.rectangularLengthCm);
     
     // Calculate separator visual height in pixels
     const separatorHeightPx = separatorConfig ? cmToPixels(separatorConfig.heightCm) : 0;
@@ -60,6 +65,8 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
       separatorConfig,
       separatorHeightPx,
       actualServings,
+      isRectangular,
+      rectangularLengthCm: rectangularLength,
     };
   });
 
@@ -170,6 +177,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
           const hasSelection = selectedTier !== null;
           const opacity = hasSelection && !isSelected ? 0.3 : 1;
           const isSquare = tier.shape === "square";
+          const isRectangular = tier.shape === "rectangular";
 
           // Calculate tier price for display
           const config = tierConfigs[tierIndex];
@@ -329,8 +337,44 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                 </g>
               )}
 
-              {/* Tier body - with perspective (different for round vs square) */}
-              {isSquare ? (
+              {/* Tier body - with perspective (different for round vs square vs rectangular) */}
+              {isRectangular ? (
+                // RECTANGULAR TIER - elongated 3D box
+                <g>
+                  {/* Front face */}
+                  <motion.path
+                    d={`M ${centerX - tier.width / 2} ${tier.y + perspectiveSkew}
+                        L ${centerX - tier.width / 2} ${tier.y + tier.visualHeight}
+                        L ${centerX + tier.width / 2} ${tier.y + tier.visualHeight}
+                        L ${centerX + tier.width / 2} ${tier.y + perspectiveSkew}
+                        Z`}
+                    className={isSelected ? "fill-secondary/15" : "fill-background"}
+                    stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
+                    strokeWidth={isSelected ? 2 : 1.5}
+                  />
+                  {/* Top face (showing it's rectangular) */}
+                  <motion.path
+                    d={`M ${centerX - tier.width / 2} ${tier.y + perspectiveSkew}
+                        L ${centerX - topWidth / 2} ${tier.y}
+                        L ${centerX + topWidth / 2} ${tier.y}
+                        L ${centerX + tier.width / 2} ${tier.y + perspectiveSkew}
+                        Z`}
+                    className={isSelected ? "fill-secondary/25" : "fill-muted/10"}
+                    stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
+                    strokeWidth={isSelected ? 1.5 : 1}
+                  />
+                  {/* Rectangular indicator - horizontal line pattern */}
+                  <line
+                    x1={centerX - topWidth / 2 + 10}
+                    y1={tier.y + perspectiveSkew / 2}
+                    x2={centerX + topWidth / 2 - 10}
+                    y2={tier.y + perspectiveSkew / 2}
+                    stroke={isSelected ? "hsl(43 60% 52% / 0.5)" : "hsl(0 0% 10% / 0.2)"}
+                    strokeWidth={1}
+                    strokeDasharray="4,4"
+                  />
+                </g>
+              ) : isSquare ? (
                 // SQUARE TIER - 3D box with visible top
                 <g>
                   {/* Front face */}
@@ -433,7 +477,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                   className="fill-muted-foreground font-ui text-[10px] font-medium"
                   opacity={isSelected ? 1 : 0.8}
                 >
-                  {tier.sizeInches}"
+                  {isRectangular ? `${RECTANGULAR_WIDTH_CM}×${tier.rectangularLengthCm}` : `${tier.sizeInches}"`}
                 </text>
                 <text
                   x={centerX - tier.width / 2 - 40}
@@ -442,7 +486,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                   className="fill-muted-foreground/70 font-ui text-[8px]"
                   opacity={isSelected ? 1 : 0.7}
                 >
-                  ({Math.round(tier.sizeInches * 2.54)} cm) {isSquare ? "□" : "○"}
+                  {isRectangular ? "cm ▬" : `(${Math.round(tier.sizeInches * 2.54)} cm) ${isSquare ? "□" : "○"}`}
                 </text>
               </g>
 

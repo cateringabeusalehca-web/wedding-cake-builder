@@ -98,7 +98,7 @@ export function CakeConfigurator() {
       const config = tierConfigs[i];
       const effectiveSize = config?.customSizeInches || tier.sizeInches;
       const shape = config?.shape || "round";
-      const tierServings = getServingsForTier(effectiveSize, shape);
+      const tierServings = getServingsForTier(effectiveSize, shape, config?.rectangularLengthCm);
       accumulatedServings += tierServings;
       
       // If we've reached enough servings, we don't need more tiers
@@ -506,9 +506,9 @@ export function CakeConfigurator() {
                               (f) => f.id === config?.fillingId
                             );
                             const actualServings = config 
-                              ? getServingsForTier(tier.sizeInches, config.shape)
+                              ? getServingsForTier(config.customSizeInches || tier.sizeInches, config.shape, config.rectangularLengthCm)
                               : tier.servings;
-                            const shapeIcon = config?.shape === "square" ? "◼" : "●";
+                            const shapeIcon = config?.shape === "rectangular" ? "▬" : config?.shape === "square" ? "◼" : "●";
                             return (
                               <button
                                 key={tier.tierLevel}
