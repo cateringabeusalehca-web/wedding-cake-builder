@@ -86,6 +86,21 @@ export const cakeStructures: CakeStructure[] = [
     totalServings: 129,
     basePrice: 774, // 129 * $6.00
   },
+  {
+    id: "royal",
+    name: "The Royal Affair",
+    description: "Magnificent five-tier masterpiece",
+    tierCount: 5,
+    tiers: [
+      { tierLevel: 1, sizeInches: 14, servings: 78, height: 55 },
+      { tierLevel: 2, sizeInches: 12, servings: 56, height: 50 },
+      { tierLevel: 3, sizeInches: 10, servings: 38, height: 45 },
+      { tierLevel: 4, sizeInches: 8, servings: 24, height: 40 },
+      { tierLevel: 5, sizeInches: 6, servings: 11, height: 35 },
+    ],
+    totalServings: 207,
+    basePrice: 1242, // 207 * $6.00
+  },
 ];
 
 // ============= SPONGE OPTIONS =============
@@ -335,7 +350,8 @@ export function getRecommendedStructure(guests: number): CakeStructure {
   if (guests <= 35) return cakeStructures[0]; // intimate
   if (guests <= 55) return cakeStructures[1]; // classic
   if (guests <= 85) return cakeStructures[2]; // grand
-  return cakeStructures[3]; // gala
+  if (guests <= 130) return cakeStructures[3]; // gala
+  return cakeStructures[4]; // royal (5 tiers)
 }
 
 // Get fillings allowed for a specific sponge

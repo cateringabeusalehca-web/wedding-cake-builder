@@ -43,6 +43,7 @@ export function CakeConfigurator() {
     { ...defaultTierConfig },
     { ...defaultTierConfig },
     { ...defaultTierConfig },
+    { ...defaultTierConfig },
   ]);
   const [coatingId, setCoatingId] = useState(coatingOptions[0].id);
   const [decorationId, setDecorationId] = useState(decorationOptions[0].id);
@@ -111,7 +112,7 @@ export function CakeConfigurator() {
     const tierIndex = structure.tiers.findIndex(t => t.tierLevel === selectedTier);
     if (tierIndex !== -1) {
       const currentConfig = tierConfigs[tierIndex];
-      setTierConfigs(Array(4).fill({ ...currentConfig }));
+      setTierConfigs(Array(5).fill({ ...currentConfig }));
     }
   }, [selectedTier, tierConfigs, structure.tiers]);
 
@@ -119,6 +120,7 @@ export function CakeConfigurator() {
     setGuestCount(50);
     setSelectedTier(null);
     setTierConfigs([
+      { ...defaultTierConfig },
       { ...defaultTierConfig },
       { ...defaultTierConfig },
       { ...defaultTierConfig },
