@@ -411,14 +411,61 @@ export function CakeConfigurator() {
           </div>
         </motion.div>
 
+        {/* Mobile: Sticky header with Guest Slider + Cake Preview */}
+        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-4 pb-4">
+          {/* Guest Slider - Mobile Sticky */}
+          {!isReadyToOrder && (
+            <div className="pt-2">
+              <GuestSlider
+                value={guestCount}
+                onChange={(v) => {
+                  setGuestCount(v);
+                  setHasUserInteracted(true);
+                }}
+                tierCount={structure.tierCount}
+                selectedStructure={baseStructure}
+                onStructureChange={(id) => {
+                  handleStructureChange(id);
+                  setHasUserInteracted(true);
+                }}
+                isManualSelection={manualStructureId !== null}
+                onResetToRecommended={() => setManualStructureId(null)}
+                actualTotalServings={totalServings}
+                hasUserInteracted={hasUserInteracted}
+              />
+            </div>
+          )}
+          
+          {/* Cake Preview - Mobile Sticky */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center mt-2"
+          >
+            <div className="h-[320px] w-full flex items-center justify-center">
+              <CakeSVG
+                structure={structure}
+                selectedTier={selectedTier}
+                onTierSelect={handleTierSelect}
+                tierConfigs={tierConfigs}
+                selectedDecorations={selectedDecorations}
+                totalServings={totalServings}
+              />
+            </div>
+            <p className="text-center text-xs text-muted-foreground">
+              Tap a tier to customize
+            </p>
+          </motion.div>
+        </div>
+
         {/* Configurator Grid - Fixed left column, scrollable right */}
-        <div className="grid gap-8 lg:grid-cols-[1fr,1fr] lg:gap-12">
-          {/* Left: SVG Cake - Fixed position on desktop */}
+        <div className="grid gap-8 lg:grid-cols-[1fr,1fr] lg:gap-12 mt-4 lg:mt-0">
+          {/* Left: SVG Cake - Fixed position on desktop only */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="relative order-2 lg:order-1 lg:sticky lg:top-20 lg:self-start flex flex-col items-center"
+            className="relative hidden lg:flex lg:sticky lg:top-20 lg:self-start flex-col items-center"
           >
             <CakeSVG
               structure={structure}
@@ -440,7 +487,7 @@ export function CakeConfigurator() {
             </motion.p>
           </motion.div>
 
-          <div className="order-1 space-y-6 lg:order-2">
+          <div className="space-y-6">
             {/* Configuration Panels - Hidden when ready to order */}
             <AnimatePresence mode="wait">
               {!isReadyToOrder && (
@@ -450,24 +497,26 @@ export function CakeConfigurator() {
                   transition={{ duration: 0.3 }}
                   className="space-y-6"
                 >
-                  {/* Guest Slider */}
-                  <GuestSlider
-                    value={guestCount}
-                    onChange={(v) => {
-                      setGuestCount(v);
-                      setHasUserInteracted(true);
-                    }}
-                    tierCount={structure.tierCount}
-                    selectedStructure={baseStructure}
-                    onStructureChange={(id) => {
-                      handleStructureChange(id);
-                      setHasUserInteracted(true);
-                    }}
-                    isManualSelection={manualStructureId !== null}
-                    onResetToRecommended={() => setManualStructureId(null)}
-                    actualTotalServings={totalServings}
-                    hasUserInteracted={hasUserInteracted}
-                  />
+                  {/* Guest Slider - Desktop only (mobile version is in sticky header) */}
+                  <div className="hidden lg:block">
+                    <GuestSlider
+                      value={guestCount}
+                      onChange={(v) => {
+                        setGuestCount(v);
+                        setHasUserInteracted(true);
+                      }}
+                      tierCount={structure.tierCount}
+                      selectedStructure={baseStructure}
+                      onStructureChange={(id) => {
+                        handleStructureChange(id);
+                        setHasUserInteracted(true);
+                      }}
+                      isManualSelection={manualStructureId !== null}
+                      onResetToRecommended={() => setManualStructureId(null)}
+                      actualTotalServings={totalServings}
+                      hasUserInteracted={hasUserInteracted}
+                    />
+                  </div>
 
                   {/* Tier Config Panel */}
                   <AnimatePresence mode="wait">
