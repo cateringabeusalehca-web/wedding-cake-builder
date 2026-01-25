@@ -66,16 +66,38 @@ export function GlobalOptionsPanel({
           <SelectTrigger className="input-sketch border-0 border-b" aria-label="Select frosting type">
             <SelectValue placeholder="Select frosting" />
           </SelectTrigger>
-          <SelectContent>
-            {coatingOptions.map((coating) => (
+          <SelectContent className="bg-background border-border z-50">
+            {/* Included options first */}
+            {coatingOptions.filter(c => c.flatFee === 0).map((coating) => (
               <SelectItem key={coating.id} value={coating.id}>
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
                   <span className="font-medium">{coating.name}</span>
-                  {coating.flatFee > 0 && (
-                    <span className="text-xs text-secondary font-medium">
-                      +${coating.flatFee}
-                    </span>
-                  )}
+                  <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                    Included
+                  </span>
+                </div>
+              </SelectItem>
+            ))}
+            
+            {/* Premium separator */}
+            {coatingOptions.some(c => c.flatFee > 0) && (
+              <div className="flex items-center gap-2 px-2 py-2 border-t border-border mt-1">
+                <div className="h-px flex-1 bg-secondary/30" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary">
+                  Premium
+                </span>
+                <div className="h-px flex-1 bg-secondary/30" />
+              </div>
+            )}
+            
+            {/* Premium options */}
+            {coatingOptions.filter(c => c.flatFee > 0).map((coating) => (
+              <SelectItem key={coating.id} value={coating.id}>
+                <div className="flex items-center gap-3">
+                  <span className="font-medium">{coating.name}</span>
+                  <span className="text-[10px] bg-secondary/20 text-secondary px-1.5 py-0.5 rounded-full font-medium">
+                    +${coating.flatFee}
+                  </span>
                 </div>
               </SelectItem>
             ))}
@@ -95,21 +117,48 @@ export function GlobalOptionsPanel({
           <SelectTrigger className="input-sketch border-0 border-b" aria-label="Select decoration and florals">
             <SelectValue placeholder="Select decoration" />
           </SelectTrigger>
-          <SelectContent>
-            {decorationOptions.map((decoration) => (
+          <SelectContent className="bg-background border-border z-50">
+            {/* Included options first */}
+            {decorationOptions.filter(d => d.flatFee === 0).map((decoration) => (
               <SelectItem key={decoration.id} value={decoration.id}>
-                <div className="flex items-center justify-between gap-4">
-                  <div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
                     <span className="font-medium">{decoration.name}</span>
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {decoration.description}
+                    <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                      Included
                     </span>
                   </div>
-                  {decoration.flatFee > 0 && (
-                    <span className="text-xs text-secondary font-medium">
+                  <span className="text-xs text-muted-foreground">
+                    {decoration.description}
+                  </span>
+                </div>
+              </SelectItem>
+            ))}
+            
+            {/* Premium separator */}
+            {decorationOptions.some(d => d.flatFee > 0) && (
+              <div className="flex items-center gap-2 px-2 py-2 border-t border-border mt-1">
+                <div className="h-px flex-1 bg-secondary/30" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-secondary">
+                  Premium
+                </span>
+                <div className="h-px flex-1 bg-secondary/30" />
+              </div>
+            )}
+            
+            {/* Premium options */}
+            {decorationOptions.filter(d => d.flatFee > 0).map((decoration) => (
+              <SelectItem key={decoration.id} value={decoration.id}>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{decoration.name}</span>
+                    <span className="text-[10px] bg-secondary/20 text-secondary px-1.5 py-0.5 rounded-full font-medium">
                       +${decoration.flatFee}
                     </span>
-                  )}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {decoration.description}
+                  </span>
                 </div>
               </SelectItem>
             ))}
