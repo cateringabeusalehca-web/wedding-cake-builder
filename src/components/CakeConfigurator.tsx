@@ -1,9 +1,9 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Instagram, Facebook, Layers } from "lucide-react";
+import { ExternalLink, Instagram, Facebook, Layers, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CakeSVG } from "./CakeSVG";
-import { GuestSlider } from "./GuestSlider";
+import { DynamicTierManager } from "./DynamicTierManager";
 import { TierConfigPanel } from "./TierConfigPanel";
 import { LeadForm } from "./LeadForm";
 import { SuccessScreen } from "./SuccessScreen";
@@ -12,11 +12,11 @@ import { ConfettiCelebration } from "./ConfettiCelebration";
 import { StickyPriceBar } from "./StickyPriceBar";
 import { PersonalizeDesignPanel } from "./PersonalizeDesignPanel";
 import { CelebrationCheckout } from "./CelebrationCheckout";
-import logoHorizontal from "@/assets/logo-horizontal.png";
 import logoAmarillo from "@/assets/logo-amarillo.png";
 import {
-  getRecommendedStructure,
   TierConfiguration,
+  TierStructure,
+  CakeStructure,
   calculateTotalPrice,
   coatingOptions,
   decorationOptions,
@@ -24,10 +24,10 @@ import {
   spongeOptions,
   fillingOptions,
   getTierLabel,
-  cakeStructures,
-  CakeStructure,
   getServingsForTier,
   calculateTotalServings,
+  appConfig,
+  getSeparatorPrice,
 } from "@/data/menuDatabase";
 import { calculateDecorationTotal } from "@/data/decorationOptions";
 
@@ -41,16 +41,25 @@ const defaultTierConfig: TierConfiguration = {
   hasSeparatorAbove: false,
 };
 
+// Default initial tiers for a 2-tier cake
+const getInitialTiers = (): TierStructure[] => [
+  { tierLevel: 1, sizeInches: 10, servings: 30, height: 55 },
+  { tierLevel: 2, sizeInches: 6, servings: 8, height: 45 },
+];
+
+const getInitialTierConfigs = (): TierConfiguration[] => [
+  { ...defaultTierConfig, customSizeInches: 10 },
+  { ...defaultTierConfig, customSizeInches: 6 },
+];
+
 export function CakeConfigurator() {
   const [guestCount, setGuestCount] = useState(50);
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
-  const [tierConfigs, setTierConfigs] = useState<TierConfiguration[]>([
-    { ...defaultTierConfig },
-    { ...defaultTierConfig },
-    { ...defaultTierConfig },
-    { ...defaultTierConfig },
-    { ...defaultTierConfig },
-  ]);
+  
+  // Dynamic tiers state
+  const [dynamicTiers, setDynamicTiers] = useState<TierStructure[]>(getInitialTiers());
+  const [tierConfigs, setTierConfigs] = useState<TierConfiguration[]>(getInitialTierConfigs());
+  
   const [coatingId, setCoatingId] = useState(coatingOptions[0].id);
   const [decorationId, setDecorationId] = useState(decorationOptions[0].id);
   const [topperId, setTopperId] = useState(topperOptions[0].id);
@@ -70,74 +79,37 @@ export function CakeConfigurator() {
   const [eventTheme, setEventTheme] = useState("");
   const [eventStyle, setEventStyle] = useState("");
   
-  // Structure selection state
-  const [manualStructureId, setManualStructureId] = useState<string | null>(null);
-  
-  const recommendedStructure = useMemo(() => getRecommendedStructure(guestCount), [guestCount]);
-  
-  const structure = useMemo(() => {
-    if (manualStructureId) {
-      const manual = cakeStructures.find(s => s.id === manualStructureId);
-      if (manual) return manual;
-    }
-    return recommendedStructure;
-  }, [manualStructureId, recommendedStructure]);
-  
-  const handleStructureChange = useCallback((structureId: string) => {
-    const selected = cakeStructures.find(s => s.id === structureId);
-    const recommended = getRecommendedStructure(guestCount);
+  // Create a dynamic structure from the current tiers
+  const structure: CakeStructure = useMemo(() => {
+    const totalServings = dynamicTiers.reduce((sum, tier, index) => {
+      const config = tierConfigs[index];
+      const size = config?.customSizeInches || tier.sizeInches;
+      const shape = config?.shape || "round";
+      return sum + getServingsForTier(size, shape);
+    }, 0);
     
-    if (selected?.id === recommended.id) {
-      setManualStructureId(null); // Reset to auto
-    } else {
-      setManualStructureId(structureId);
-    }
-    setSelectedTier(null);
+    const basePrice = totalServings * appConfig.pricingBase.basePricePerServing;
     
-    // Clear separators for tiers that won't exist in the new structure
-    if (selected) {
-      setTierConfigs(prev => {
-        const updated = [...prev];
-        // For any tier that's at the top of the new structure, remove its separator
-        // And for tiers that won't exist, reset their config
-        for (let i = 0; i < updated.length; i++) {
-          if (i >= selected.tierCount) {
-            // Tier doesn't exist in new structure, reset it
-            updated[i] = { ...defaultTierConfig };
-          } else if (i === selected.tierCount - 1) {
-            // This is the new top tier, can't have separator above
-            updated[i] = { ...updated[i], hasSeparatorAbove: false, separatorConfig: undefined };
-          }
-        }
-        return updated;
-      });
+    return {
+      id: "dynamic",
+      name: dynamicTiers.length === 1 ? "Single Tier" : `${dynamicTiers.length}-Tier Cake`,
+      description: "Custom designed cake",
+      tierCount: dynamicTiers.length,
+      tiers: dynamicTiers,
+      totalServings,
+      basePrice,
+    };
+  }, [dynamicTiers, tierConfigs]);
+
+  // Handle tier changes from DynamicTierManager
+  const handleTiersChange = useCallback((newTiers: TierStructure[], newConfigs: TierConfiguration[]) => {
+    setDynamicTiers(newTiers);
+    setTierConfigs(newConfigs);
+    // Deselect if selected tier no longer exists
+    if (selectedTier && selectedTier > newTiers.length) {
+      setSelectedTier(null);
     }
-  }, [guestCount]);
-  
-  // Reset to auto when guest count changes significantly
-  useEffect(() => {
-    if (manualStructureId) {
-      const recommended = getRecommendedStructure(guestCount);
-      // If manual selection is now the recommended one, clear manual
-      if (manualStructureId === recommended.id) {
-        setManualStructureId(null);
-      }
-    }
-  }, [guestCount, manualStructureId]);
-  
-  // Clean up separators when structure changes
-  useEffect(() => {
-    setTierConfigs(prev => {
-      const updated = [...prev];
-      for (let i = 0; i < updated.length; i++) {
-        // Top tier can't have separator above
-        if (i === structure.tierCount - 1 && updated[i].hasSeparatorAbove) {
-          updated[i] = { ...updated[i], hasSeparatorAbove: false, separatorConfig: undefined };
-        }
-      }
-      return updated;
-    });
-  }, [structure.tierCount]);
+  }, [selectedTier]);
 
   const basePrice = useMemo(
     () =>
@@ -192,21 +164,16 @@ export function CakeConfigurator() {
     const tierIndex = structure.tiers.findIndex(t => t.tierLevel === selectedTier);
     if (tierIndex !== -1) {
       const currentConfig = tierConfigs[tierIndex];
-      setTierConfigs(Array(5).fill({ ...currentConfig }));
+      // Apply to all tiers that exist
+      setTierConfigs(prev => prev.map(() => ({ ...currentConfig })));
     }
   }, [selectedTier, tierConfigs, structure.tiers]);
 
   const handleReset = useCallback(() => {
-    // Reset to recommended structure defaults but keep guest count context
-    const recommended = getRecommendedStructure(guestCount);
+    // Reset to initial 2-tier cake
     setSelectedTier(null);
-    setTierConfigs([
-      { ...defaultTierConfig },
-      { ...defaultTierConfig },
-      { ...defaultTierConfig },
-      { ...defaultTierConfig },
-      { ...defaultTierConfig },
-    ]);
+    setDynamicTiers(getInitialTiers());
+    setTierConfigs(getInitialTierConfigs());
     setCoatingId(coatingOptions[0].id);
     setDecorationId(decorationOptions[0].id);
     setTopperId(topperOptions[0].id);
@@ -215,7 +182,6 @@ export function CakeConfigurator() {
     setTopperNames("");
     setCurrentView("configurator");
     setIsReadyToOrder(false);
-    setManualStructureId(null); // Return to recommended structure
     // Reset personalization state
     setReferenceImages([]);
     setSelectedDecorations([]);
@@ -223,7 +189,7 @@ export function CakeConfigurator() {
     setSelectedColorPalette(null);
     setEventTheme("");
     setEventStyle("");
-  }, [guestCount]);
+  }, []);
 
   // Intersection observer to show sticky bar when price display scrolls out of view
   useEffect(() => {
@@ -401,16 +367,16 @@ export function CakeConfigurator() {
                   transition={{ duration: 0.3 }}
                   className="space-y-6"
                 >
-                  {/* Guest Slider */}
-                  <GuestSlider
-                    value={guestCount}
-                    onChange={setGuestCount}
-                    tierCount={structure.tierCount}
-                    selectedStructure={structure}
-                    onStructureChange={handleStructureChange}
-                    isManualSelection={manualStructureId !== null}
-                    onResetToRecommended={() => setManualStructureId(null)}
-                    actualTotalServings={totalServings}
+                  {/* Dynamic Tier Manager */}
+                  <DynamicTierManager
+                    guestCount={guestCount}
+                    onGuestCountChange={setGuestCount}
+                    tiers={dynamicTiers}
+                    tierConfigs={tierConfigs}
+                    onTiersChange={handleTiersChange}
+                    onTierSelect={handleTierSelect}
+                    selectedTier={selectedTier}
+                    totalServings={totalServings}
                   />
 
                   {/* Tier Config Panel */}
@@ -432,73 +398,18 @@ export function CakeConfigurator() {
                     )}
                   </AnimatePresence>
 
-                  {/* No tier selected - show tier summary */}
-                  <AnimatePresence>
-                    {!selectedTier && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="relative overflow-hidden rounded-lg border-2 border-secondary/30 bg-gradient-to-br from-card via-card to-secondary/5 p-6 shadow-lg"
-                      >
-                        {/* Decorative corner accents */}
-                        <div className="absolute top-0 left-0 h-4 w-4 border-t-2 border-l-2 border-secondary/50" />
-                        <div className="absolute top-0 right-0 h-4 w-4 border-t-2 border-r-2 border-secondary/50" />
-                        <div className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-secondary/50" />
-                        <div className="absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-secondary/50" />
-                        
-                        <h2 className="font-display text-2xl md:text-3xl font-medium text-secondary mb-4 tracking-wide flex items-center gap-2">
-                          <Layers className="h-6 w-6" />
-                          Your Tiers
-                        </h2>
-                        <div className="space-y-1">
-                          {structure.tiers.map((tier, index) => {
-                            const config = tierConfigs[index];
-                            const sponge = spongeOptions.find(
-                              (s) => s.id === config?.spongeId
-                            );
-                            const filling = fillingOptions.find(
-                              (f) => f.id === config?.fillingId
-                            );
-                            const actualServings = config 
-                              ? getServingsForTier(tier.sizeInches, config.shape)
-                              : tier.servings;
-                            const shapeIcon = config?.shape === "square" ? "◼" : "●";
-                            return (
-                              <button
-                                key={tier.tierLevel}
-                                onClick={() => handleTierSelect(tier.tierLevel)}
-                                className="group flex w-full items-center justify-between rounded-md border border-transparent bg-background/50 px-4 py-3 text-left transition-all duration-300 hover:border-secondary/40 hover:bg-secondary/10 hover:shadow-md"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <span className="text-xs text-secondary">{shapeIcon}</span>
-                                  <div>
-                                    <span className="text-sketch text-foreground block group-hover:text-secondary transition-colors">
-                                      {getTierLabel(tier.tierLevel, structure.tierCount)}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                      {tier.sizeInches}" {config?.shape || "round"} • {actualServings} servings
-                                      {config?.hasSeparatorAbove && " • +separator"}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <span className="text-sm block text-foreground group-hover:text-secondary transition-colors">
-                                    {sponge?.name || "Configure →"}
-                                  </span>
-                                  {filling && (
-                                    <span className="text-xs text-muted-foreground">
-                                      {filling.name}
-                                    </span>
-                                  )}
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {/* Reset Button */}
+                  <div className="flex justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleReset}
+                      className="gap-2 border-secondary/40 text-secondary hover:bg-secondary/10"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      Reset to Default
+                    </Button>
+                  </div>
 
                   {/* Global Options */}
                   <GlobalOptionsPanel
@@ -593,9 +504,9 @@ export function CakeConfigurator() {
       <footer className="mt-auto border-t border-border py-4">
         <div className="container px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <motion.img 
-            src={logoHorizontal} 
+            src={logoAmarillo} 
             alt="Abeu-Saleh Catering & Events" 
-            className="h-8 w-auto"
+            className="h-8 w-auto mix-blend-multiply dark:mix-blend-screen dark:invert"
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
           />
