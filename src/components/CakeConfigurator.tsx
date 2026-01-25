@@ -488,6 +488,8 @@ export function CakeConfigurator() {
                     eventStyle={eventStyle}
                     onEventStyleChange={setEventStyle}
                     tierCount={structure.tierCount}
+                    coatingId={coatingId}
+                    decorationId={decorationId}
                   />
 
                   {/* Ready to Order Button */}

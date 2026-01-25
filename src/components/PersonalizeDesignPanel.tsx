@@ -24,6 +24,8 @@ interface PersonalizeDesignPanelProps {
   eventStyle: string;
   onEventStyleChange: (style: string) => void;
   tierCount: number;
+  coatingId: string;
+  decorationId: string;
 }
 
 export function PersonalizeDesignPanel({
@@ -40,19 +42,29 @@ export function PersonalizeDesignPanel({
   eventStyle,
   onEventStyleChange,
   tierCount,
+  coatingId,
+  decorationId,
 }: PersonalizeDesignPanelProps) {
   const [showToppers, setShowToppers] = useState(false);
   const [showColorPalette, setShowColorPalette] = useState(false);
   const [showReferencePhotos, setShowReferencePhotos] = useState(false);
   const [showEventTheme, setShowEventTheme] = useState(false);
 
-  const toggleDecoration = (decorationId: string) => {
-    onDecorationsChange(
-      selectedDecorations.includes(decorationId)
-        ? selectedDecorations.filter((id) => id !== decorationId)
-        : [...selectedDecorations, decorationId]
-    );
+  // Single selection for toppers - only one allowed at a time
+  const selectTopper = (topperId: string) => {
+    if (selectedDecorations.includes(topperId)) {
+      // Deselect if already selected
+      onDecorationsChange([]);
+    } else {
+      // Replace with new selection (only one topper allowed)
+      onDecorationsChange([topperId]);
+    }
   };
+
+  // Color palette only available for fondant decorations, not chocolate coating
+  const isChocolateCoating = coatingId === "coat_choc_ganache" || coatingId === "coat_wht_choc";
+  const hasFondantDecoration = decorationId === "fondant_accents";
+  const canSelectColorPalette = hasFondantDecoration && !isChocolateCoating;
 
   const getPrice = (item: DecorationItem) => {
     if (item.priceType === "per_tier") {
@@ -132,32 +144,40 @@ export function PersonalizeDesignPanel({
           </AnimatePresence>
         </div>
 
-        {/* Color Palette Selection */}
-        <div className="rounded-lg border border-border bg-card/50 overflow-hidden">
+        {/* Color Palette Selection - Only available with fondant decorations and non-chocolate coating */}
+        <div className={`rounded-lg border bg-card/50 overflow-hidden ${!canSelectColorPalette ? 'opacity-50 border-muted' : 'border-border'}`}>
           <button
-            onClick={() => setShowColorPalette(!showColorPalette)}
-            className="w-full p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+            onClick={() => canSelectColorPalette && setShowColorPalette(!showColorPalette)}
+            disabled={!canSelectColorPalette}
+            className={`w-full p-3 flex items-center justify-between transition-colors ${canSelectColorPalette ? 'hover:bg-muted/30 cursor-pointer' : 'cursor-not-allowed'}`}
           >
             <div className="flex items-center gap-2">
               <Palette className="h-4 w-4 text-muted-foreground" />
               <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
                 Color Palette
               </span>
-              {selectedColorPalette && (
+              {selectedColorPalette && canSelectColorPalette && (
                 <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold">
                   1
                 </span>
               )}
+              {!canSelectColorPalette && (
+                <span className="text-xs text-muted-foreground italic ml-2">
+                  {isChocolateCoating ? "(Not available with chocolate coating)" : "(Requires fondant decoration)"}
+                </span>
+              )}
             </div>
-            {showColorPalette ? (
-              <ChevronUp className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            {canSelectColorPalette && (
+              showColorPalette ? (
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              )
             )}
           </button>
 
           <AnimatePresence>
-            {showColorPalette && (
+            {showColorPalette && canSelectColorPalette && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
@@ -316,6 +336,9 @@ export function PersonalizeDesignPanel({
                 className="border-t border-border"
               >
                 <div className="p-3 space-y-2">
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Select one topper for your cake
+                  </p>
                   {topperOptions3D.map((option) => {
                     const isSelected = selectedDecorations.includes(option.id);
                     const price = getPrice(option);
@@ -323,7 +346,7 @@ export function PersonalizeDesignPanel({
                     return (
                       <div key={option.id}>
                         <button
-                          onClick={() => toggleDecoration(option.id)}
+                          onClick={() => selectTopper(option.id)}
                           className={`
                             w-full p-3 rounded-lg border transition-all duration-200 text-left
                             ${
