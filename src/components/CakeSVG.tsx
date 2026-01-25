@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { GoldDustParticles } from "./GoldDustParticles";
 import { CakeDecorationOverlays } from "./CakeDecorationOverlays";
-import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_SIZE_DESCRIPTION, inchesToCm } from "@/data/menuDatabase";
+import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_SIZE_DESCRIPTION, PORTION_WEIGHT_GRAMS, inchesToCm } from "@/data/menuDatabase";
 
 interface CakeSVGProps {
   structure: CakeStructure;
@@ -69,8 +69,8 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
   return (
     <div className="relative flex items-center justify-center">
       <svg
-        viewBox="0 0 400 420"
-        className="h-[480px] w-full max-w-[480px] md:h-[580px] md:max-w-[520px]"
+        viewBox="0 0 400 440"
+        className="h-[500px] w-full max-w-[480px] md:h-[600px] md:max-w-[520px]"
         style={{ overflow: "visible" }}
       >
         {/* Blueprint grid lines */}
@@ -564,7 +564,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
         >
           <text
             x={centerX}
-            y={plateY + standHeight + 22}
+            y={plateY + standHeight + 25}
             textAnchor="middle"
             className="fill-foreground font-ui text-[12px] font-semibold uppercase tracking-wider"
           >
@@ -572,11 +572,19 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
           </text>
           <text
             x={centerX}
-            y={plateY + standHeight + 38}
+            y={plateY + standHeight + 45}
             textAnchor="middle"
             className="fill-muted-foreground/70 font-ui text-[9px]"
           >
             Portion: {PORTION_SIZE_DESCRIPTION}
+          </text>
+          <text
+            x={centerX}
+            y={plateY + standHeight + 60}
+            textAnchor="middle"
+            className="fill-muted-foreground/50 font-ui text-[9px]"
+          >
+            ~{PORTION_WEIGHT_GRAMS}g per portion
           </text>
         </motion.g>
       </svg>

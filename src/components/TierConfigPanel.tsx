@@ -645,10 +645,13 @@ export function TierConfigPanel({
                   Decorative transparent stand
                 </p>
               </div>
+              <span className="text-xs text-muted-foreground ml-2">
+                (Rental fee)
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs text-secondary font-medium">
-                +${config.separatorConfig ? getSeparatorPrice(config.separatorConfig) : 0}
+                +${config.separatorConfig ? getSeparatorPrice(config.separatorConfig) : 0} rental
               </span>
               <Switch
                 id="separator"

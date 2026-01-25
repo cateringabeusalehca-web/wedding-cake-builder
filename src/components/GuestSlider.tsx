@@ -184,13 +184,13 @@ export function GuestSlider({
             )}
             
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={onResetToRecommended}
-              className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+              className="h-8 text-xs gap-1.5 border-secondary/40 text-secondary hover:bg-secondary/10 hover:text-secondary shadow-sm"
             >
-              <RotateCcw className="h-3 w-3" />
-              Use recommended: {recommended.name}
+              <RotateCcw className="h-3.5 w-3.5" />
+              Reset to: {recommended.name}
             </Button>
           </motion.div>
         )}
