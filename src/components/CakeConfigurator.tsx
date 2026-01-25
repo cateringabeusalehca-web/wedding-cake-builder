@@ -411,12 +411,12 @@ export function CakeConfigurator() {
           </div>
         </motion.div>
 
-        {/* Mobile: Sticky header with Guest Slider + Cake Preview side by side */}
-        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-4 py-2 overflow-hidden">
-          <div className="flex items-start gap-2">
-            {/* Left: Cake Preview - Compact */}
-            <div className="flex-shrink-0 w-[140px] h-[180px] flex items-center justify-center overflow-hidden">
-              <div className="scale-[0.55] origin-center">
+        {/* Mobile: Sticky header with Cake Preview (left) + Guest Slider (right) - 50/50 */}
+        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-2 py-2">
+          <div className="flex items-stretch gap-2">
+            {/* Left 50%: Cake Preview - Full size, contained */}
+            <div className="w-1/2 flex items-center justify-center overflow-hidden">
+              <div className="h-[280px] w-full flex items-center justify-center">
                 <CakeSVG
                   structure={structure}
                   selectedTier={selectedTier}
@@ -428,9 +428,9 @@ export function CakeConfigurator() {
               </div>
             </div>
             
-            {/* Right: Guest Slider */}
+            {/* Right 50%: Guest Slider */}
             {!isReadyToOrder && (
-              <div className="flex-1 min-w-0 pt-1">
+              <div className="w-1/2 flex flex-col justify-center">
                 <GuestSlider
                   value={guestCount}
                   onChange={(v) => {
