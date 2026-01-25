@@ -20,6 +20,8 @@ interface GlobalOptionsPanelProps {
   onDecorationChange: (id: string) => void;
   floralPalette: string;
   onFloralPaletteChange: (palette: string) => void;
+  fondantPalette: string;
+  onFondantPaletteChange: (palette: string) => void;
 }
 
 export function GlobalOptionsPanel({
@@ -29,8 +31,11 @@ export function GlobalOptionsPanel({
   onDecorationChange,
   floralPalette,
   onFloralPaletteChange,
+  fondantPalette,
+  onFondantPaletteChange,
 }: GlobalOptionsPanelProps) {
   const selectedDecoration = decorationOptions.find((d) => d.id === decorationId);
+  const isChocolateCoating = coatingId === "coat_choc_ganache" || coatingId === "coat_wht_choc";
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -111,8 +116,8 @@ export function GlobalOptionsPanel({
           </SelectContent>
         </Select>
 
-        {/* Floral palette input */}
-        {selectedDecoration?.hasPaletteInput && (
+        {/* Floral/Fruit palette input */}
+        {selectedDecoration?.hasFloralPaletteInput && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -121,7 +126,7 @@ export function GlobalOptionsPanel({
             <Input
               value={floralPalette}
               onChange={(e) => onFloralPaletteChange(e.target.value)}
-              placeholder="Color palette (e.g., White/Green, Pink/Blush)"
+              placeholder="Flower/Fruit colors (e.g., White/Green, Pink/Blush)"
               className="input-sketch"
             />
             <div className="mt-3 flex items-start gap-2 bg-muted/30 p-3 rounded">
@@ -131,6 +136,37 @@ export function GlobalOptionsPanel({
                 We will match your color palette, but specific varieties cannot be guaranteed.
               </p>
             </div>
+          </motion.div>
+        )}
+
+        {/* Fondant palette input - only if not chocolate coating */}
+        {selectedDecoration?.hasFondantPaletteInput && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="pt-2"
+          >
+            {isChocolateCoating ? (
+              <div className="flex items-start gap-2 bg-muted/30 p-3 rounded">
+                <AlertTriangle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground">
+                  Fondant colors are not available with chocolate coating. 
+                  Consider switching to buttercream for colored fondant decorations.
+                </p>
+              </div>
+            ) : (
+              <>
+                <Input
+                  value={fondantPalette}
+                  onChange={(e) => onFondantPaletteChange(e.target.value)}
+                  placeholder="Fondant colors (e.g., White/Gold, Pastel Blue/Pink)"
+                  className="input-sketch"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Specify the colors for your fondant decorations.
+                </p>
+              </>
+            )}
           </motion.div>
         )}
       </div>

@@ -464,13 +464,17 @@ export interface DecorationOption {
   name: string;
   description: string;
   flatFee: number;
-  hasPaletteInput?: boolean;
+  hasFloralPaletteInput?: boolean;  // For flowers/greenery color palette
+  hasFondantPaletteInput?: boolean; // For fondant color palette
 }
 
 export const decorationOptions: DecorationOption[] = [
   { id: "minimal", name: "Clean & Minimalist", description: "No flowers, pure elegance", flatFee: 0 },
-  { id: "fresh_floral", name: "Fresh Floral Cascade", description: "Chef's selection of seasonal flowers", flatFee: 85, hasPaletteInput: true },
-  { id: "fondant_accents", name: "Fondant Accents", description: "Handcrafted pearls, bows, geometric", flatFee: 65 },
+  { id: "fresh_floral", name: "Fresh Floral Cascade", description: "Seasonal flowers & greenery", flatFee: 85, hasFloralPaletteInput: true },
+  { id: "fresh_fruit", name: "Fresh Fruit Decorations", description: "Seasonal berries & fruits", flatFee: 55, hasFloralPaletteInput: true },
+  { id: "fondant_decorations", name: "Fondant Decorations", description: "Handcrafted pearls, bows, geometric shapes", flatFee: 65, hasFondantPaletteInput: true },
+  { id: "gold_leaf", name: "Edible Gold/Silver Leaf", description: "Luxurious metallic accents", flatFee: 80 },
+  { id: "macarons_chocolates", name: "Macarons & Chocolates", description: "Gourmet confections as decoration", flatFee: 70 },
 ];
 
 // ============= TOPPER OPTIONS =============

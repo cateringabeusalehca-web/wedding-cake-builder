@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Palette, Sparkles, Check, ChevronDown, ChevronUp, PartyPopper, Crown } from "lucide-react";
+import { Camera, Sparkles, Check, ChevronDown, ChevronUp, PartyPopper, Crown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ReferencePhotoUpload } from "./ReferencePhotoUpload";
 import {
   topperOptions3D,
-  colorPalettes,
   type DecorationItem,
 } from "@/data/decorationOptions";
 
@@ -17,15 +16,11 @@ interface PersonalizeDesignPanelProps {
   onDecorationsChange: (decorations: string[]) => void;
   customInputs: Record<string, string>;
   onCustomInputChange: (decorationId: string, value: string) => void;
-  selectedColorPalette: string | null;
-  onColorPaletteChange: (paletteId: string | null) => void;
   eventTheme: string;
   onEventThemeChange: (theme: string) => void;
   eventStyle: string;
   onEventStyleChange: (style: string) => void;
   tierCount: number;
-  coatingId: string;
-  decorationId: string;
 }
 
 export function PersonalizeDesignPanel({
@@ -35,18 +30,13 @@ export function PersonalizeDesignPanel({
   onDecorationsChange,
   customInputs,
   onCustomInputChange,
-  selectedColorPalette,
-  onColorPaletteChange,
   eventTheme,
   onEventThemeChange,
   eventStyle,
   onEventStyleChange,
   tierCount,
-  coatingId,
-  decorationId,
 }: PersonalizeDesignPanelProps) {
   const [showToppers, setShowToppers] = useState(false);
-  const [showColorPalette, setShowColorPalette] = useState(false);
   const [showReferencePhotos, setShowReferencePhotos] = useState(false);
   const [showEventTheme, setShowEventTheme] = useState(false);
 
@@ -60,11 +50,6 @@ export function PersonalizeDesignPanel({
       onDecorationsChange([topperId]);
     }
   };
-
-  // Color palette only available for fondant decorations, not chocolate coating
-  const isChocolateCoating = coatingId === "coat_choc_ganache" || coatingId === "coat_wht_choc";
-  const hasFondantDecoration = decorationId === "fondant_accents";
-  const canSelectColorPalette = hasFondantDecoration && !isChocolateCoating;
 
   const getPrice = (item: DecorationItem) => {
     if (item.priceType === "per_tier") {
@@ -138,95 +123,6 @@ export function PersonalizeDesignPanel({
                     onImagesChange={onReferenceImagesChange}
                     maxImages={5}
                   />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Color Palette Selection - Only available with fondant decorations and non-chocolate coating */}
-        <div className={`rounded-lg border bg-card/50 overflow-hidden ${!canSelectColorPalette ? 'opacity-50 border-muted' : 'border-border'}`}>
-          <button
-            onClick={() => canSelectColorPalette && setShowColorPalette(!showColorPalette)}
-            disabled={!canSelectColorPalette}
-            className={`w-full p-3 flex items-center justify-between transition-colors ${canSelectColorPalette ? 'hover:bg-muted/30 cursor-pointer' : 'cursor-not-allowed'}`}
-          >
-            <div className="flex items-center gap-2">
-              <Palette className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
-                Color Palette
-              </span>
-              {selectedColorPalette && canSelectColorPalette && (
-                <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold">
-                  1
-                </span>
-              )}
-              {!canSelectColorPalette && (
-                <span className="text-xs text-muted-foreground italic ml-2">
-                  {isChocolateCoating ? "(Not available with chocolate coating)" : "(Requires fondant decoration)"}
-                </span>
-              )}
-            </div>
-            {canSelectColorPalette && (
-              showColorPalette ? (
-                <ChevronUp className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              )
-            )}
-          </button>
-
-          <AnimatePresence>
-            {showColorPalette && canSelectColorPalette && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="border-t border-border"
-              >
-                <div className="p-3">
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Select the colors that best represent your event
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {colorPalettes.map((palette) => (
-                      <button
-                        key={palette.id}
-                        onClick={() =>
-                          onColorPaletteChange(
-                            selectedColorPalette === palette.id ? null : palette.id
-                          )
-                        }
-                        className={`
-                          relative p-2 rounded-lg border transition-all duration-200 text-left
-                          ${
-                            selectedColorPalette === palette.id
-                              ? "border-secondary bg-secondary/10 ring-1 ring-secondary"
-                              : "border-border hover:border-secondary/50"
-                          }
-                        `}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="flex -space-x-1">
-                            {palette.colors.map((color, i) => (
-                              <div
-                                key={i}
-                                className="w-4 h-4 rounded-full border border-white shadow-sm"
-                                style={{ backgroundColor: color }}
-                              />
-                            ))}
-                          </div>
-                          {selectedColorPalette === palette.id && (
-                            <Check className="h-3 w-3 text-secondary ml-auto" />
-                          )}
-                        </div>
-                        <span className="text-xs font-medium text-foreground">
-                          {palette.name}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </motion.div>
             )}
