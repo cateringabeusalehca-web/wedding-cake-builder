@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Copy, DollarSign, Cake, Layers, Palette, Circle, Square, Minus, Ruler } from "lucide-react";
+import { Check, Copy, DollarSign, Cake, Layers, Palette, Circle, Square, Minus, Ruler, Wheat, Droplet, Leaf, Milk } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -43,12 +43,12 @@ import { useMemo, useState } from "react";
 import { PortionDiagram } from "./PortionDiagram";
 import { Toggle } from "@/components/ui/toggle";
 
-// Dietary tag definitions for filtering
+// Dietary tag definitions for filtering with icons
 const dietaryTags = [
-  { id: "GF", label: "Gluten-Free", color: "bg-amber-100 text-amber-700 border-amber-300" },
-  { id: "SF", label: "Sugar-Free", color: "bg-blue-100 text-blue-700 border-blue-300" },
-  { id: "V", label: "Vegan", color: "bg-green-100 text-green-700 border-green-300" },
-  { id: "DF", label: "Dairy-Free", color: "bg-purple-100 text-purple-700 border-purple-300" },
+  { id: "GF", label: "Gluten-Free", color: "bg-amber-100 text-amber-700 border-amber-300", icon: Wheat },
+  { id: "SF", label: "Sugar-Free", color: "bg-blue-100 text-blue-700 border-blue-300", icon: Droplet },
+  { id: "V", label: "Vegan", color: "bg-green-100 text-green-700 border-green-300", icon: Leaf },
+  { id: "DF", label: "Dairy-Free", color: "bg-purple-100 text-purple-700 border-purple-300", icon: Milk },
 ] as const;
 
 type DietaryTag = typeof dietaryTags[number]["id"];
@@ -128,6 +128,7 @@ function FillingSelector({
         {dietaryTags.map((tag) => {
           const isActive = activeDietaryFilters.has(tag.id);
           const count = tagCounts[tag.id];
+          const Icon = tag.icon;
           return (
             <Toggle
               key={tag.id}
@@ -135,15 +136,16 @@ function FillingSelector({
               onPressedChange={() => toggleDietaryFilter(tag.id)}
               variant="outline"
               size="sm"
-              className={`text-xs px-2.5 py-1 h-auto transition-all ${
+              className={`text-xs px-2.5 py-1 h-auto transition-all gap-1 ${
                 isActive
                   ? tag.color + " border"
                   : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
               }`}
               disabled={count === 0}
             >
+              <Icon className="h-3 w-3" />
               {tag.id}
-              <span className="ml-1 text-[10px] opacity-70">({count})</span>
+              <span className="text-[10px] opacity-70">({count})</span>
             </Toggle>
           );
         })}
@@ -164,7 +166,7 @@ function FillingSelector({
         <SelectTrigger className="input-sketch border-0 border-b">
           <SelectValue placeholder="Select filling" />
         </SelectTrigger>
-        <SelectContent className="max-h-[300px]">
+        <SelectContent className="max-h-[300px] bg-background border-border z-50">
           {(Object.keys(fillingCategories) as FillingCategory[]).map((category) => {
             const categoryFillings = filteredFillings.filter(
               (f) => 'category' in f && f.category === category
@@ -172,25 +174,56 @@ function FillingSelector({
             if (categoryFillings.length === 0) return null;
 
             const categoryInfo = fillingCategories[category];
+            
+            // Separate included and premium fillings
+            const includedFillings = categoryFillings.filter(f => f.priceExtra === 0);
+            const premiumFillings = categoryFillings.filter(f => f.priceExtra > 0);
+            
             return (
               <div key={category}>
                 <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0">
                   {categoryInfo.emoji} {categoryInfo.label}
                 </div>
-                    {categoryFillings.map((filling) => (
-                      <SelectItem key={filling.id} value={filling.id}>
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{filling.name}</span>
-                            {filling.dietary && filling.dietary.length > 0 && (
-                              <span className="text-[10px] text-muted-foreground">
-                                {filling.dietary.join(" · ")}
-                              </span>
-                            )}
-                          </div>
-                      {filling.priceExtra > 0 && (
-                        <span className="text-xs text-secondary font-medium">
-                          +${filling.priceExtra.toFixed(2)}/srv
+                
+                {/* Included fillings */}
+                {includedFillings.map((filling) => (
+                  <SelectItem key={filling.id} value={filling.id}>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{filling.name}</span>
+                      <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                        Included
+                      </span>
+                      {filling.dietary && filling.dietary.length > 0 && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {filling.dietary.join(" · ")}
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+                
+                {/* Premium separator within category */}
+                {includedFillings.length > 0 && premiumFillings.length > 0 && (
+                  <div className="flex items-center gap-2 px-2 py-1.5">
+                    <div className="h-px flex-1 bg-secondary/30" />
+                    <span className="text-[9px] font-medium uppercase tracking-wider text-secondary">
+                      Premium
+                    </span>
+                    <div className="h-px flex-1 bg-secondary/30" />
+                  </div>
+                )}
+                
+                {/* Premium fillings */}
+                {premiumFillings.map((filling) => (
+                  <SelectItem key={filling.id} value={filling.id}>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{filling.name}</span>
+                      <span className="text-[10px] bg-secondary/20 text-secondary px-1.5 py-0.5 rounded-full font-medium">
+                        +${filling.priceExtra.toFixed(2)}/srv
+                      </span>
+                      {filling.dietary && filling.dietary.length > 0 && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {filling.dietary.join(" · ")}
                         </span>
                       )}
                     </div>
@@ -293,6 +326,7 @@ function SpongeSelector({
         {dietaryTags.map((tag) => {
           const isActive = activeDietaryFilters.has(tag.id);
           const count = tagCounts[tag.id];
+          const Icon = tag.icon;
           return (
             <Toggle
               key={tag.id}
@@ -300,15 +334,16 @@ function SpongeSelector({
               onPressedChange={() => toggleDietaryFilter(tag.id)}
               variant="outline"
               size="sm"
-              className={`text-xs px-2.5 py-1 h-auto transition-all ${
+              className={`text-xs px-2.5 py-1 h-auto transition-all gap-1 ${
                 isActive
                   ? tag.color + " border"
                   : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
               }`}
               disabled={count === 0}
             >
+              <Icon className="h-3 w-3" />
               {tag.id}
-              <span className="ml-1 text-[10px] opacity-70">({count})</span>
+              <span className="text-[10px] opacity-70">({count})</span>
             </Toggle>
           );
         })}
@@ -327,26 +362,50 @@ function SpongeSelector({
         <SelectTrigger className="input-sketch border-0 border-b">
           <SelectValue placeholder="Select sponge" />
         </SelectTrigger>
-        <SelectContent className="max-h-[300px]">
+        <SelectContent className="max-h-[300px] bg-background border-border z-50">
+          {/* Standard (Included) Sponges */}
           {standardSponges.length > 0 && (
             <div>
               <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0">
                 🍰 Standard
               </div>
-              {standardSponges.map((sponge) => (
+              {/* Included standard sponges */}
+              {standardSponges.filter(s => s.priceExtra === 0).map((sponge) => (
                 <SelectItem key={sponge.id} value={sponge.id}>
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{sponge.name}</span>
-                      {sponge.dietary && sponge.dietary.length > 0 && (
-                        <span className="text-[10px] text-muted-foreground">
-                          {sponge.dietary.join(" · ")}
-                        </span>
-                      )}
-                    </div>
-                    {sponge.priceExtra > 0 && (
-                      <span className="text-xs text-secondary font-medium">
-                        +${sponge.priceExtra.toFixed(2)}/srv
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{sponge.name}</span>
+                    <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                      Included
+                    </span>
+                    {sponge.dietary && sponge.dietary.length > 0 && (
+                      <span className="text-[10px] text-muted-foreground">
+                        {sponge.dietary.join(" · ")}
+                      </span>
+                    )}
+                  </div>
+                </SelectItem>
+              ))}
+              {/* Premium standard sponges */}
+              {standardSponges.filter(s => s.priceExtra === 0).length > 0 && 
+               standardSponges.filter(s => s.priceExtra > 0).length > 0 && (
+                <div className="flex items-center gap-2 px-2 py-1.5">
+                  <div className="h-px flex-1 bg-secondary/30" />
+                  <span className="text-[9px] font-medium uppercase tracking-wider text-secondary">
+                    Premium
+                  </span>
+                  <div className="h-px flex-1 bg-secondary/30" />
+                </div>
+              )}
+              {standardSponges.filter(s => s.priceExtra > 0).map((sponge) => (
+                <SelectItem key={sponge.id} value={sponge.id}>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{sponge.name}</span>
+                    <span className="text-[10px] bg-secondary/20 text-secondary px-1.5 py-0.5 rounded-full font-medium">
+                      +${sponge.priceExtra.toFixed(2)}/srv
+                    </span>
+                    {sponge.dietary && sponge.dietary.length > 0 && (
+                      <span className="text-[10px] text-muted-foreground">
+                        {sponge.dietary.join(" · ")}
                       </span>
                     )}
                   </div>
@@ -354,25 +413,23 @@ function SpongeSelector({
               ))}
             </div>
           )}
+          
+          {/* Premium Category Sponges */}
           {premiumSponges.length > 0 && (
             <div>
-              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0">
-                ✨ Premium
+              <div className="px-2 py-1.5 text-xs font-semibold text-secondary bg-secondary/10 sticky top-0 flex items-center gap-1">
+                ✨ Premium Flavors
               </div>
               {premiumSponges.map((sponge) => (
                 <SelectItem key={sponge.id} value={sponge.id}>
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{sponge.name}</span>
-                      {sponge.dietary && sponge.dietary.length > 0 && (
-                        <span className="text-[10px] text-muted-foreground">
-                          {sponge.dietary.join(" · ")}
-                        </span>
-                      )}
-                    </div>
-                    {sponge.priceExtra > 0 && (
-                      <span className="text-xs text-secondary font-medium">
-                        +${sponge.priceExtra.toFixed(2)}/srv
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{sponge.name}</span>
+                    <span className="text-[10px] bg-secondary/20 text-secondary px-1.5 py-0.5 rounded-full font-medium">
+                      +${sponge.priceExtra.toFixed(2)}/srv
+                    </span>
+                    {sponge.dietary && sponge.dietary.length > 0 && (
+                      <span className="text-[10px] text-muted-foreground">
+                        {sponge.dietary.join(" · ")}
                       </span>
                     )}
                   </div>
