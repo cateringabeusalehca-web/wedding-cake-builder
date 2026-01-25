@@ -70,14 +70,19 @@ export interface TierStructure {
   height: number;
 }
 
-// Enhanced tier configuration with shape and separator
+// Enhanced tier configuration with shape, separator, and custom size
 export interface TierConfiguration {
   spongeId: string;
   dietaryId: string;
   fillingId: string;
   shape: CakeShape;
   hasSeparatorAbove: boolean; // Acrylic separator above this tier
+  customSizeInches?: number; // Optional custom size (allows same-size tiers)
 }
+
+// Available tier sizes
+export const availableTierSizes = [6, 7, 8, 10, 12, 14] as const;
+export type TierSize = typeof availableTierSizes[number];
 
 // Helper to get servings for a tier based on shape
 export function getServingsForTier(sizeInches: number, shape: CakeShape): number {
@@ -511,12 +516,13 @@ export function calculateTotalPrice(
 ): number {
   let total = 0;
 
-  // Calculate each tier with shape-adjusted servings
+  // Calculate each tier with shape-adjusted servings and custom sizes
   structure.tiers.forEach((tier, index) => {
     const config = tierConfigs[index];
     if (config) {
-      // Use shape-specific servings
-      const actualServings = getServingsForTier(tier.sizeInches, config.shape);
+      // Use custom size if set, otherwise use default
+      const effectiveSize = config.customSizeInches || tier.sizeInches;
+      const actualServings = getServingsForTier(effectiveSize, config.shape);
       const tierPrice = calculateTierPrice(
         actualServings,
         config.spongeId,
@@ -527,7 +533,7 @@ export function calculateTotalPrice(
       
       // Add separator cost if enabled
       if (config.hasSeparatorAbove) {
-        total += getSeparatorPrice(tier.sizeInches);
+        total += getSeparatorPrice(effectiveSize);
       }
     }
   });
@@ -547,7 +553,7 @@ export function calculateTotalPrice(
   return total;
 }
 
-// Calculate total servings based on tier shapes
+// Calculate total servings based on tier shapes and custom sizes
 export function calculateTotalServings(
   structure: CakeStructure,
   tierConfigs: TierConfiguration[]
@@ -555,8 +561,14 @@ export function calculateTotalServings(
   return structure.tiers.reduce((total, tier, index) => {
     const config = tierConfigs[index];
     const shape = config?.shape || "round";
-    return total + getServingsForTier(tier.sizeInches, shape);
+    const size = config?.customSizeInches || tier.sizeInches;
+    return total + getServingsForTier(size, shape);
   }, 0);
+}
+
+// Get effective tier size (custom or default)
+export function getEffectiveTierSize(tier: TierStructure, config?: TierConfiguration): number {
+  return config?.customSizeInches || tier.sizeInches;
 }
 
 export function getMinEventDate(): Date {

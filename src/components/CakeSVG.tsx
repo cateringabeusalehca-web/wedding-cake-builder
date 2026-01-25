@@ -19,15 +19,17 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
   const plateY = baseY;
   const separatorHeight = 45; // Height similar to a tier for visual impact
 
-  // Calculate tier visual properties dynamically with separators
+  // Calculate tier visual properties dynamically with separators and custom sizes
   const tierVisuals = structure.tiers.map((tier, index) => {
-    // Width based on size (inches * scale factor)
-    const width = tier.sizeInches * 16;
-    const height = tier.height;
     const config = tierConfigs[index];
+    // Use custom size if set, otherwise use default
+    const effectiveSize = config?.customSizeInches || tier.sizeInches;
+    // Width based on size (inches * scale factor)
+    const width = effectiveSize * 16;
+    const height = tier.height;
     const shape = config?.shape || "round";
     const hasSeparatorAbove = config?.hasSeparatorAbove || false;
-    const actualServings = getServingsForTier(tier.sizeInches, shape);
+    const actualServings = getServingsForTier(effectiveSize, shape);
     
     // Calculate Y position (stacked from bottom, accounting for separators)
     let y = plateY;
@@ -42,6 +44,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
     
     return {
       ...tier,
+      sizeInches: effectiveSize, // Use effective size
       width,
       visualHeight: height,
       y,
