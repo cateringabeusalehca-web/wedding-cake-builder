@@ -1,6 +1,6 @@
 import { Slider } from "@/components/ui/slider";
 import { motion } from "framer-motion";
-import { Users, ChevronDown } from "lucide-react";
+import { Users, RotateCcw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -8,7 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cakeStructures, CakeStructure } from "@/data/menuDatabase";
+import { Button } from "@/components/ui/button";
+import { cakeStructures, CakeStructure, getRecommendedStructure } from "@/data/menuDatabase";
 
 interface GuestSliderProps {
   value: number;
@@ -17,6 +18,7 @@ interface GuestSliderProps {
   selectedStructure: CakeStructure;
   onStructureChange: (structureId: string) => void;
   isManualSelection: boolean;
+  onResetToRecommended?: () => void;
 }
 
 export function GuestSlider({ 
@@ -25,8 +27,10 @@ export function GuestSlider({
   tierCount, 
   selectedStructure,
   onStructureChange,
-  isManualSelection
+  isManualSelection,
+  onResetToRecommended
 }: GuestSliderProps) {
+  const recommended = getRecommendedStructure(value);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -138,21 +142,33 @@ export function GuestSlider({
         </Select>
 
         {isManualSelection && (
-          <motion.p
+          <motion.div
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-center text-muted-foreground"
+            className="flex flex-col items-center gap-2"
           >
-            Manual selection • {selectedStructure.totalServings >= value ? (
-              <span className="text-secondary">
-                {selectedStructure.totalServings - value} extra servings
-              </span>
-            ) : (
-              <span className="text-destructive">
-                {value - selectedStructure.totalServings} servings short
-              </span>
-            )}
-          </motion.p>
+            <p className="text-xs text-center text-muted-foreground">
+              Manual selection • {selectedStructure.totalServings >= value ? (
+                <span className="text-secondary">
+                  {selectedStructure.totalServings - value} extra servings
+                </span>
+              ) : (
+                <span className="text-destructive">
+                  {value - selectedStructure.totalServings} servings short
+                </span>
+              )}
+            </p>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onResetToRecommended}
+              className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Use recommended: {recommended.name}
+            </Button>
+          </motion.div>
         )}
       </div>
     </motion.div>
