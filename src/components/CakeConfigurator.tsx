@@ -9,7 +9,7 @@ import { LeadForm } from "./LeadForm";
 import { SuccessScreen } from "./SuccessScreen";
 import { GlobalOptionsPanel } from "./GlobalOptionsPanel";
 import { ConfettiCelebration } from "./ConfettiCelebration";
-import { StickyPriceBar } from "./StickyPriceBar";
+
 import { PersonalizeDesignPanel } from "./PersonalizeDesignPanel";
 import { CelebrationCheckout } from "./CelebrationCheckout";
 import logoHorizontal from "@/assets/logo-horizontal.png";
@@ -59,9 +59,7 @@ export function CakeConfigurator() {
   const [topperNames, setTopperNames] = useState("");
   const [currentView, setCurrentView] = useState<View>("configurator");
   const [isReadyToOrder, setIsReadyToOrder] = useState(false);
-  const [showStickyBar, setShowStickyBar] = useState(false);
   const [showFullscreenCake, setShowFullscreenCake] = useState(false);
-  const priceDisplayRef = useRef<HTMLDivElement>(null);
   
   // Personalization state
   const [referenceImages, setReferenceImages] = useState<string[]>([]);
@@ -292,21 +290,6 @@ export function CakeConfigurator() {
     setEventStyle("");
   }, [guestCount]);
 
-  // Intersection observer to show sticky bar when price display scrolls out of view
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setShowStickyBar(!entry.isIntersecting);
-      },
-      { threshold: 0, rootMargin: "-80px 0px 0px 0px" }
-    );
-
-    if (priceDisplayRef.current) {
-      observer.observe(priceDisplayRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   const selectedTierInfo = selectedTier
     ? structure.tiers.find((t) => t.tierLevel === selectedTier)
@@ -322,14 +305,6 @@ export function CakeConfigurator() {
   return (
     <div className="min-h-screen bg-background">
       
-      {/* Sticky Price Bar */}
-      <StickyPriceBar
-        guestCount={guestCount}
-        eventName={structure.name}
-        totalServings={structure.totalServings}
-        totalPrice={totalPrice}
-        isVisible={showStickyBar}
-      />
       {/* Lead Form Modal */}
       <AnimatePresence>
         {currentView === "form" && (
@@ -397,7 +372,6 @@ export function CakeConfigurator() {
 
         {/* Price Display */}
         <motion.div
-          ref={priceDisplayRef}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
