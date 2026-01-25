@@ -33,6 +33,7 @@ import {
   SeparatorHeight,
   getDefaultSeparatorConfig,
   formatSizeWithUnits,
+  getAvailableSizesForTier,
 } from "@/data/menuDatabase";
 import { useMemo } from "react";
 import { PortionDiagram } from "./PortionDiagram";
@@ -46,6 +47,8 @@ interface TierConfigPanelProps {
   onClose: () => void;
   totalTiers: number;
   isTopTier?: boolean;
+  allTierConfigs: TierConfiguration[];
+  allDefaultTierSizes: number[];
 }
 
 export function TierConfigPanel({
@@ -57,11 +60,19 @@ export function TierConfigPanel({
   onClose,
   totalTiers,
   isTopTier = false,
+  allTierConfigs,
+  allDefaultTierSizes,
 }: TierConfigPanelProps) {
   const tierLabel = getTierLabel(tierNumber, totalTiers);
   
   // Get effective size (custom or default)
   const effectiveSize = config.customSizeInches || tierInfo.sizeInches;
+  
+  // Get available sizes for this tier based on structural constraints
+  const tierIndex = tierNumber - 1; // Convert tier number (1-based) to index (0-based)
+  const availableSizes = useMemo(() => {
+    return getAvailableSizesForTier(tierIndex, totalTiers, allTierConfigs, allDefaultTierSizes);
+  }, [tierIndex, totalTiers, allTierConfigs, allDefaultTierSizes]);
   
   // Get actual servings based on shape and size
   const actualServings = getServingsForTier(effectiveSize, config.shape);
@@ -167,7 +178,7 @@ export function TierConfigPanel({
               {tierLabel}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {effectiveSize}" {config.shape} • {actualServings} servings
+              {formatSizeWithUnits(effectiveSize)} {config.shape} • {actualServings} servings
             </p>
           </div>
         </div>
@@ -182,30 +193,43 @@ export function TierConfigPanel({
       {/* Size Selection */}
       <div className="space-y-2 border-b border-border pb-4">
         <div className="flex items-center gap-2">
+          <Ruler className="h-4 w-4 text-secondary" />
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
             Tier Size
           </span>
-          <span className="text-xs text-muted-foreground">(allows same-size tiers)</span>
+          {totalTiers > 1 && (
+            <span className="text-xs text-muted-foreground">(bottom tiers must be ≥ top tiers)</span>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
-          {availableTierSizes.map((size) => (
-            <Button
-              key={size}
-              variant={(config.customSizeInches || tierInfo.sizeInches) === size ? "default" : "outline"}
-              size="sm"
-              onClick={() => onConfigChange({ 
-                ...config, 
-                customSizeInches: size === tierInfo.sizeInches ? undefined : size 
-              })}
-              className={`min-w-[50px] ${(config.customSizeInches || tierInfo.sizeInches) === size ? "btn-gold" : ""}`}
-            >
-              {size}"
-            </Button>
-          ))}
+          {availableSizes.map((size) => {
+            const isSelected = (config.customSizeInches || tierInfo.sizeInches) === size;
+            const isDefault = size === tierInfo.sizeInches && !config.customSizeInches;
+            return (
+              <Button
+                key={size}
+                variant={isSelected ? "default" : "outline"}
+                size="sm"
+                onClick={() => onConfigChange({ 
+                  ...config, 
+                  customSizeInches: size === tierInfo.sizeInches ? undefined : size 
+                })}
+                className={`min-w-[80px] flex flex-col items-center py-2 h-auto ${isSelected ? "btn-gold" : ""}`}
+              >
+                <span className="font-semibold">{size}"</span>
+                <span className="text-[10px] opacity-75">{Math.round(size * 2.54)} cm</span>
+              </Button>
+            );
+          })}
         </div>
+        {availableSizes.length === 0 && (
+          <p className="text-xs text-destructive">
+            No valid sizes available. Adjust other tiers first.
+          </p>
+        )}
         {config.customSizeInches && config.customSizeInches !== tierInfo.sizeInches && (
           <p className="text-xs text-secondary">
-            Custom size (default: {tierInfo.sizeInches}")
+            Custom size (default: {formatSizeWithUnits(tierInfo.sizeInches)})
           </p>
         )}
       </div>
@@ -324,7 +348,7 @@ export function TierConfigPanel({
               {/* Separator Diameter */}
               <div className="flex items-center gap-4">
                 <span className="text-xs font-medium text-muted-foreground w-16">Diameter:</span>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-2">
                   {availableSeparatorDiameters.map((size) => (
                     <Button
                       key={size}
@@ -334,16 +358,14 @@ export function TierConfigPanel({
                         ...config, 
                         separatorConfig: { ...config.separatorConfig!, diameterInches: size }
                       })}
-                      className={`min-w-[40px] px-2 text-xs ${config.separatorConfig!.diameterInches === size ? "btn-gold" : ""}`}
+                      className={`min-w-[60px] flex flex-col items-center py-1.5 h-auto ${config.separatorConfig!.diameterInches === size ? "btn-gold" : ""}`}
                     >
-                      {size}"
+                      <span className="text-xs font-semibold">{size}"</span>
+                      <span className="text-[9px] opacity-75">{Math.round(size * 2.54)} cm</span>
                     </Button>
                   ))}
                 </div>
               </div>
-              <p className="text-[10px] text-muted-foreground ml-20">
-                {formatSizeWithUnits(config.separatorConfig.diameterInches)}
-              </p>
               
               {/* Separator Height */}
               <div className="flex items-center gap-4">

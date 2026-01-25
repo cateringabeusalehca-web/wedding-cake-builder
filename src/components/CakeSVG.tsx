@@ -428,12 +428,21 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                 />
                 <text
                   x={centerX - tier.width / 2 - 40}
-                  y={tier.y + tier.visualHeight / 2 + 4}
+                  y={tier.y + tier.visualHeight / 2}
                   textAnchor="middle"
-                  className="fill-muted-foreground font-ui text-[11px] font-medium"
+                  className="fill-muted-foreground font-ui text-[10px] font-medium"
                   opacity={isSelected ? 1 : 0.8}
                 >
-                  {tier.sizeInches}" {isSquare ? "□" : "○"}
+                  {tier.sizeInches}"
+                </text>
+                <text
+                  x={centerX - tier.width / 2 - 40}
+                  y={tier.y + tier.visualHeight / 2 + 10}
+                  textAnchor="middle"
+                  className="fill-muted-foreground/70 font-ui text-[8px]"
+                  opacity={isSelected ? 1 : 0.7}
+                >
+                  ({Math.round(tier.sizeInches * 2.54)} cm) {isSquare ? "□" : "○"}
                 </text>
               </g>
 
