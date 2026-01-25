@@ -406,13 +406,9 @@ export function CakeConfigurator() {
         {/* Mobile: Sticky header with Cake Preview (left 60%) + Guest Slider (right 40%) */}
         <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-2 py-2 shadow-md">
           <div className="flex items-center gap-1 min-h-[340px]">
-            {/* Left 60%: Cake Preview - Tap to expand */}
-            <button
-              onClick={() => setShowFullscreenCake(true)}
-              className="w-[60%] h-[340px] flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
-              aria-label="Tap to view cake fullscreen"
-            >
-              <div className="transform scale-[0.75] origin-center pointer-events-none">
+            {/* Left 60%: Cake Preview - Tiers are tappable for editing */}
+            <div className="w-[60%] h-[340px] flex items-center justify-center relative">
+              <div className="transform scale-[0.75] origin-center">
                 <CakeSVG
                   structure={structure}
                   selectedTier={selectedTier}
@@ -422,7 +418,21 @@ export function CakeConfigurator() {
                   totalServings={totalServings}
                 />
               </div>
-            </button>
+              {/* Expand button */}
+              <button
+                onClick={() => setShowFullscreenCake(true)}
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 text-[10px] bg-secondary/20 hover:bg-secondary/30 text-secondary border border-secondary/30 rounded-full transition-colors flex items-center gap-1"
+                aria-label="Expand cake view"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <polyline points="9 21 3 21 3 15"></polyline>
+                  <line x1="21" y1="3" x2="14" y2="10"></line>
+                  <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+                Expand
+              </button>
+            </div>
             
             {/* Right 40%: Guest Slider + Price */}
             {!isReadyToOrder && (
@@ -460,7 +470,6 @@ export function CakeConfigurator() {
               </div>
             )}
           </div>
-          <p className="text-center text-[10px] text-muted-foreground mt-1">Tap cake to view larger</p>
         </div>
 
         {/* Fullscreen Cake Modal - Mobile */}
