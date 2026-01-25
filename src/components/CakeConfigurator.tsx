@@ -415,8 +415,8 @@ export function CakeConfigurator() {
         <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-2 py-2">
           <div className="flex items-stretch gap-2">
             {/* Left 50%: Cake Preview - Full size, contained */}
-            <div className="w-1/2 flex items-center justify-center overflow-hidden">
-              <div className="h-[280px] w-full flex items-center justify-center">
+            <div className="w-1/2 flex items-start justify-center overflow-hidden pt-0">
+              <div className="h-[300px] w-full flex items-start justify-center -mt-4">
                 <CakeSVG
                   structure={structure}
                   selectedTier={selectedTier}
