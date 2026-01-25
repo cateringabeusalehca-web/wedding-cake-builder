@@ -16,6 +16,7 @@ import {
   fillingOptions,
   fillingCategories,
   FillingCategory,
+  FillingOptionWithCategory,
   TierConfiguration,
   calculateTierPrice,
   getTierLabel,
@@ -37,8 +38,181 @@ import {
   formatSizeWithUnits,
   getAvailableSizesForTier,
 } from "@/data/menuDatabase";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { PortionDiagram } from "./PortionDiagram";
+import { Toggle } from "@/components/ui/toggle";
+
+// Dietary tag definitions for filtering
+const dietaryTags = [
+  { id: "GF", label: "Gluten-Free", color: "bg-amber-100 text-amber-700 border-amber-300" },
+  { id: "SF", label: "Sugar-Free", color: "bg-blue-100 text-blue-700 border-blue-300" },
+  { id: "V", label: "Vegan", color: "bg-green-100 text-green-700 border-green-300" },
+  { id: "DF", label: "Dairy-Free", color: "bg-purple-100 text-purple-700 border-purple-300" },
+] as const;
+
+type DietaryTag = typeof dietaryTags[number]["id"];
+
+// Separate component for filling selection with dietary filters
+interface FillingSelectorProps {
+  config: TierConfiguration;
+  availableFillings: FillingOptionWithCategory[];
+  selectedFilling: FillingOptionWithCategory | undefined;
+  tierInfo: TierStructure;
+  onConfigChange: (config: TierConfiguration) => void;
+}
+
+function FillingSelector({
+  config,
+  availableFillings,
+  selectedFilling,
+  tierInfo,
+  onConfigChange,
+}: FillingSelectorProps) {
+  const [activeDietaryFilters, setActiveDietaryFilters] = useState<Set<DietaryTag>>(new Set());
+
+  const toggleDietaryFilter = (tag: DietaryTag) => {
+    setActiveDietaryFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) {
+        next.delete(tag);
+      } else {
+        next.add(tag);
+      }
+      return next;
+    });
+  };
+
+  // Filter fillings based on active dietary tags
+  const filteredFillings = useMemo(() => {
+    if (activeDietaryFilters.size === 0) {
+      return availableFillings;
+    }
+    return availableFillings.filter((filling) => {
+      // Check if filling has all the active dietary tags
+      return Array.from(activeDietaryFilters).every((tag) =>
+        filling.dietary?.includes(tag)
+      );
+    });
+  }, [availableFillings, activeDietaryFilters]);
+
+  // Count fillings per tag for showing availability
+  const tagCounts = useMemo(() => {
+    const counts: Record<DietaryTag, number> = { GF: 0, SF: 0, V: 0, DF: 0 };
+    availableFillings.forEach((filling) => {
+      filling.dietary?.forEach((tag) => {
+        if (tag in counts) {
+          counts[tag as DietaryTag]++;
+        }
+      });
+    });
+    return counts;
+  }, [availableFillings]);
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <div className="flex items-center gap-2">
+          <Palette className="h-4 w-4 text-secondary" />
+          <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
+            Filling
+          </span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Select the cream between your cake layers
+        </p>
+      </div>
+
+      {/* Dietary Filter Toggles */}
+      <div className="flex flex-wrap gap-2">
+        {dietaryTags.map((tag) => {
+          const isActive = activeDietaryFilters.has(tag.id);
+          const count = tagCounts[tag.id];
+          return (
+            <Toggle
+              key={tag.id}
+              pressed={isActive}
+              onPressedChange={() => toggleDietaryFilter(tag.id)}
+              variant="outline"
+              size="sm"
+              className={`text-xs px-2.5 py-1 h-auto transition-all ${
+                isActive
+                  ? tag.color + " border"
+                  : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+              }`}
+              disabled={count === 0}
+            >
+              {tag.id}
+              <span className="ml-1 text-[10px] opacity-70">({count})</span>
+            </Toggle>
+          );
+        })}
+      </div>
+
+      {activeDietaryFilters.size > 0 && (
+        <p className="text-xs text-secondary">
+          Showing {filteredFillings.length} of {availableFillings.length} fillings
+        </p>
+      )}
+
+      <Select
+        value={config.fillingId}
+        onValueChange={(fillingId) =>
+          onConfigChange({ ...config, fillingId })
+        }
+      >
+        <SelectTrigger className="input-sketch border-0 border-b">
+          <SelectValue placeholder="Select filling" />
+        </SelectTrigger>
+        <SelectContent className="max-h-[300px]">
+          {(Object.keys(fillingCategories) as FillingCategory[]).map((category) => {
+            const categoryFillings = filteredFillings.filter(
+              (f) => 'category' in f && f.category === category
+            );
+            if (categoryFillings.length === 0) return null;
+
+            const categoryInfo = fillingCategories[category];
+            return (
+              <div key={category}>
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0">
+                  {categoryInfo.emoji} {categoryInfo.label}
+                </div>
+                    {categoryFillings.map((filling) => (
+                      <SelectItem key={filling.id} value={filling.id}>
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{filling.name}</span>
+                            {filling.dietary && filling.dietary.length > 0 && (
+                              <span className="text-[10px] text-muted-foreground">
+                                {filling.dietary.join(" · ")}
+                              </span>
+                            )}
+                          </div>
+                      {filling.priceExtra > 0 && (
+                        <span className="text-xs text-secondary font-medium">
+                          +${filling.priceExtra.toFixed(2)}/srv
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </div>
+            );
+          })}
+          {filteredFillings.length === 0 && (
+            <div className="px-3 py-4 text-center text-sm text-muted-foreground">
+              No fillings match selected dietary filters
+            </div>
+          )}
+        </SelectContent>
+      </Select>
+      {selectedFilling && selectedFilling.priceExtra > 0 && (
+        <p className="text-xs text-secondary">
+          +${(selectedFilling.priceExtra * tierInfo.servings).toFixed(0)} for this tier
+        </p>
+      )}
+    </div>
+  );
+}
 
 interface TierConfigPanelProps {
   tierNumber: number;
@@ -517,64 +691,14 @@ export function TierConfigPanel({
           )}
         </div>
 
-        {/* Filling Selection - Grouped by Category */}
-        <div className="space-y-2">
-          <div>
-            <div className="flex items-center gap-2">
-              <Palette className="h-4 w-4 text-secondary" />
-              <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
-                Filling
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Select the cream between your cake layers
-            </p>
-          </div>
-          <Select
-            value={config.fillingId}
-            onValueChange={(fillingId) =>
-              onConfigChange({ ...config, fillingId })
-            }
-          >
-            <SelectTrigger className="input-sketch border-0 border-b">
-              <SelectValue placeholder="Select filling" />
-            </SelectTrigger>
-            <SelectContent className="max-h-[300px]">
-              {(Object.keys(fillingCategories) as FillingCategory[]).map((category) => {
-                const categoryFillings = availableFillings.filter(
-                  (f) => 'category' in f && f.category === category
-                );
-                if (categoryFillings.length === 0) return null;
-                
-                const categoryInfo = fillingCategories[category];
-                return (
-                  <div key={category}>
-                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0">
-                      {categoryInfo.emoji} {categoryInfo.label}
-                    </div>
-                    {categoryFillings.map((filling) => (
-                      <SelectItem key={filling.id} value={filling.id}>
-                        <div className="flex items-center justify-between gap-4">
-                          <span className="font-medium">{filling.name}</span>
-                          {filling.priceExtra > 0 && (
-                            <span className="text-xs text-secondary font-medium">
-                              +${filling.priceExtra.toFixed(2)}/srv
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </div>
-                );
-              })}
-            </SelectContent>
-          </Select>
-          {selectedFilling && selectedFilling.priceExtra > 0 && (
-            <p className="text-xs text-secondary">
-              +${(selectedFilling.priceExtra * tierInfo.servings).toFixed(0)} for this tier
-            </p>
-          )}
-        </div>
+        {/* Filling Selection - Grouped by Category with Dietary Filters */}
+        <FillingSelector
+          config={config}
+          availableFillings={availableFillings}
+          selectedFilling={selectedFilling}
+          tierInfo={tierInfo}
+          onConfigChange={onConfigChange}
+        />
       </div>
 
       {/* Actions */}
