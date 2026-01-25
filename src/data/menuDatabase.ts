@@ -116,9 +116,32 @@ export function inchesToCm(inches: number): number {
   return Math.round(inches * 2.54 * 10) / 10;
 }
 
-// Format size with both units
+// Convert cm to inches
+export function cmToInches(cm: number): number {
+  return Math.round(cm / 2.54 * 10) / 10;
+}
+
+// Format size with both units (inches first, then cm)
 export function formatSizeWithUnits(inches: number): string {
   return `${inches}" (${inchesToCm(inches)} cm)`;
+}
+
+// Format cm size with both units (cm first, then inches)
+export function formatCmWithUnits(cm: number): string {
+  return `${cm} cm (${cmToInches(cm)}")`;
+}
+
+// Format rectangular dimensions with both units
+export function formatRectangularDimensions(widthCm: number, lengthCm: number): { 
+  primary: string; 
+  secondary: string;
+} {
+  const widthIn = cmToInches(widthCm);
+  const lengthIn = cmToInches(lengthCm);
+  return {
+    primary: `${widthCm}×${lengthCm} cm`,
+    secondary: `${widthIn}"×${lengthIn}"`,
+  };
 }
 
 // Enhanced tier configuration with shape, separator, and custom size
