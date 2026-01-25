@@ -97,7 +97,11 @@ export function GuestSlider({
       {/* Structure selector */}
       <div className="pt-4 space-y-3">
         <div className="flex items-center justify-center gap-2">
-          {isManualSelection && onResetToRecommended ? (
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-sketch text-foreground text-sm">
+            Cake Structure
+          </span>
+          {onResetToRecommended && (
             <Button
               variant="ghost"
               size="sm"
@@ -106,12 +110,7 @@ export function GuestSlider({
             >
               Reset
             </Button>
-          ) : (
-            <div className="h-px flex-1 bg-border" />
           )}
-          <span className="text-sketch text-foreground text-sm">
-            Cake Structure
-          </span>
           <div className="h-px flex-1 bg-border" />
         </div>
 
