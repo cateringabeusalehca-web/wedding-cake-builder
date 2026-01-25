@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { GoldDustParticles } from "./GoldDustParticles";
 import { CakeDecorationOverlays } from "./CakeDecorationOverlays";
-import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_SIZE_DESCRIPTION, PORTION_WEIGHT_GRAMS, inchesToCm, cmToInches, RECTANGULAR_WIDTH_CM } from "@/data/menuDatabase";
+import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_SIZE_DESCRIPTION, PORTION_WEIGHT_GRAMS, inchesToCm, cmToInches, RECTANGULAR_WIDTH_CM, RECTANGULAR_HEIGHT_CM } from "@/data/menuDatabase";
 
 interface CakeSVGProps {
   structure: CakeStructure;
@@ -29,13 +29,19 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
     const shape = config?.shape || "round";
     const isRectangular = shape === "rectangular";
     
-    // Width calculation: rectangular cakes use proportional width, others use size in inches
+    // Width calculation: rectangular cakes use proportional width based on dimensions
     const rectangularWidthCm = config?.rectangularWidthCm || 40;
     const rectangularLengthCm = config?.rectangularLengthCm || 50;
-    // For rectangular: scale based on width (40cm = 160px, 80cm = 220px)
-    const width = isRectangular ? (rectangularWidthCm === 80 ? 220 : 160) : effectiveSize * 16;
     
-    const height = tier.height;
+    // For rectangular: scale proportionally - max width ~200px for largest cakes
+    // Use the shorter dimension for visual width (front face)
+    const rectScale = Math.min(200 / Math.max(rectangularWidthCm, 50), 3.5);
+    const width = isRectangular 
+      ? Math.max(rectangularWidthCm * rectScale, 100) 
+      : effectiveSize * 16;
+    
+    // For rectangular, use fixed 15cm height converted to pixels
+    const height = isRectangular ? cmToPixels(RECTANGULAR_HEIGHT_CM) : tier.height;
     const hasSeparatorAbove = config?.hasSeparatorAbove || false;
     const separatorConfig = config?.separatorConfig;
     const actualServings = getServingsForTier(effectiveSize, shape, config?.rectangularLengthCm, config?.rectangularWidthCm);
@@ -341,41 +347,142 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
 
               {/* Tier body - with perspective (different for round vs square vs rectangular) */}
               {isRectangular ? (
-                // RECTANGULAR TIER - elongated 3D box
-                <g>
-                  {/* Front face */}
-                  <motion.path
-                    d={`M ${centerX - tier.width / 2} ${tier.y + perspectiveSkew}
-                        L ${centerX - tier.width / 2} ${tier.y + tier.visualHeight}
-                        L ${centerX + tier.width / 2} ${tier.y + tier.visualHeight}
-                        L ${centerX + tier.width / 2} ${tier.y + perspectiveSkew}
-                        Z`}
-                    className={isSelected ? "fill-secondary/15" : "fill-background"}
-                    stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
-                    strokeWidth={isSelected ? 2 : 1.5}
-                  />
-                  {/* Top face (showing it's rectangular) */}
-                  <motion.path
-                    d={`M ${centerX - tier.width / 2} ${tier.y + perspectiveSkew}
-                        L ${centerX - topWidth / 2} ${tier.y}
-                        L ${centerX + topWidth / 2} ${tier.y}
-                        L ${centerX + tier.width / 2} ${tier.y + perspectiveSkew}
-                        Z`}
-                    className={isSelected ? "fill-secondary/25" : "fill-muted/10"}
-                    stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
-                    strokeWidth={isSelected ? 1.5 : 1}
-                  />
-                  {/* Rectangular indicator - horizontal line pattern */}
-                  <line
-                    x1={centerX - topWidth / 2 + 10}
-                    y1={tier.y + perspectiveSkew / 2}
-                    x2={centerX + topWidth / 2 - 10}
-                    y2={tier.y + perspectiveSkew / 2}
-                    stroke={isSelected ? "hsl(43 60% 52% / 0.5)" : "hsl(0 0% 10% / 0.2)"}
-                    strokeWidth={1}
-                    strokeDasharray="4,4"
-                  />
-                </g>
+                // RECTANGULAR TIER - enhanced 3D box with visible depth
+                (() => {
+                  // Calculate depth perspective based on length (longer = more depth)
+                  const depthRatio = tier.rectangularLengthCm / tier.rectangularWidthCm;
+                  const depth = Math.min(depthRatio * 12, 30); // Visual depth in pixels
+                  const boxHeight = tier.visualHeight;
+                  
+                  return (
+                    <g>
+                      {/* Right side face (showing depth/length) */}
+                      <motion.path
+                        d={`M ${centerX + tier.width / 2} ${tier.y + perspectiveSkew}
+                            L ${centerX + tier.width / 2 + depth} ${tier.y + perspectiveSkew - depth * 0.4}
+                            L ${centerX + tier.width / 2 + depth} ${tier.y + boxHeight - depth * 0.4}
+                            L ${centerX + tier.width / 2} ${tier.y + boxHeight}
+                            Z`}
+                        fill={isSelected ? "hsl(43 60% 52% / 0.08)" : "hsl(0 0% 10% / 0.05)"}
+                        stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
+                        strokeWidth={isSelected ? 1.5 : 1}
+                      />
+                      
+                      {/* Front face */}
+                      <motion.path
+                        d={`M ${centerX - tier.width / 2} ${tier.y + perspectiveSkew}
+                            L ${centerX - tier.width / 2} ${tier.y + boxHeight}
+                            L ${centerX + tier.width / 2} ${tier.y + boxHeight}
+                            L ${centerX + tier.width / 2} ${tier.y + perspectiveSkew}
+                            Z`}
+                        className={isSelected ? "fill-secondary/15" : "fill-background"}
+                        stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
+                        strokeWidth={isSelected ? 2 : 1.5}
+                      />
+                      
+                      {/* Top face (showing rectangular shape with depth) */}
+                      <motion.path
+                        d={`M ${centerX - tier.width / 2} ${tier.y + perspectiveSkew}
+                            L ${centerX - tier.width / 2 + depth} ${tier.y + perspectiveSkew - depth * 0.4}
+                            L ${centerX + tier.width / 2 + depth} ${tier.y + perspectiveSkew - depth * 0.4}
+                            L ${centerX + tier.width / 2} ${tier.y + perspectiveSkew}
+                            Z`}
+                        className={isSelected ? "fill-secondary/25" : "fill-muted/10"}
+                        stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
+                        strokeWidth={isSelected ? 1.5 : 1}
+                      />
+                      
+                      {/* Grid pattern on top to show portions */}
+                      {(() => {
+                        const cols = Math.min(Math.floor(tier.rectangularWidthCm / 10), 6);
+                        const rows = Math.min(Math.floor(tier.rectangularLengthCm / 10), 4);
+                        const gridLines = [];
+                        
+                        // Vertical lines
+                        for (let i = 1; i < cols; i++) {
+                          const xOffset = (tier.width / cols) * i;
+                          const depthOffset = (depth / cols) * i;
+                          gridLines.push(
+                            <line
+                              key={`v-${i}`}
+                              x1={centerX - tier.width / 2 + xOffset}
+                              y1={tier.y + perspectiveSkew}
+                              x2={centerX - tier.width / 2 + xOffset + depth}
+                              y2={tier.y + perspectiveSkew - depth * 0.4}
+                              stroke={isSelected ? "hsl(43 60% 52% / 0.3)" : "hsl(0 0% 10% / 0.15)"}
+                              strokeWidth={0.5}
+                              strokeDasharray="2,2"
+                            />
+                          );
+                        }
+                        
+                        // Horizontal lines
+                        for (let i = 1; i < rows; i++) {
+                          const yOffset = (depth * 0.4 / rows) * i;
+                          const xDepthOffset = (depth / rows) * i;
+                          gridLines.push(
+                            <line
+                              key={`h-${i}`}
+                              x1={centerX - tier.width / 2 + xDepthOffset}
+                              y1={tier.y + perspectiveSkew - yOffset}
+                              x2={centerX + tier.width / 2 + xDepthOffset}
+                              y2={tier.y + perspectiveSkew - yOffset}
+                              stroke={isSelected ? "hsl(43 60% 52% / 0.3)" : "hsl(0 0% 10% / 0.15)"}
+                              strokeWidth={0.5}
+                              strokeDasharray="2,2"
+                            />
+                          );
+                        }
+                        
+                        return gridLines;
+                      })()}
+                      
+                      {/* Height indicator on right side */}
+                      <g>
+                        <line
+                          x1={centerX + tier.width / 2 + depth + 8}
+                          y1={tier.y + perspectiveSkew - depth * 0.4}
+                          x2={centerX + tier.width / 2 + depth + 8}
+                          y2={tier.y + boxHeight - depth * 0.4}
+                          stroke="hsl(43 60% 52% / 0.6)"
+                          strokeWidth={1}
+                        />
+                        <line
+                          x1={centerX + tier.width / 2 + depth + 4}
+                          y1={tier.y + perspectiveSkew - depth * 0.4}
+                          x2={centerX + tier.width / 2 + depth + 12}
+                          y2={tier.y + perspectiveSkew - depth * 0.4}
+                          stroke="hsl(43 60% 52% / 0.6)"
+                          strokeWidth={1}
+                        />
+                        <line
+                          x1={centerX + tier.width / 2 + depth + 4}
+                          y1={tier.y + boxHeight - depth * 0.4}
+                          x2={centerX + tier.width / 2 + depth + 12}
+                          y2={tier.y + boxHeight - depth * 0.4}
+                          stroke="hsl(43 60% 52% / 0.6)"
+                          strokeWidth={1}
+                        />
+                        <text
+                          x={centerX + tier.width / 2 + depth + 20}
+                          y={tier.y + perspectiveSkew + (boxHeight - depth * 0.4) / 2}
+                          textAnchor="start"
+                          className="fill-secondary font-ui text-[8px] font-medium"
+                        >
+                          {RECTANGULAR_HEIGHT_CM}cm
+                        </text>
+                        <text
+                          x={centerX + tier.width / 2 + depth + 20}
+                          y={tier.y + perspectiveSkew + (boxHeight - depth * 0.4) / 2 + 9}
+                          textAnchor="start"
+                          className="fill-muted-foreground/70 font-ui text-[7px]"
+                        >
+                          ({cmToInches(RECTANGULAR_HEIGHT_CM)}")
+                        </text>
+                      </g>
+                    </g>
+                  );
+                })()
               ) : isSquare ? (
                 // SQUARE TIER - 3D box with visible top
                 <g>
