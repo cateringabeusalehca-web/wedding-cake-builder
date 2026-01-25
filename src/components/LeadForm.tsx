@@ -191,13 +191,17 @@ export function LeadForm({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{
+        background: "linear-gradient(135deg, hsla(20, 15%, 8%, 0.85) 0%, hsla(25, 20%, 12%, 0.9) 50%, hsla(20, 15%, 8%, 0.85) 100%)",
+        backdropFilter: "blur(8px)",
+      }}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto bg-background p-8 shadow-2xl"
+        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto bg-background/95 backdrop-blur-md p-8 shadow-2xl rounded-2xl border border-secondary/20"
       >
         <button
           onClick={onClose}
