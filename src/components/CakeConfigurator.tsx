@@ -55,6 +55,7 @@ export function CakeConfigurator() {
   const [decorationId, setDecorationId] = useState(decorationOptions[0].id);
   const [topperId, setTopperId] = useState(topperOptions[0].id);
   const [floralPalette, setFloralPalette] = useState("");
+  const [fondantPalette, setFondantPalette] = useState("");
   const [topperNames, setTopperNames] = useState("");
   const [currentView, setCurrentView] = useState<View>("configurator");
   const [isReadyToOrder, setIsReadyToOrder] = useState(false);
@@ -176,6 +177,7 @@ export function CakeConfigurator() {
     setDecorationId(decorationOptions[0].id);
     setTopperId(topperOptions[0].id);
     setFloralPalette("");
+    setFondantPalette("");
     setTopperNames("");
     setCurrentView("configurator");
     setIsReadyToOrder(false);
@@ -471,6 +473,8 @@ export function CakeConfigurator() {
                     onDecorationChange={setDecorationId}
                     floralPalette={floralPalette}
                     onFloralPaletteChange={setFloralPalette}
+                    fondantPalette={fondantPalette}
+                    onFondantPaletteChange={setFondantPalette}
                   />
 
                   {/* Personalize Design Panel - Inline */}
@@ -481,15 +485,11 @@ export function CakeConfigurator() {
                     onDecorationsChange={setSelectedDecorations}
                     customInputs={decorationCustomInputs}
                     onCustomInputChange={handleDecorationCustomInputChange}
-                    selectedColorPalette={selectedColorPalette}
-                    onColorPaletteChange={setSelectedColorPalette}
                     eventTheme={eventTheme}
                     onEventThemeChange={setEventTheme}
                     eventStyle={eventStyle}
                     onEventStyleChange={setEventStyle}
                     tierCount={structure.tierCount}
-                    coatingId={coatingId}
-                    decorationId={decorationId}
                   />
 
                   {/* Ready to Order Button */}
