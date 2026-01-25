@@ -84,6 +84,19 @@ export function getSeparatorPrice(sizeInches: number): number {
   return appConfig.acrylicSeparatorPrices[sizeInches] || 25;
 }
 
+// Weight calculation: ~110g per serving (industry average)
+export function calculateCakeWeight(totalServings: number): number {
+  return totalServings * 110; // grams
+}
+
+// Format weight for display
+export function formatWeight(grams: number): string {
+  if (grams >= 1000) {
+    return `${(grams / 1000).toFixed(1)} kg`;
+  }
+  return `${grams} g`;
+}
+
 export const cakeStructures: CakeStructure[] = [
   {
     id: "intimate",

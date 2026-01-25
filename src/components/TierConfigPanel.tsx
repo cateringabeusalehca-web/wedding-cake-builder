@@ -206,7 +206,7 @@ export function TierConfigPanel({
 
       {/* Acrylic Separator Option - Not for top tier */}
       {!isTopTier && (
-        <div className="flex items-center justify-between py-2 border-b border-border">
+        <div className="flex items-center justify-between py-3 border-b border-border">
           <div className="flex items-center gap-3">
             <Minus className="h-4 w-4 text-secondary" />
             <div>
@@ -214,7 +214,10 @@ export function TierConfigPanel({
                 Acrylic Separator Above
               </Label>
               <p className="text-xs text-muted-foreground">
-                Decorative transparent stand
+                Allows stacking tiers of the same size
+              </p>
+              <p className="text-[10px] text-muted-foreground/70">
+                Decorative transparent pillars for architectural designs
               </p>
             </div>
           </div>
