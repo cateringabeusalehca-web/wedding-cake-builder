@@ -24,6 +24,8 @@ import {
   spongeOptions,
   fillingOptions,
   getTierLabel,
+  cakeStructures,
+  CakeStructure,
 } from "@/data/menuDatabase";
 import { calculateDecorationTotal } from "@/data/decorationOptions";
 
@@ -62,8 +64,42 @@ export function CakeConfigurator() {
   const [selectedColorPalette, setSelectedColorPalette] = useState<string | null>(null);
   const [eventTheme, setEventTheme] = useState("");
   const [eventStyle, setEventStyle] = useState("");
-
-  const structure = useMemo(() => getRecommendedStructure(guestCount), [guestCount]);
+  
+  // Structure selection state
+  const [manualStructureId, setManualStructureId] = useState<string | null>(null);
+  
+  const recommendedStructure = useMemo(() => getRecommendedStructure(guestCount), [guestCount]);
+  
+  const structure = useMemo(() => {
+    if (manualStructureId) {
+      const manual = cakeStructures.find(s => s.id === manualStructureId);
+      if (manual) return manual;
+    }
+    return recommendedStructure;
+  }, [manualStructureId, recommendedStructure]);
+  
+  const handleStructureChange = useCallback((structureId: string) => {
+    const selected = cakeStructures.find(s => s.id === structureId);
+    const recommended = getRecommendedStructure(guestCount);
+    
+    if (selected?.id === recommended.id) {
+      setManualStructureId(null); // Reset to auto
+    } else {
+      setManualStructureId(structureId);
+    }
+    setSelectedTier(null);
+  }, [guestCount]);
+  
+  // Reset to auto when guest count changes significantly
+  useEffect(() => {
+    if (manualStructureId) {
+      const recommended = getRecommendedStructure(guestCount);
+      // If manual selection is now the recommended one, clear manual
+      if (manualStructureId === recommended.id) {
+        setManualStructureId(null);
+      }
+    }
+  }, [guestCount, manualStructureId]);
 
   const basePrice = useMemo(
     () =>
@@ -322,6 +358,9 @@ export function CakeConfigurator() {
                     value={guestCount}
                     onChange={setGuestCount}
                     tierCount={structure.tierCount}
+                    selectedStructure={structure}
+                    onStructureChange={handleStructureChange}
+                    isManualSelection={manualStructureId !== null}
                   />
 
                   {/* Tier Config Panel */}
