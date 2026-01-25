@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { CakeShape, getServingsForTier } from "@/data/menuDatabase";
+import { CakeShape, getServingsForTier, formatSizeWithUnits } from "@/data/menuDatabase";
 
 interface PortionDiagramProps {
   sizeInches: number;
@@ -63,15 +63,23 @@ export function PortionDiagram({ sizeInches, shape }: PortionDiagramProps) {
     const centerY = viewBoxSize / 2;
     const radius = cakeSize / 2;
     
-    // Determine ring structure based on total servings (adjusted for smaller round cakes)
+    // Determine ring structure based on total servings (supports 4" to 18" sizes)
     const getRings = (total: number) => {
-      if (total <= 6) return [total];
-      if (total <= 10) return [4, total - 4];
-      if (total <= 16) return [4, 6, total - 10];
-      if (total <= 24) return [4, 8, 8, total - 20];
-      if (total <= 36) return [4, 8, 10, 10, total - 32];
-      if (total <= 50) return [4, 8, 10, 12, 12, total - 46];
-      return [4, 8, 10, 14, 16, total - 52];
+      if (total <= 4) return [total]; // 4" round
+      if (total <= 6) return [total]; // 5" round
+      if (total <= 8) return [4, total - 4]; // 6" round
+      if (total <= 12) return [4, total - 4]; // 7" round
+      if (total <= 20) return [4, 6, total - 10]; // 8" round
+      if (total <= 24) return [4, 6, 8, total - 18]; // 9" round
+      if (total <= 30) return [4, 8, 8, total - 20]; // 10" round
+      if (total <= 36) return [4, 8, 10, total - 22]; // 11" round
+      if (total <= 44) return [4, 8, 10, 10, total - 32]; // 12" round
+      if (total <= 52) return [4, 8, 10, 12, total - 34]; // 13" round
+      if (total <= 63) return [4, 8, 10, 12, 12, total - 46]; // 14" round
+      if (total <= 72) return [4, 8, 12, 14, 14, total - 52]; // 15" round
+      if (total <= 84) return [4, 8, 12, 16, 16, total - 56]; // 16" round
+      if (total <= 96) return [4, 8, 12, 16, 18, total - 58]; // 17" round
+      return [4, 8, 14, 18, 20, total - 64]; // 18" round (110 servings)
     };
     
     const rings = getRings(total);
@@ -175,7 +183,7 @@ export function PortionDiagram({ sizeInches, shape }: PortionDiagramProps) {
           {servings} portions
         </p>
         <p className="text-xs text-muted-foreground">
-          {sizeInches}" {shape}
+          {formatSizeWithUnits(sizeInches)} {shape}
         </p>
       </div>
     </motion.div>

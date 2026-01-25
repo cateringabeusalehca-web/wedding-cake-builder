@@ -14,14 +14,25 @@ export const appConfig = {
     K: 1.0,   // Keto
     DF: 0.5,  // Dairy-Free
   } as Record<string, number>,
+  // Separator prices based on diameter and height
   acrylicSeparatorPrices: {
-    6: 15,
-    7: 18,
-    8: 22,
-    10: 28,
-    12: 35,
-    14: 45,
-  } as Record<number, number>,
+    // 5cm height prices
+    "4-5": 12,
+    "5-5": 14,
+    "6-5": 16,
+    "7-5": 18,
+    "8-5": 22,
+    "9-5": 25,
+    "10-5": 28,
+    // 10cm height prices
+    "4-10": 18,
+    "5-10": 20,
+    "6-10": 24,
+    "7-10": 28,
+    "8-10": 32,
+    "9-10": 38,
+    "10-10": 45,
+  } as Record<string, number>,
 };
 
 // ============= CAKE SHAPE & SERVINGS =============
@@ -35,20 +46,38 @@ export const PORTION_SIZE_DESCRIPTION = "1\"×2\"×4\" (2.5×5×10 cm)"; // Stan
 // Round cakes yield fewer portions due to geometry
 export const servingsPerSize: Record<CakeShape, Record<number, number>> = {
   round: {
-    6: 8,    // Reduced from 11 - realistic for round
-    7: 12,   // Reduced from 17
-    8: 20,   // Reduced from 24
-    10: 30,  // Reduced from 38
-    12: 44,  // Reduced from 56
-    14: 63,  // Reduced from 78
+    4: 4,
+    5: 6,
+    6: 8,
+    7: 12,
+    8: 20,
+    9: 24,
+    10: 30,
+    11: 36,
+    12: 44,
+    13: 52,
+    14: 63,
+    15: 72,
+    16: 84,
+    17: 96,
+    18: 110,
   },
   square: {
+    4: 8,
+    5: 12,
     6: 18,
     7: 24,
     8: 32,
+    9: 40,
     10: 50,
+    11: 60,
     12: 72,
+    13: 84,
     14: 98,
+    15: 112,
+    16: 128,
+    17: 144,
+    18: 162,
   },
 };
 
@@ -70,6 +99,30 @@ export interface TierStructure {
   height: number;
 }
 
+// Acrylic separator configuration
+export type SeparatorShape = "round" | "square";
+export type SeparatorHeight = 5 | 10; // cm
+
+export interface SeparatorConfig {
+  diameterInches: number;
+  heightCm: SeparatorHeight;
+  shape: SeparatorShape;
+}
+
+// Available separator sizes
+export const availableSeparatorDiameters = [4, 5, 6, 7, 8, 9, 10] as const;
+export const availableSeparatorHeights: SeparatorHeight[] = [5, 10];
+
+// Convert inches to cm
+export function inchesToCm(inches: number): number {
+  return Math.round(inches * 2.54 * 10) / 10;
+}
+
+// Format size with both units
+export function formatSizeWithUnits(inches: number): string {
+  return `${inches}" (${inchesToCm(inches)} cm)`;
+}
+
 // Enhanced tier configuration with shape, separator, and custom size
 export interface TierConfiguration {
   spongeId: string;
@@ -77,11 +130,12 @@ export interface TierConfiguration {
   fillingId: string;
   shape: CakeShape;
   hasSeparatorAbove: boolean; // Acrylic separator above this tier
+  separatorConfig?: SeparatorConfig; // Separator configuration if enabled
   customSizeInches?: number; // Optional custom size (allows same-size tiers)
 }
 
-// Available tier sizes
-export const availableTierSizes = [6, 7, 8, 10, 12, 14] as const;
+// Available tier sizes (4" to 18")
+export const availableTierSizes = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] as const;
 export type TierSize = typeof availableTierSizes[number];
 
 // Helper to get servings for a tier based on shape
@@ -89,9 +143,22 @@ export function getServingsForTier(sizeInches: number, shape: CakeShape): number
   return servingsPerSize[shape][sizeInches] || servingsPerSize.round[sizeInches] || 0;
 }
 
-// Helper to get separator price
-export function getSeparatorPrice(sizeInches: number): number {
-  return appConfig.acrylicSeparatorPrices[sizeInches] || 25;
+// Helper to get separator price based on config
+export function getSeparatorPrice(config?: SeparatorConfig): number {
+  if (!config) return 0;
+  const key = `${config.diameterInches}-${config.heightCm}`;
+  return appConfig.acrylicSeparatorPrices[key] || 25;
+}
+
+// Get default separator config for a tier
+export function getDefaultSeparatorConfig(tierSizeInches: number): SeparatorConfig {
+  // Default to 85% of tier diameter, max 10"
+  const defaultDiameter = Math.min(10, Math.max(4, Math.round(tierSizeInches * 0.85)));
+  return {
+    diameterInches: defaultDiameter,
+    heightCm: 5,
+    shape: "round",
+  };
 }
 
 export const cakeStructures: CakeStructure[] = [
@@ -532,8 +599,8 @@ export function calculateTotalPrice(
       total += tierPrice.total;
       
       // Add separator cost if enabled
-      if (config.hasSeparatorAbove) {
-        total += getSeparatorPrice(effectiveSize);
+      if (config.hasSeparatorAbove && config.separatorConfig) {
+        total += getSeparatorPrice(config.separatorConfig);
       }
     }
   });

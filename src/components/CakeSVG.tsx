@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { GoldDustParticles } from "./GoldDustParticles";
 import { CakeDecorationOverlays } from "./CakeDecorationOverlays";
-import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_SIZE_DESCRIPTION } from "@/data/menuDatabase";
+import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_SIZE_DESCRIPTION, inchesToCm } from "@/data/menuDatabase";
 
 interface CakeSVGProps {
   structure: CakeStructure;
@@ -17,7 +17,9 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
   const baseY = 320;
   const standHeight = 35;
   const plateY = baseY;
-  const separatorHeight = 45; // Height similar to a tier for visual impact
+
+  // Convert separator height from cm to pixels (scale factor)
+  const cmToPixels = (cm: number) => cm * 4.5; // 5cm = 22.5px, 10cm = 45px
 
   // Calculate tier visual properties dynamically with separators and custom sizes
   const tierVisuals = structure.tiers.map((tier, index) => {
@@ -29,15 +31,20 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
     const height = tier.height;
     const shape = config?.shape || "round";
     const hasSeparatorAbove = config?.hasSeparatorAbove || false;
+    const separatorConfig = config?.separatorConfig;
     const actualServings = getServingsForTier(effectiveSize, shape);
+    
+    // Calculate separator visual height in pixels
+    const separatorHeightPx = separatorConfig ? cmToPixels(separatorConfig.heightCm) : 0;
     
     // Calculate Y position (stacked from bottom, accounting for separators)
     let y = plateY;
     for (let i = 0; i < index; i++) {
       y -= structure.tiers[i].height;
       // Add separator space if the tier below has a separator above
-      if (tierConfigs[i]?.hasSeparatorAbove) {
-        y -= separatorHeight;
+      const prevConfig = tierConfigs[i];
+      if (prevConfig?.hasSeparatorAbove && prevConfig?.separatorConfig) {
+        y -= cmToPixels(prevConfig.separatorConfig.heightCm);
       }
     }
     y -= height;
@@ -50,6 +57,8 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
       y,
       shape,
       hasSeparatorAbove,
+      separatorConfig,
+      separatorHeightPx,
       actualServings,
     };
   });
@@ -190,8 +199,8 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
               className="cursor-pointer"
               style={{ transformOrigin: `${centerX}px ${tier.y + tier.visualHeight / 2}px` }}
             >
-              {/* Acrylic Separator above tier - tall cylinder with texture */}
-              {tier.hasSeparatorAbove && (
+              {/* Acrylic Separator above tier - tall cylinder/box with texture */}
+              {tier.hasSeparatorAbove && tier.separatorConfig && (
                 <g>
                   {/* Defs for acrylic texture pattern */}
                   <defs>
@@ -208,67 +217,111 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                     </linearGradient>
                   </defs>
                   
-                  {/* Separator diameter is smaller than the tier below */}
+                  {/* Separator with custom diameter, height, and shape */}
                   {(() => {
-                    const sepWidth = tier.width * 0.85; // 85% of tier width
-                    const sepY = tier.y - separatorHeight;
+                    const sepDiameterInches = tier.separatorConfig!.diameterInches;
+                    const sepHeightCm = tier.separatorConfig!.heightCm;
+                    const sepShape = tier.separatorConfig!.shape;
+                    const sepWidth = sepDiameterInches * 16; // Convert inches to pixels
+                    const sepHeight = tier.separatorHeightPx;
+                    const sepY = tier.y - sepHeight;
                     const perspectiveSkew = 5;
+                    const isSquareSep = sepShape === "square";
                     
                     return (
                       <>
-                        {/* Separator cylinder body */}
-                        <path
-                          d={`M ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
-                              L ${centerX - sepWidth / 2} ${tier.y - 2}
-                              A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX + sepWidth / 2} ${tier.y - 2}
-                              L ${centerX + sepWidth / 2} ${sepY + perspectiveSkew}
-                              A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
-                              Z`}
-                          fill={`url(#acrylic-gradient-${actualTierNumber})`}
-                          stroke="hsl(200 30% 75%)"
-                          strokeWidth={1}
-                        />
-                        
-                        {/* Texture overlay */}
-                        <path
-                          d={`M ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
-                              L ${centerX - sepWidth / 2} ${tier.y - 2}
-                              A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX + sepWidth / 2} ${tier.y - 2}
-                              L ${centerX + sepWidth / 2} ${sepY + perspectiveSkew}
-                              A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
-                              Z`}
-                          fill={`url(#acrylic-pattern-${actualTierNumber})`}
-                          opacity={0.6}
-                        />
-                        
-                        {/* Top ellipse */}
-                        <ellipse
-                          cx={centerX}
-                          cy={sepY + perspectiveSkew}
-                          rx={sepWidth / 2}
-                          ry={perspectiveSkew}
-                          fill="hsl(200 40% 96% / 0.6)"
-                          stroke="hsl(200 30% 75%)"
-                          strokeWidth={0.8}
-                        />
+                        {isSquareSep ? (
+                          // SQUARE SEPARATOR
+                          <>
+                            {/* Front face */}
+                            <path
+                              d={`M ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
+                                  L ${centerX - sepWidth / 2} ${tier.y - 2}
+                                  L ${centerX + sepWidth / 2} ${tier.y - 2}
+                                  L ${centerX + sepWidth / 2} ${sepY + perspectiveSkew}
+                                  Z`}
+                              fill={`url(#acrylic-gradient-${actualTierNumber})`}
+                              stroke="hsl(200 30% 75%)"
+                              strokeWidth={1}
+                            />
+                            {/* Texture overlay */}
+                            <path
+                              d={`M ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
+                                  L ${centerX - sepWidth / 2} ${tier.y - 2}
+                                  L ${centerX + sepWidth / 2} ${tier.y - 2}
+                                  L ${centerX + sepWidth / 2} ${sepY + perspectiveSkew}
+                                  Z`}
+                              fill={`url(#acrylic-pattern-${actualTierNumber})`}
+                              opacity={0.6}
+                            />
+                            {/* Top face */}
+                            <path
+                              d={`M ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
+                                  L ${centerX - sepWidth / 2 * 0.92} ${sepY}
+                                  L ${centerX + sepWidth / 2 * 0.92} ${sepY}
+                                  L ${centerX + sepWidth / 2} ${sepY + perspectiveSkew}
+                                  Z`}
+                              fill="hsl(200 40% 96% / 0.6)"
+                              stroke="hsl(200 30% 75%)"
+                              strokeWidth={0.8}
+                            />
+                          </>
+                        ) : (
+                          // ROUND SEPARATOR
+                          <>
+                            {/* Separator cylinder body */}
+                            <path
+                              d={`M ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
+                                  L ${centerX - sepWidth / 2} ${tier.y - 2}
+                                  A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX + sepWidth / 2} ${tier.y - 2}
+                                  L ${centerX + sepWidth / 2} ${sepY + perspectiveSkew}
+                                  A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
+                                  Z`}
+                              fill={`url(#acrylic-gradient-${actualTierNumber})`}
+                              stroke="hsl(200 30% 75%)"
+                              strokeWidth={1}
+                            />
+                            {/* Texture overlay */}
+                            <path
+                              d={`M ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
+                                  L ${centerX - sepWidth / 2} ${tier.y - 2}
+                                  A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX + sepWidth / 2} ${tier.y - 2}
+                                  L ${centerX + sepWidth / 2} ${sepY + perspectiveSkew}
+                                  A ${sepWidth / 2} ${perspectiveSkew} 0 0 0 ${centerX - sepWidth / 2} ${sepY + perspectiveSkew}
+                                  Z`}
+                              fill={`url(#acrylic-pattern-${actualTierNumber})`}
+                              opacity={0.6}
+                            />
+                            {/* Top ellipse */}
+                            <ellipse
+                              cx={centerX}
+                              cy={sepY + perspectiveSkew}
+                              rx={sepWidth / 2}
+                              ry={perspectiveSkew}
+                              fill="hsl(200 40% 96% / 0.6)"
+                              stroke="hsl(200 30% 75%)"
+                              strokeWidth={0.8}
+                            />
+                          </>
+                        )}
                         
                         {/* Shine effect */}
                         <ellipse
                           cx={centerX - sepWidth / 4}
-                          cy={sepY + separatorHeight / 2}
+                          cy={sepY + sepHeight / 2}
                           rx={3}
-                          ry={separatorHeight / 3}
+                          ry={sepHeight / 3}
                           fill="hsl(0 0% 100% / 0.3)"
                         />
                         
-                        {/* Label */}
+                        {/* Size label */}
                         <text
                           x={centerX}
-                          y={sepY + separatorHeight / 2 + 3}
+                          y={sepY + sepHeight / 2 + 3}
                           textAnchor="middle"
-                          className="fill-muted-foreground/50 font-ui text-[8px] uppercase tracking-wider"
+                          className="fill-muted-foreground/60 font-ui text-[7px] uppercase tracking-wider"
                         >
-                          Acrylic
+                          {sepDiameterInches}" × {sepHeightCm}cm
                         </text>
                       </>
                     );
@@ -444,7 +497,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                 >
                   <rect
                     x={centerX - 40}
-                    y={tier.y - (tier.hasSeparatorAbove ? 45 : 28)}
+                    y={tier.y - (tier.hasSeparatorAbove && tier.separatorHeightPx > 0 ? tier.separatorHeightPx + 5 : 28)}
                     width={80}
                     height={22}
                     rx="4"
@@ -452,7 +505,7 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                   />
                   <text
                     x={centerX}
-                    y={tier.y - (tier.hasSeparatorAbove ? 30 : 13)}
+                    y={tier.y - (tier.hasSeparatorAbove && tier.separatorHeightPx > 0 ? tier.separatorHeightPx - 10 : 13)}
                     textAnchor="middle"
                     className="fill-foreground font-ui text-[11px] font-semibold"
                   >
