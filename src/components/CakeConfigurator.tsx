@@ -214,15 +214,6 @@ export function CakeConfigurator() {
     (config: TierConfiguration) => {
       if (selectedTier === null) return;
       
-      // If switching to rectangular, force single tier structure
-      if (config.shape === "rectangular" && structure.tierCount > 1) {
-        // Set to smallest single-tier structure
-        const singleTierStructure = cakeStructures.find(s => s.tierCount === 1);
-        if (singleTierStructure) {
-          setManualStructureId(singleTierStructure.id);
-        }
-      }
-      
       setTierConfigs((prev) => {
         const next = [...prev];
         const tierIndex = structure.tiers.findIndex(t => t.tierLevel === selectedTier);
@@ -232,8 +223,18 @@ export function CakeConfigurator() {
         return next;
       });
     },
-    [selectedTier, structure.tiers, structure.tierCount]
+    [selectedTier, structure.tiers]
   );
+  
+  // Force rectangular mode: switch to single tier structure
+  const handleForceRectangular = useCallback(() => {
+    const singleTierStructure = cakeStructures.find(s => s.tierCount === 1);
+    if (singleTierStructure) {
+      setManualStructureId(singleTierStructure.id);
+      // Keep the tier panel open on the first tier
+      setSelectedTier(1);
+    }
+  }, []);
 
   const handleApplyToAll = useCallback(() => {
     if (selectedTier === null) return;
@@ -483,6 +484,7 @@ export function CakeConfigurator() {
                         isTopTier={selectedTier === structure.tierCount}
                         allTierConfigs={tierConfigs}
                         allDefaultTierSizes={structure.tiers.map(t => t.sizeInches)}
+                        onForceRectangular={handleForceRectangular}
                       />
                     )}
                   </AnimatePresence>

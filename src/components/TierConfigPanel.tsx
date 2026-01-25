@@ -470,6 +470,7 @@ interface TierConfigPanelProps {
   isTopTier?: boolean;
   allTierConfigs: TierConfiguration[];
   allDefaultTierSizes: number[];
+  onForceRectangular?: () => void;
 }
 
 export function TierConfigPanel({
@@ -483,6 +484,7 @@ export function TierConfigPanel({
   isTopTier = false,
   allTierConfigs,
   allDefaultTierSizes,
+  onForceRectangular,
 }: TierConfigPanelProps) {
   const tierLabel = getTierLabel(tierNumber, totalTiers);
   
@@ -690,14 +692,20 @@ export function TierConfigPanel({
             <Button
               variant={config.shape === "rectangular" ? "default" : "outline"}
               size="sm"
-              onClick={() => onConfigChange({ 
-                ...config, 
-                shape: "rectangular", 
-                rectangularLengthCm: config.rectangularLengthCm || 50,
-                rectangularWidthCm: config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM,
-                hasSeparatorAbove: false, // No separators for rectangular
-                separatorConfig: undefined
-              })}
+              onClick={() => {
+                // Force single tier if needed
+                if (totalTiers > 1 && onForceRectangular) {
+                  onForceRectangular();
+                }
+                onConfigChange({ 
+                  ...config, 
+                  shape: "rectangular", 
+                  rectangularLengthCm: config.rectangularLengthCm || 50,
+                  rectangularWidthCm: config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM,
+                  hasSeparatorAbove: false,
+                  separatorConfig: undefined
+                });
+              }}
               className={`flex-1 gap-2 ${config.shape === "rectangular" ? "btn-gold" : ""}`}
             >
               <RectangleHorizontal className="h-4 w-4" />
