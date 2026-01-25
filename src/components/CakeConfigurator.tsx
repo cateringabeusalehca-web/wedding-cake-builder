@@ -213,6 +213,16 @@ export function CakeConfigurator() {
   const handleTierConfigChange = useCallback(
     (config: TierConfiguration) => {
       if (selectedTier === null) return;
+      
+      // If switching to rectangular, force single tier structure
+      if (config.shape === "rectangular" && structure.tierCount > 1) {
+        // Set to smallest single-tier structure
+        const singleTierStructure = cakeStructures.find(s => s.tierCount === 1);
+        if (singleTierStructure) {
+          setManualStructureId(singleTierStructure.id);
+        }
+      }
+      
       setTierConfigs((prev) => {
         const next = [...prev];
         const tierIndex = structure.tiers.findIndex(t => t.tierLevel === selectedTier);
@@ -222,7 +232,7 @@ export function CakeConfigurator() {
         return next;
       });
     },
-    [selectedTier, structure.tiers]
+    [selectedTier, structure.tiers, structure.tierCount]
   );
 
   const handleApplyToAll = useCallback(() => {

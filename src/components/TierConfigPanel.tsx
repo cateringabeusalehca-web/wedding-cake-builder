@@ -498,8 +498,8 @@ export function TierConfigPanel({
   // Get actual servings based on shape and size
   const actualServings = getServingsForTier(effectiveSize, config.shape, config.rectangularLengthCm, config.rectangularWidthCm);
   
-  // Check if rectangular is available (only for single tier cakes)
-  const canBeRectangular = totalTiers === 1;
+  // Rectangular shape is always available but enforces single tier
+  const isRectangular = config.shape === "rectangular";
   
   const pricing = calculateTierPrice(
     actualServings,
@@ -614,49 +614,51 @@ export function TierConfigPanel({
         </button>
       </div>
 
-      {/* Size Selection */}
-      <div className="space-y-2 border-b border-border pb-4">
-        <div className="flex items-center gap-2">
-          <Ruler className="h-4 w-4 text-secondary" />
-          <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
-            Tier Size
-          </span>
-          {totalTiers > 1 && (
-            <span className="text-xs text-muted-foreground">(bottom tiers must be ≥ top tiers)</span>
+      {/* Size Selection - Hidden for rectangular cakes */}
+      {!isRectangular && (
+        <div className="space-y-2 border-b border-border pb-4">
+          <div className="flex items-center gap-2">
+            <Ruler className="h-4 w-4 text-secondary" />
+            <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
+              Tier Size
+            </span>
+            {totalTiers > 1 && (
+              <span className="text-xs text-muted-foreground">(bottom tiers must be ≥ top tiers)</span>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {availableSizes.map((size) => {
+              const isSelected = (config.customSizeInches || tierInfo.sizeInches) === size;
+              const isDefault = size === tierInfo.sizeInches && !config.customSizeInches;
+              return (
+                <Button
+                  key={size}
+                  variant={isSelected ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => onConfigChange({ 
+                    ...config, 
+                    customSizeInches: size === tierInfo.sizeInches ? undefined : size 
+                  })}
+                  className={`min-w-[80px] flex flex-col items-center py-2 h-auto ${isSelected ? "btn-gold" : ""}`}
+                >
+                  <span className="font-semibold">{size}"</span>
+                  <span className="text-[10px] opacity-75">{Math.round(size * 2.54)} cm</span>
+                </Button>
+              );
+            })}
+          </div>
+          {availableSizes.length === 0 && (
+            <p className="text-xs text-destructive">
+              No valid sizes available. Adjust other tiers first.
+            </p>
+          )}
+          {config.customSizeInches && config.customSizeInches !== tierInfo.sizeInches && (
+            <p className="text-xs text-secondary">
+              Custom size (default: {formatSizeWithUnits(tierInfo.sizeInches)})
+            </p>
           )}
         </div>
-        <div className="flex flex-wrap gap-2">
-          {availableSizes.map((size) => {
-            const isSelected = (config.customSizeInches || tierInfo.sizeInches) === size;
-            const isDefault = size === tierInfo.sizeInches && !config.customSizeInches;
-            return (
-              <Button
-                key={size}
-                variant={isSelected ? "default" : "outline"}
-                size="sm"
-                onClick={() => onConfigChange({ 
-                  ...config, 
-                  customSizeInches: size === tierInfo.sizeInches ? undefined : size 
-                })}
-                className={`min-w-[80px] flex flex-col items-center py-2 h-auto ${isSelected ? "btn-gold" : ""}`}
-              >
-                <span className="font-semibold">{size}"</span>
-                <span className="text-[10px] opacity-75">{Math.round(size * 2.54)} cm</span>
-              </Button>
-            );
-          })}
-        </div>
-        {availableSizes.length === 0 && (
-          <p className="text-xs text-destructive">
-            No valid sizes available. Adjust other tiers first.
-          </p>
-        )}
-        {config.customSizeInches && config.customSizeInches !== tierInfo.sizeInches && (
-          <p className="text-xs text-secondary">
-            Custom size (default: {formatSizeWithUnits(tierInfo.sizeInches)})
-          </p>
-        )}
-      </div>
+      )}
 
       {/* Shape Selection & Portion Diagram */}
       <div className="grid grid-cols-2 gap-4 border-b border-border pb-4">
@@ -679,27 +681,28 @@ export function TierConfigPanel({
             <Button
               variant={config.shape === "square" ? "default" : "outline"}
               size="sm"
-              onClick={() => onConfigChange({ ...config, shape: "square", rectangularLengthCm: undefined })}
+              onClick={() => onConfigChange({ ...config, shape: "square", rectangularLengthCm: undefined, rectangularWidthCm: undefined })}
               className={`flex-1 gap-2 ${config.shape === "square" ? "btn-gold" : ""}`}
             >
               <Square className="h-4 w-4" />
               Square
             </Button>
-            {canBeRectangular && (
-              <Button
-                variant={config.shape === "rectangular" ? "default" : "outline"}
-                size="sm"
-                onClick={() => onConfigChange({ 
-                  ...config, 
-                  shape: "rectangular", 
-                  rectangularLengthCm: config.rectangularLengthCm || 50 
-                })}
-                className={`flex-1 gap-2 ${config.shape === "rectangular" ? "btn-gold" : ""}`}
-              >
-                <RectangleHorizontal className="h-4 w-4" />
-                Rectangular
-              </Button>
-            )}
+            <Button
+              variant={config.shape === "rectangular" ? "default" : "outline"}
+              size="sm"
+              onClick={() => onConfigChange({ 
+                ...config, 
+                shape: "rectangular", 
+                rectangularLengthCm: config.rectangularLengthCm || 50,
+                rectangularWidthCm: config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM,
+                hasSeparatorAbove: false, // No separators for rectangular
+                separatorConfig: undefined
+              })}
+              className={`flex-1 gap-2 ${config.shape === "rectangular" ? "btn-gold" : ""}`}
+            >
+              <RectangleHorizontal className="h-4 w-4" />
+              Rectangular
+            </Button>
           </div>
           {config.shape !== "rectangular" && (
             <p className="text-xs text-muted-foreground">
@@ -798,8 +801,8 @@ export function TierConfigPanel({
         </div>
       )}
 
-      {/* Acrylic Separator Option - Not for top tier */}
-      {!isTopTier && (
+      {/* Acrylic Separator Option - Not for top tier and not for rectangular cakes */}
+      {!isTopTier && !isRectangular && (
         <div className="space-y-3 py-3 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
