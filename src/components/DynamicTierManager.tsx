@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus, Users, AlertTriangle, Layers, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -58,8 +59,20 @@ export function DynamicTierManager({
   selectedTier,
   totalServings,
 }: DynamicTierManagerProps) {
+  // Track if user has interacted with the configurator
+  const [hasInteracted, setHasInteracted] = useState(false);
+  
   const isSufficient = totalServings >= guestCount;
   const servingsDiff = totalServings - guestCount;
+  
+  // Show warning only after user has made changes
+  const showInsufficientWarning = hasInteracted && !isSufficient;
+  
+  // Mark as interacted when user changes guest count or tiers
+  const handleGuestCountChange = (count: number) => {
+    setHasInteracted(true);
+    onGuestCountChange(count);
+  };
 
   // Get the maximum allowed size for adding a new tier (must be <= smallest existing tier)
   const getMaxSizeForNewTier = (): number => {
@@ -82,6 +95,7 @@ export function DynamicTierManager({
 
   const addTier = () => {
     if (tiers.length >= 6) return; // Max 6 tiers
+    setHasInteracted(true);
     
     const newSize = getSuggestedNewTierSize();
     const newTierLevel = tiers.length + 1;
@@ -103,6 +117,7 @@ export function DynamicTierManager({
 
   const removeTier = () => {
     if (tiers.length <= 1) return; // Min 1 tier
+    setHasInteracted(true);
     
     // Remove the top tier and its separator from the tier below
     const updatedTiers = tiers.slice(0, -1);
@@ -123,6 +138,7 @@ export function DynamicTierManager({
   };
 
   const changeTierSize = (tierIndex: number, newSize: number) => {
+    setHasInteracted(true);
     const updatedTiers = tiers.map((tier, index) => {
       if (index === tierIndex) {
         return {
@@ -203,7 +219,7 @@ export function DynamicTierManager({
         <div className="relative py-4">
           <Slider
             value={[guestCount]}
-            onValueChange={([v]) => onGuestCountChange(v)}
+            onValueChange={([v]) => handleGuestCountChange(v)}
             min={20}
             max={250}
             step={5}
@@ -220,28 +236,57 @@ export function DynamicTierManager({
         </div>
       </div>
 
-      {/* Servings Status */}
-      <div className={`rounded-lg p-4 border ${isSufficient ? 'bg-secondary/10 border-secondary/30' : 'bg-destructive/10 border-destructive/30'}`}>
+      {/* Servings Status - Always show status, but warning style only after interaction */}
+      <div className={`rounded-lg p-4 border transition-colors ${
+        isSufficient 
+          ? 'bg-secondary/10 border-secondary/30' 
+          : showInsufficientWarning
+            ? 'bg-destructive/10 border-destructive/30'
+            : 'bg-muted/30 border-muted-foreground/20'
+      }`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {isSufficient ? (
               <Layers className="h-5 w-5 text-secondary" />
-            ) : (
+            ) : showInsufficientWarning ? (
               <AlertTriangle className="h-5 w-5 text-destructive" />
+            ) : (
+              <Layers className="h-5 w-5 text-muted-foreground" />
             )}
-            <span className={`font-medium ${isSufficient ? 'text-secondary' : 'text-destructive'}`}>
+            <span className={`font-medium ${
+              isSufficient 
+                ? 'text-secondary' 
+                : showInsufficientWarning 
+                  ? 'text-destructive' 
+                  : 'text-muted-foreground'
+            }`}>
               {totalServings} servings
             </span>
           </div>
-          <span className={`text-sm ${isSufficient ? 'text-secondary' : 'text-destructive'}`}>
-            {isSufficient ? `+${servingsDiff} extra` : `${Math.abs(servingsDiff)} short`}
+          <span className={`text-sm ${
+            isSufficient 
+              ? 'text-secondary' 
+              : showInsufficientWarning 
+                ? 'text-destructive' 
+                : 'text-muted-foreground'
+          }`}>
+            {isSufficient 
+              ? `+${servingsDiff} extra` 
+              : `${Math.abs(servingsDiff)} needed`}
           </span>
         </div>
-        {!isSufficient && (
-          <p className="text-xs text-destructive mt-2">
-            Add more tiers or increase tier sizes to serve all guests
-          </p>
-        )}
+        <AnimatePresence>
+          {showInsufficientWarning && (
+            <motion.p 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="text-xs text-destructive mt-2"
+            >
+              Add more tiers or increase tier sizes to serve all guests
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Dynamic Tier List */}
