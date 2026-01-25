@@ -413,10 +413,10 @@ export function CakeConfigurator() {
 
         {/* Mobile: Sticky header with Cake Preview (left) + Guest Slider (right) - 50/50 */}
         <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-2 py-2">
-          <div className="flex items-stretch gap-2">
-            {/* Left 50%: Cake Preview - Full size, contained */}
-            <div className="w-1/2 flex items-start justify-center overflow-hidden pt-0">
-              <div className="h-[300px] w-full flex items-start justify-center -mt-4">
+          <div className="flex items-center gap-2 min-h-[320px]">
+            {/* Left 50%: Cake Preview - Scaled to fit */}
+            <div className="w-1/2 h-[320px] flex items-center justify-center">
+              <div className="transform scale-[0.65] origin-center">
                 <CakeSVG
                   structure={structure}
                   selectedTier={selectedTier}
