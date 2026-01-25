@@ -516,7 +516,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to orders inbox
     const emailResponse = await resend.emails.send({
-      from: "Cake Design Studio <orders@cateringabeusaleh.ca>",
+      from: "Wedding Cake Builder <orders@cateringabeusaleh.ca>",
       to: ["orders@cateringabeusaleh.ca"],
       reply_to: orderData.client.email,
       subject: `🎂 New Cake Order: ${orderData.client.fullName} - ${orderData.client.eventType} (${orderData.project.structure.name})`,
@@ -567,7 +567,7 @@ const handler = async (req: Request): Promise<Response> => {
                 ABE U-SALEH CATERING
               </p>
               <p style="color: #666; margin: 8px 0 0 0; font-size: 12px;">
-                Cake Design Studio
+                Wedding Cake Builder
               </p>
             </td>
           </tr>
