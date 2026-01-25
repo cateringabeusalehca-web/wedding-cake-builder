@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
   spongeOptions,
+  SpongeOption,
   dietaryOptions,
   fillingOptions,
   fillingCategories,
@@ -208,6 +209,187 @@ function FillingSelector({
       {selectedFilling && selectedFilling.priceExtra > 0 && (
         <p className="text-xs text-secondary">
           +${(selectedFilling.priceExtra * tierInfo.servings).toFixed(0)} for this tier
+        </p>
+      )}
+    </div>
+  );
+}
+
+// Separate component for sponge selection with dietary filters
+interface SpongeSelectorProps {
+  config: TierConfiguration;
+  availableSponges: SpongeOption[];
+  selectedSponge: SpongeOption | undefined;
+  tierInfo: TierStructure;
+  onSpongeChange: (spongeId: string) => void;
+}
+
+function SpongeSelector({
+  config,
+  availableSponges,
+  selectedSponge,
+  tierInfo,
+  onSpongeChange,
+}: SpongeSelectorProps) {
+  const [activeDietaryFilters, setActiveDietaryFilters] = useState<Set<DietaryTag>>(new Set());
+
+  const toggleDietaryFilter = (tag: DietaryTag) => {
+    setActiveDietaryFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) {
+        next.delete(tag);
+      } else {
+        next.add(tag);
+      }
+      return next;
+    });
+  };
+
+  // Filter sponges based on active dietary tags
+  const filteredSponges = useMemo(() => {
+    if (activeDietaryFilters.size === 0) {
+      return availableSponges;
+    }
+    return availableSponges.filter((sponge) => {
+      return Array.from(activeDietaryFilters).every((tag) =>
+        sponge.dietary?.includes(tag)
+      );
+    });
+  }, [availableSponges, activeDietaryFilters]);
+
+  // Count sponges per tag for showing availability
+  const tagCounts = useMemo(() => {
+    const counts: Record<DietaryTag, number> = { GF: 0, SF: 0, V: 0, DF: 0 };
+    availableSponges.forEach((sponge) => {
+      sponge.dietary?.forEach((tag) => {
+        if (tag in counts) {
+          counts[tag as DietaryTag]++;
+        }
+      });
+    });
+    return counts;
+  }, [availableSponges]);
+
+  // Group sponges by category
+  const standardSponges = filteredSponges.filter((s) => s.category === "Standard");
+  const premiumSponges = filteredSponges.filter((s) => s.category === "Premium");
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <div className="flex items-center gap-2">
+          <Layers className="h-4 w-4 text-secondary" />
+          <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
+            Sponge
+          </span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Choose the cake base flavor for this tier
+        </p>
+      </div>
+
+      {/* Dietary Filter Toggles */}
+      <div className="flex flex-wrap gap-2">
+        {dietaryTags.map((tag) => {
+          const isActive = activeDietaryFilters.has(tag.id);
+          const count = tagCounts[tag.id];
+          return (
+            <Toggle
+              key={tag.id}
+              pressed={isActive}
+              onPressedChange={() => toggleDietaryFilter(tag.id)}
+              variant="outline"
+              size="sm"
+              className={`text-xs px-2.5 py-1 h-auto transition-all ${
+                isActive
+                  ? tag.color + " border"
+                  : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+              }`}
+              disabled={count === 0}
+            >
+              {tag.id}
+              <span className="ml-1 text-[10px] opacity-70">({count})</span>
+            </Toggle>
+          );
+        })}
+      </div>
+
+      {activeDietaryFilters.size > 0 && (
+        <p className="text-xs text-secondary">
+          Showing {filteredSponges.length} of {availableSponges.length} sponges
+        </p>
+      )}
+
+      <Select
+        value={config.spongeId}
+        onValueChange={onSpongeChange}
+      >
+        <SelectTrigger className="input-sketch border-0 border-b">
+          <SelectValue placeholder="Select sponge" />
+        </SelectTrigger>
+        <SelectContent className="max-h-[300px]">
+          {standardSponges.length > 0 && (
+            <div>
+              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0">
+                🍰 Standard
+              </div>
+              {standardSponges.map((sponge) => (
+                <SelectItem key={sponge.id} value={sponge.id}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{sponge.name}</span>
+                      {sponge.dietary && sponge.dietary.length > 0 && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {sponge.dietary.join(" · ")}
+                        </span>
+                      )}
+                    </div>
+                    {sponge.priceExtra > 0 && (
+                      <span className="text-xs text-secondary font-medium">
+                        +${sponge.priceExtra.toFixed(2)}/srv
+                      </span>
+                    )}
+                  </div>
+                </SelectItem>
+              ))}
+            </div>
+          )}
+          {premiumSponges.length > 0 && (
+            <div>
+              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0">
+                ✨ Premium
+              </div>
+              {premiumSponges.map((sponge) => (
+                <SelectItem key={sponge.id} value={sponge.id}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{sponge.name}</span>
+                      {sponge.dietary && sponge.dietary.length > 0 && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {sponge.dietary.join(" · ")}
+                        </span>
+                      )}
+                    </div>
+                    {sponge.priceExtra > 0 && (
+                      <span className="text-xs text-secondary font-medium">
+                        +${sponge.priceExtra.toFixed(2)}/srv
+                      </span>
+                    )}
+                  </div>
+                </SelectItem>
+              ))}
+            </div>
+          )}
+          {filteredSponges.length === 0 && (
+            <div className="px-3 py-4 text-center text-sm text-muted-foreground">
+              No sponges match selected dietary filters
+            </div>
+          )}
+        </SelectContent>
+      </Select>
+      {selectedSponge && selectedSponge.priceExtra > 0 && (
+        <p className="text-xs text-secondary">
+          +${(selectedSponge.priceExtra * tierInfo.servings).toFixed(0)} for this tier
         </p>
       )}
     </div>
@@ -639,57 +821,14 @@ export function TierConfigPanel({
           )}
         </div>
 
-        {/* Sponge Selection */}
-        <div className="space-y-2">
-          <div>
-            <div className="flex items-center gap-2">
-              <Layers className="h-4 w-4 text-secondary" />
-              <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
-                Sponge
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Choose the cake base flavor for this tier
-            </p>
-          </div>
-          <Select
-            value={config.spongeId}
-            onValueChange={handleSpongeChange}
-          >
-            <SelectTrigger className="input-sketch border-0 border-b">
-              <SelectValue placeholder="Select sponge" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableSponges.map((sponge) => (
-                <SelectItem key={sponge.id} value={sponge.id}>
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <span className="font-medium">{sponge.name}</span>
-                      {sponge.category === "Premium" && (
-                        <span className="ml-2 text-[10px] text-secondary/80 uppercase">
-                          Premium
-                        </span>
-                      )}
-                      <span className="block text-xs text-muted-foreground">
-                        {sponge.description}
-                      </span>
-                    </div>
-                    {sponge.priceExtra > 0 && (
-                      <span className="text-xs text-secondary font-medium">
-                        +${sponge.priceExtra.toFixed(2)}/srv
-                      </span>
-                    )}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {selectedSponge && selectedSponge.priceExtra > 0 && (
-            <p className="text-xs text-secondary">
-              +${(selectedSponge.priceExtra * tierInfo.servings).toFixed(0)} for this tier
-            </p>
-          )}
-        </div>
+        {/* Sponge Selection with Dietary Filters */}
+        <SpongeSelector
+          config={config}
+          availableSponges={availableSponges}
+          selectedSponge={selectedSponge}
+          tierInfo={tierInfo}
+          onSpongeChange={handleSpongeChange}
+        />
 
         {/* Filling Selection - Grouped by Category with Dietary Filters */}
         <FillingSelector
