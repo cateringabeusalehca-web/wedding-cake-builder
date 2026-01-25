@@ -38,13 +38,13 @@ import {
   getDefaultSeparatorConfig,
   formatSizeWithUnits,
   getAvailableSizesForTier,
-  RECTANGULAR_WIDTH_CM,
-  RECTANGULAR_MIN_LENGTH_CM,
-  RECTANGULAR_MAX_LENGTH_CM,
-  RECTANGULAR_WIDTH_OPTIONS,
+  RECTANGULAR_MIN_DIMENSION_CM,
+  RECTANGULAR_MAX_DIMENSION_CM,
+  RECTANGULAR_HEIGHT_CM,
   RECTANGULAR_DEFAULT_WIDTH_CM,
   getServingsForRectangular,
   cmToInches,
+  PORTION_WEIGHT_GRAMS,
 } from "@/data/menuDatabase";
 import { useMemo, useState } from "react";
 import { PortionDiagram } from "./PortionDiagram";
@@ -740,42 +740,67 @@ export function TierConfigPanel({
         )}
       </div>
       
-      {/* Rectangular Dimensions */}
+      {/* Rectangular Dimensions - Flexible sliders for both dimensions */}
       {config.shape === "rectangular" && (
         <div className="space-y-4 border-b border-border pb-4">
-          {/* Width Selection */}
+          {/* Height Notice */}
+          <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg text-xs">
+            <span className="text-muted-foreground">
+              Fixed height: <span className="font-semibold text-foreground">{RECTANGULAR_HEIGHT_CM} cm ({cmToInches(RECTANGULAR_HEIGHT_CM)}")</span>
+            </span>
+          </div>
+          
+          {/* Width Slider */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Ruler className="h-4 w-4 text-secondary" />
-              <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
-                Width
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Ruler className="h-4 w-4 text-secondary" />
+                <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
+                  Width (short side)
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-lg font-bold text-foreground">
+                  {config.rectangularWidthCm || 40} cm
+                </span>
+                <span className="text-sm text-muted-foreground ml-2">
+                  ({cmToInches(config.rectangularWidthCm || 40)}")
+                </span>
+              </div>
             </div>
-            <div className="flex gap-2">
-              {RECTANGULAR_WIDTH_OPTIONS.map((width) => (
-                <Button
-                  key={width}
-                  variant={(config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM) === width ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => onConfigChange({ 
-                    ...config, 
-                    rectangularWidthCm: width 
-                  })}
-                  className={`flex-1 flex-col h-auto py-2 ${(config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM) === width ? "btn-gold" : ""}`}
-                >
-                  <span className="font-semibold">{width} cm</span>
-                  <span className="text-[10px] opacity-75">{cmToInches(width)}"</span>
-                </Button>
-              ))}
+            <input
+              type="range"
+              min={RECTANGULAR_MIN_DIMENSION_CM}
+              max={RECTANGULAR_MAX_DIMENSION_CM}
+              step={5}
+              value={config.rectangularWidthCm || 40}
+              onChange={(e) => {
+                const newWidth = parseInt(e.target.value);
+                const currentLength = config.rectangularLengthCm || 50;
+                // Ensure width is always <= length (short side)
+                onConfigChange({ 
+                  ...config, 
+                  rectangularWidthCm: newWidth,
+                  rectangularLengthCm: Math.max(currentLength, newWidth)
+                });
+              }}
+              className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-secondary"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{RECTANGULAR_MIN_DIMENSION_CM} cm ({cmToInches(RECTANGULAR_MIN_DIMENSION_CM)}")</span>
+              <span>{RECTANGULAR_MAX_DIMENSION_CM} cm ({cmToInches(RECTANGULAR_MAX_DIMENSION_CM)}")</span>
             </div>
           </div>
           
           {/* Length Slider */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
-                Length
-              </span>
+              <div className="flex items-center gap-2">
+                <Ruler className="h-4 w-4 text-secondary" />
+                <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
+                  Length (long side)
+                </span>
+              </div>
               <div className="text-right">
                 <span className="text-lg font-bold text-foreground">
                   {config.rectangularLengthCm || 50} cm
@@ -787,8 +812,8 @@ export function TierConfigPanel({
             </div>
             <input
               type="range"
-              min={RECTANGULAR_MIN_LENGTH_CM}
-              max={RECTANGULAR_MAX_LENGTH_CM}
+              min={config.rectangularWidthCm || RECTANGULAR_MIN_DIMENSION_CM}
+              max={RECTANGULAR_MAX_DIMENSION_CM}
               step={5}
               value={config.rectangularLengthCm || 50}
               onChange={(e) => onConfigChange({ 
@@ -798,22 +823,27 @@ export function TierConfigPanel({
               className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-secondary"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{RECTANGULAR_MIN_LENGTH_CM} cm ({cmToInches(RECTANGULAR_MIN_LENGTH_CM)}")</span>
-              <span>{RECTANGULAR_MAX_LENGTH_CM} cm ({cmToInches(RECTANGULAR_MAX_LENGTH_CM)}")</span>
+              <span>{config.rectangularWidthCm || RECTANGULAR_MIN_DIMENSION_CM} cm</span>
+              <span>{RECTANGULAR_MAX_DIMENSION_CM} cm ({cmToInches(RECTANGULAR_MAX_DIMENSION_CM)}")</span>
             </div>
           </div>
           
-          {/* Summary */}
-          <div className="flex items-center gap-2 p-3 bg-secondary/10 rounded-lg">
-            <RectangleHorizontal className="h-5 w-5 text-secondary" />
-            <div className="text-sm">
-              <span className="font-medium">
-                {config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM} cm × {config.rectangularLengthCm || 50} cm
-              </span>
-              <span className="text-muted-foreground ml-1">
-                ({cmToInches(config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM)}" × {cmToInches(config.rectangularLengthCm || 50)}")
-              </span>
-              <span className="text-muted-foreground ml-2">• {actualServings} servings</span>
+          {/* Summary with portion weight */}
+          <div className="flex flex-col gap-2 p-3 bg-secondary/10 rounded-lg">
+            <div className="flex items-center gap-2">
+              <RectangleHorizontal className="h-5 w-5 text-secondary" />
+              <div className="text-sm">
+                <span className="font-medium">
+                  {config.rectangularWidthCm || 40} × {config.rectangularLengthCm || 50} × {RECTANGULAR_HEIGHT_CM} cm
+                </span>
+                <span className="text-muted-foreground ml-1">
+                  ({cmToInches(config.rectangularWidthCm || 40)}" × {cmToInches(config.rectangularLengthCm || 50)}" × {cmToInches(RECTANGULAR_HEIGHT_CM)}")
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-semibold text-secondary">{actualServings} servings</span>
+              <span className="text-muted-foreground">~{PORTION_WEIGHT_GRAMS}g per portion</span>
             </div>
           </div>
         </div>

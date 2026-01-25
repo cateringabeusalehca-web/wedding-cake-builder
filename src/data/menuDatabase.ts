@@ -37,13 +37,16 @@ export type CakeShape = "round" | "square" | "rectangular";
 export const PORTION_WEIGHT_GRAMS = 110; // ~110g per portion (industry standard)
 export const PORTION_SIZE_DESCRIPTION = "1\"×2\"×4\" (2.5×5×10 cm)"; // Standard wedding cake portion
 
-// Rectangular cake constraints
-export const RECTANGULAR_WIDTH_OPTIONS = [40, 80] as const; // Available widths in cm
-export const RECTANGULAR_DEFAULT_WIDTH_CM = 40; // Default width: 40cm
-export const RECTANGULAR_MIN_LENGTH_CM = 20; // Minimum length: 20cm
-export const RECTANGULAR_MAX_LENGTH_CM = 120; // Maximum length: 120cm
+// Rectangular cake constraints - flexible dimensions
+export const RECTANGULAR_MIN_DIMENSION_CM = 20; // Minimum dimension: 20cm
+export const RECTANGULAR_MAX_DIMENSION_CM = 150; // Maximum dimension: 150cm  
+export const RECTANGULAR_HEIGHT_CM = 15; // Fixed height: 15cm
 
-// Legacy export for backwards compatibility
+// Legacy exports for backwards compatibility
+export const RECTANGULAR_WIDTH_OPTIONS = [40, 80] as const;
+export const RECTANGULAR_DEFAULT_WIDTH_CM = 40;
+export const RECTANGULAR_MIN_LENGTH_CM = 20;
+export const RECTANGULAR_MAX_LENGTH_CM = 120;
 export const RECTANGULAR_WIDTH_CM = RECTANGULAR_DEFAULT_WIDTH_CM;
 
 // Servings per size based on shape (even sizes only: 4, 6, 8, 10, 12, 14, 16, 18 inches)
