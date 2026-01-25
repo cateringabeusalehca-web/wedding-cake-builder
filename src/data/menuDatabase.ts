@@ -119,38 +119,51 @@ export const availableTierSizes = [4, 6, 8, 10, 12, 14, 16, 18] as const;
 export type TierSize = typeof availableTierSizes[number];
 
 // Get available sizes for a specific tier based on structural constraints
-// Bottom tier can be any size, but higher tiers must be smaller than or equal to the tier below
+// Bottom tier can be any size, middle tiers 6-12", top tier 4-10"
 export function getAvailableSizesForTier(
   tierIndex: number,
   totalTiers: number,
   tierConfigs: TierConfiguration[],
   defaultTierSizes: number[]
 ): number[] {
-  // Get the maximum allowed size based on the tier below (if any)
-  let maxSize = 18; // Bottom tier can be any size
+  const isBottomTier = tierIndex === 0;
+  const isTopTier = tierIndex === totalTiers - 1;
+  const isMiddleTier = !isBottomTier && !isTopTier;
   
+  // Base constraints for tier position
+  let minSize = 4;
+  let maxSize = 18;
+  
+  // Middle tiers: restricted to 6" - 12"
+  if (isMiddleTier) {
+    minSize = Math.max(minSize, 6);
+    maxSize = Math.min(maxSize, 12);
+  }
+  
+  // Top tier: restricted to 4" - 10" (can't be too large on top)
+  if (isTopTier && totalTiers > 1) {
+    maxSize = Math.min(maxSize, 10);
+  }
+  
+  // Structural constraint: must be <= tier below
   if (tierIndex > 0) {
-    // This tier must be smaller than or equal to the tier below
     const tierBelowIndex = tierIndex - 1;
     const tierBelowConfig = tierConfigs[tierBelowIndex];
     const tierBelowDefaultSize = defaultTierSizes[tierBelowIndex] || 18;
     const tierBelowSize = tierBelowConfig?.customSizeInches || tierBelowDefaultSize;
-    maxSize = tierBelowSize; // Can be same size or smaller
+    maxSize = Math.min(maxSize, tierBelowSize);
   }
   
-  // Get the minimum allowed size based on the tier above (if any)
-  let minSize = 4; // Top tier can be as small as 4"
-  
+  // Structural constraint: must be >= tier above
   if (tierIndex < totalTiers - 1) {
-    // This tier must be larger than or equal to the tier above
     const tierAboveIndex = tierIndex + 1;
     const tierAboveConfig = tierConfigs[tierAboveIndex];
     const tierAboveDefaultSize = defaultTierSizes[tierAboveIndex] || 4;
     const tierAboveSize = tierAboveConfig?.customSizeInches || tierAboveDefaultSize;
-    minSize = tierAboveSize; // Can be same size or larger
+    minSize = Math.max(minSize, tierAboveSize);
   }
   
-  // Filter available sizes based on constraints
+  // Filter available sizes based on all constraints
   return availableTierSizes.filter(size => size >= minSize && size <= maxSize);
 }
 
