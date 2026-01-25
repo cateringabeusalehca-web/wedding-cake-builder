@@ -41,8 +41,10 @@ export function PersonalizeDesignPanel({
   onEventStyleChange,
   tierCount,
 }: PersonalizeDesignPanelProps) {
-  const [showToppers, setShowToppers] = useState(true);
+  const [showToppers, setShowToppers] = useState(false);
   const [showColorPalette, setShowColorPalette] = useState(false);
+  const [showReferencePhotos, setShowReferencePhotos] = useState(false);
+  const [showEventTheme, setShowEventTheme] = useState(false);
 
   const toggleDecoration = (decorationId: string) => {
     onDecorationsChange(
@@ -81,54 +83,77 @@ export function PersonalizeDesignPanel({
         Personalize Design
       </h2>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Reference Photos Section */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Camera className="h-4 w-4 text-muted-foreground" />
-            <label className="text-xs font-semibold uppercase tracking-wider text-secondary">
-              Reference Photos
-            </label>
-          </div>
-          <p className="text-xs text-muted-foreground mb-4">
-            Upload up to 5 Pinterest or inspiration photos to help us understand your vision.
-          </p>
-          <ReferencePhotoUpload
-            images={referenceImages}
-            onImagesChange={onReferenceImagesChange}
-            maxImages={5}
-          />
+        <div className="rounded-lg border border-border bg-card/50 overflow-hidden">
+          <button
+            onClick={() => setShowReferencePhotos(!showReferencePhotos)}
+            className="w-full p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Camera className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
+                Reference Photos
+              </span>
+              {referenceImages.length > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold">
+                  {referenceImages.length}
+                </span>
+              )}
+            </div>
+            {showReferencePhotos ? (
+              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            )}
+          </button>
+
+          <AnimatePresence>
+            {showReferencePhotos && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="border-t border-border"
+              >
+                <div className="p-3">
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Upload up to 5 Pinterest or inspiration photos to help us understand your vision.
+                  </p>
+                  <ReferencePhotoUpload
+                    images={referenceImages}
+                    onImagesChange={onReferenceImagesChange}
+                    maxImages={5}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Color Palette Selection */}
         <div className="rounded-lg border border-border bg-card/50 overflow-hidden">
           <button
             onClick={() => setShowColorPalette(!showColorPalette)}
-            className="w-full p-4 flex items-center justify-between hover:bg-muted/30 transition-colors"
+            className="w-full p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <Palette className="h-5 w-5 text-muted-foreground" />
-              <div className="text-left">
-                <span className="text-sm font-semibold text-foreground block">
-                  Color Palette
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Select the colors that best represent your event
-                </span>
-              </div>
-            </div>
             <div className="flex items-center gap-2">
+              <Palette className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
+                Color Palette
+              </span>
               {selectedColorPalette && (
                 <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold">
                   1
                 </span>
               )}
-              {showColorPalette ? (
-                <ChevronUp className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              )}
             </div>
+            {showColorPalette ? (
+              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            )}
           </button>
 
           <AnimatePresence>
@@ -140,43 +165,48 @@ export function PersonalizeDesignPanel({
                 transition={{ duration: 0.2 }}
                 className="border-t border-border"
               >
-                <div className="p-3 grid grid-cols-2 gap-2">
-                  {colorPalettes.map((palette) => (
-                    <button
-                      key={palette.id}
-                      onClick={() =>
-                        onColorPaletteChange(
-                          selectedColorPalette === palette.id ? null : palette.id
-                        )
-                      }
-                      className={`
-                        relative p-2 rounded-lg border transition-all duration-200 text-left
-                        ${
-                          selectedColorPalette === palette.id
-                            ? "border-secondary bg-secondary/10 ring-1 ring-secondary"
-                            : "border-border hover:border-secondary/50"
+                <div className="p-3">
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Select the colors that best represent your event
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {colorPalettes.map((palette) => (
+                      <button
+                        key={palette.id}
+                        onClick={() =>
+                          onColorPaletteChange(
+                            selectedColorPalette === palette.id ? null : palette.id
+                          )
                         }
-                      `}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex -space-x-1">
-                          {palette.colors.map((color, i) => (
-                            <div
-                              key={i}
-                              className="w-4 h-4 rounded-full border border-white shadow-sm"
-                              style={{ backgroundColor: color }}
-                            />
-                          ))}
+                        className={`
+                          relative p-2 rounded-lg border transition-all duration-200 text-left
+                          ${
+                            selectedColorPalette === palette.id
+                              ? "border-secondary bg-secondary/10 ring-1 ring-secondary"
+                              : "border-border hover:border-secondary/50"
+                          }
+                        `}
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex -space-x-1">
+                            {palette.colors.map((color, i) => (
+                              <div
+                                key={i}
+                                className="w-4 h-4 rounded-full border border-white shadow-sm"
+                                style={{ backgroundColor: color }}
+                              />
+                            ))}
+                          </div>
+                          {selectedColorPalette === palette.id && (
+                            <Check className="h-3 w-3 text-secondary ml-auto" />
+                          )}
                         </div>
-                        {selectedColorPalette === palette.id && (
-                          <Check className="h-3 w-3 text-secondary ml-auto" />
-                        )}
-                      </div>
-                      <span className="text-xs font-medium text-foreground">
-                        {palette.name}
-                      </span>
-                    </button>
-                  ))}
+                        <span className="text-xs font-medium text-foreground">
+                          {palette.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -184,83 +214,97 @@ export function PersonalizeDesignPanel({
         </div>
 
         {/* Event Theme & Style */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <PartyPopper className="h-4 w-4 text-muted-foreground" />
-            <label className="text-xs font-semibold uppercase tracking-wider text-secondary">
-              Event Theme & Style
-            </label>
-          </div>
-          <p className="text-xs text-muted-foreground mb-3">
-            Tell us about your event vision
-          </p>
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs font-medium text-foreground mb-2 block">
-                Event Theme
-              </label>
-              <Input
-                value={eventTheme}
-                onChange={(e) => onEventThemeChange(e.target.value)}
-                placeholder="E.g., Enchanted garden, Tropical beach, Classic elegance..."
-                className="input-sketch text-sm"
-                maxLength={100}
-              />
+        <div className="rounded-lg border border-border bg-card/50 overflow-hidden">
+          <button
+            onClick={() => setShowEventTheme(!showEventTheme)}
+            className="w-full p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <PartyPopper className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
+                Event Theme & Style
+              </span>
+              {(eventTheme || eventStyle) && (
+                <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold">
+                  ✓
+                </span>
+              )}
             </div>
-            <div>
-              <label className="text-xs font-medium text-foreground mb-2 block">
-                Style / Vibes
-              </label>
-              <Textarea
-                value={eventStyle}
-                onChange={(e) => onEventStyleChange(e.target.value)}
-                placeholder="Describe the atmosphere you want: romantic, modern, rustic, minimalist, glamorous..."
-                className="input-sketch text-sm min-h-[80px] resize-none"
-                maxLength={300}
-              />
-            </div>
-          </div>
+            {showEventTheme ? (
+              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            )}
+          </button>
+
+          <AnimatePresence>
+            {showEventTheme && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="border-t border-border"
+              >
+                <div className="p-3">
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Tell us about your event vision
+                  </p>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-2 block">
+                        Event Theme
+                      </label>
+                      <Input
+                        value={eventTheme}
+                        onChange={(e) => onEventThemeChange(e.target.value)}
+                        placeholder="E.g., Enchanted garden, Tropical beach, Classic elegance..."
+                        className="input-sketch text-sm"
+                        maxLength={100}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-2 block">
+                        Style / Vibes
+                      </label>
+                      <Textarea
+                        value={eventStyle}
+                        onChange={(e) => onEventStyleChange(e.target.value)}
+                        placeholder="Describe the atmosphere you want: romantic, modern, rustic, minimalist, glamorous..."
+                        className="input-sketch text-sm min-h-[80px] resize-none"
+                        maxLength={300}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Cake Toppers Section */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Crown className="h-4 w-4 text-muted-foreground" />
-            <label className="text-xs font-semibold uppercase tracking-wider text-secondary">
-              Cake Toppers
-            </label>
-          </div>
-
-          {/* 3D Print Toppers */}
-          <div className="rounded-lg border border-border bg-card/50 overflow-hidden">
-            <button
-              onClick={() => setShowToppers(!showToppers)}
-              className="w-full p-4 flex items-center justify-between hover:bg-muted/30 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">👑</span>
-                <div className="text-left">
-                  <span className="text-sm font-semibold text-foreground block">
-                    3D Print Toppers
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    Custom 3D printed cake toppers
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {selectedToppersCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold">
-                    {selectedToppersCount}
-                  </span>
-                )}
-                {showToppers ? (
-                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                )}
-              </div>
-            </button>
+        <div className="rounded-lg border border-border bg-card/50 overflow-hidden">
+          <button
+            onClick={() => setShowToppers(!showToppers)}
+            className="w-full p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Crown className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-secondary">
+                Cake Toppers
+              </span>
+              {selectedToppersCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold">
+                  {selectedToppersCount}
+                </span>
+              )}
+            </div>
+            {showToppers ? (
+              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            )}
+          </button>
 
           <AnimatePresence>
             {showToppers && (
@@ -349,7 +393,6 @@ export function PersonalizeDesignPanel({
               </motion.div>
             )}
           </AnimatePresence>
-          </div>
         </div>
       </div>
     </motion.div>
