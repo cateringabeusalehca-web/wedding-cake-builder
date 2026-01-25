@@ -14,6 +14,8 @@ import {
   spongeOptions,
   dietaryOptions,
   fillingOptions,
+  fillingCategories,
+  FillingCategory,
   TierConfiguration,
   calculateTierPrice,
   getTierLabel,
@@ -515,7 +517,7 @@ export function TierConfigPanel({
           )}
         </div>
 
-        {/* Filling Selection */}
+        {/* Filling Selection - Grouped by Category */}
         <div className="space-y-2">
           <div>
             <div className="flex items-center gap-2">
@@ -537,19 +539,34 @@ export function TierConfigPanel({
             <SelectTrigger className="input-sketch border-0 border-b">
               <SelectValue placeholder="Select filling" />
             </SelectTrigger>
-            <SelectContent>
-              {availableFillings.map((filling) => (
-                <SelectItem key={filling.id} value={filling.id}>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="font-medium">{filling.name}</span>
-                    {filling.priceExtra > 0 && (
-                      <span className="text-xs text-secondary font-medium">
-                        +${filling.priceExtra.toFixed(2)}/srv
-                      </span>
-                    )}
+            <SelectContent className="max-h-[300px]">
+              {(Object.keys(fillingCategories) as FillingCategory[]).map((category) => {
+                const categoryFillings = availableFillings.filter(
+                  (f) => 'category' in f && f.category === category
+                );
+                if (categoryFillings.length === 0) return null;
+                
+                const categoryInfo = fillingCategories[category];
+                return (
+                  <div key={category}>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0">
+                      {categoryInfo.emoji} {categoryInfo.label}
+                    </div>
+                    {categoryFillings.map((filling) => (
+                      <SelectItem key={filling.id} value={filling.id}>
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="font-medium">{filling.name}</span>
+                          {filling.priceExtra > 0 && (
+                            <span className="text-xs text-secondary font-medium">
+                              +${filling.priceExtra.toFixed(2)}/srv
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
                   </div>
-                </SelectItem>
-              ))}
+                );
+              })}
             </SelectContent>
           </Select>
           {selectedFilling && selectedFilling.priceExtra > 0 && (
