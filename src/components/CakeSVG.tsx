@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { GoldDustParticles } from "./GoldDustParticles";
 import { CakeDecorationOverlays } from "./CakeDecorationOverlays";
-import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_SIZE_DESCRIPTION, PORTION_WEIGHT_GRAMS, inchesToCm, RECTANGULAR_WIDTH_CM } from "@/data/menuDatabase";
+import { CakeStructure, calculateTierPrice, getTierLabel, TierConfiguration, getServingsForTier, PORTION_SIZE_DESCRIPTION, PORTION_WEIGHT_GRAMS, inchesToCm, cmToInches, RECTANGULAR_WIDTH_CM } from "@/data/menuDatabase";
 
 interface CakeSVGProps {
   structure: CakeStructure;
@@ -474,21 +474,25 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
                 />
                 <text
                   x={centerX - tier.width / 2 - 40}
-                  y={tier.y + tier.visualHeight / 2}
+                  y={tier.y + tier.visualHeight / 2 - 4}
                   textAnchor="middle"
                   className="fill-muted-foreground font-ui text-[10px] font-medium"
                   opacity={isSelected ? 1 : 0.8}
                 >
-                  {isRectangular ? `${tier.rectangularWidthCm}×${tier.rectangularLengthCm}` : `${tier.sizeInches}"`}
+                  {isRectangular 
+                    ? `${cmToInches(tier.rectangularWidthCm)}"×${cmToInches(tier.rectangularLengthCm)}"` 
+                    : `${tier.sizeInches}"`}
                 </text>
                 <text
                   x={centerX - tier.width / 2 - 40}
-                  y={tier.y + tier.visualHeight / 2 + 10}
+                  y={tier.y + tier.visualHeight / 2 + 6}
                   textAnchor="middle"
                   className="fill-muted-foreground/70 font-ui text-[8px]"
                   opacity={isSelected ? 1 : 0.7}
                 >
-                  {isRectangular ? "cm ▬" : `(${Math.round(tier.sizeInches * 2.54)} cm) ${isSquare ? "□" : "○"}`}
+                  {isRectangular 
+                    ? `(${tier.rectangularWidthCm}×${tier.rectangularLengthCm} cm) ▬`
+                    : `(${Math.round(tier.sizeInches * 2.54)} cm) ${isSquare ? "□" : "○"}`}
                 </text>
               </g>
 

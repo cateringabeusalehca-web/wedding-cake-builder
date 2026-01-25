@@ -44,6 +44,7 @@ import {
   RECTANGULAR_WIDTH_OPTIONS,
   RECTANGULAR_DEFAULT_WIDTH_CM,
   getServingsForRectangular,
+  cmToInches,
 } from "@/data/menuDatabase";
 import { useMemo, useState } from "react";
 import { PortionDiagram } from "./PortionDiagram";
@@ -760,9 +761,10 @@ export function TierConfigPanel({
                     ...config, 
                     rectangularWidthCm: width 
                   })}
-                  className={`flex-1 ${(config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM) === width ? "btn-gold" : ""}`}
+                  className={`flex-1 flex-col h-auto py-2 ${(config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM) === width ? "btn-gold" : ""}`}
                 >
-                  {width} cm
+                  <span className="font-semibold">{width} cm</span>
+                  <span className="text-[10px] opacity-75">{cmToInches(width)}"</span>
                 </Button>
               ))}
             </div>
@@ -774,9 +776,14 @@ export function TierConfigPanel({
               <span className="text-sm font-semibold uppercase tracking-wider text-secondary">
                 Length
               </span>
-              <span className="text-lg font-bold text-foreground">
-                {config.rectangularLengthCm || 50} cm
-              </span>
+              <div className="text-right">
+                <span className="text-lg font-bold text-foreground">
+                  {config.rectangularLengthCm || 50} cm
+                </span>
+                <span className="text-sm text-muted-foreground ml-2">
+                  ({cmToInches(config.rectangularLengthCm || 50)}")
+                </span>
+              </div>
             </div>
             <input
               type="range"
@@ -791,8 +798,8 @@ export function TierConfigPanel({
               className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-secondary"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{RECTANGULAR_MIN_LENGTH_CM} cm</span>
-              <span>{RECTANGULAR_MAX_LENGTH_CM} cm</span>
+              <span>{RECTANGULAR_MIN_LENGTH_CM} cm ({cmToInches(RECTANGULAR_MIN_LENGTH_CM)}")</span>
+              <span>{RECTANGULAR_MAX_LENGTH_CM} cm ({cmToInches(RECTANGULAR_MAX_LENGTH_CM)}")</span>
             </div>
           </div>
           
@@ -801,7 +808,10 @@ export function TierConfigPanel({
             <RectangleHorizontal className="h-5 w-5 text-secondary" />
             <div className="text-sm">
               <span className="font-medium">
-                {config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM}cm × {config.rectangularLengthCm || 50}cm
+                {config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM} cm × {config.rectangularLengthCm || 50} cm
+              </span>
+              <span className="text-muted-foreground ml-1">
+                ({cmToInches(config.rectangularWidthCm || RECTANGULAR_DEFAULT_WIDTH_CM)}" × {cmToInches(config.rectangularLengthCm || 50)}")
               </span>
               <span className="text-muted-foreground ml-2">• {actualServings} servings</span>
             </div>
