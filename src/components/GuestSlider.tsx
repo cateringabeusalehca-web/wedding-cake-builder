@@ -1,6 +1,6 @@
 import { Slider } from "@/components/ui/slider";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, RotateCcw, AlertTriangle } from "lucide-react";
+import { Users, AlertTriangle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -97,7 +97,18 @@ export function GuestSlider({
       {/* Structure selector */}
       <div className="pt-4 space-y-3">
         <div className="flex items-center justify-center gap-2">
-          <div className="h-px flex-1 bg-border" />
+          {isManualSelection && onResetToRecommended ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onResetToRecommended}
+              className="h-6 px-2.5 text-[10px] font-medium rounded-full bg-secondary/15 text-secondary hover:bg-secondary/25 hover:text-secondary"
+            >
+              Reset
+            </Button>
+          ) : (
+            <div className="h-px flex-1 bg-border" />
+          )}
           <span className="text-sketch text-foreground text-sm">
             Cake Structure
           </span>
@@ -174,30 +185,16 @@ export function GuestSlider({
           )}
         </AnimatePresence>
 
-        {isManualSelection && (
-          <motion.div
+        {isManualSelection && !isTooSmall && (
+          <motion.p
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center gap-2"
+            className="text-xs text-center text-muted-foreground"
           >
-            {!isTooSmall && (
-              <p className="text-xs text-center text-muted-foreground">
-                Manual selection • <span className="text-secondary">
-                  {effectiveServings - value} extra servings
-                </span>
-              </p>
-            )}
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onResetToRecommended}
-              className="h-8 text-xs gap-1.5 border-secondary/40 text-secondary hover:bg-secondary/10 hover:text-secondary shadow-sm"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              Reset to: {recommended.name}
-            </Button>
-          </motion.div>
+            Manual selection • <span className="text-secondary">
+              {effectiveServings - value} extra servings
+            </span>
+          </motion.p>
         )}
       </div>
     </motion.div>
