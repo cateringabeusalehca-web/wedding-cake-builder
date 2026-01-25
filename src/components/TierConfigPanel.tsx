@@ -716,7 +716,12 @@ export function TierConfigPanel({
             <Button
               variant={config.shape === "round" ? "default" : "outline"}
               size="sm"
-              onClick={() => onConfigChange({ ...config, shape: "round", rectangularLengthCm: undefined })}
+              onClick={() => onConfigChange({ 
+                ...config, 
+                shape: "round", 
+                rectangularLengthCm: undefined, 
+                rectangularWidthCm: undefined 
+              })}
               className={`flex-1 gap-2 ${config.shape === "round" ? "btn-gold" : ""}`}
             >
               <Circle className="h-4 w-4" />
