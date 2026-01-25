@@ -20,6 +20,7 @@ interface GuestSliderProps {
   isManualSelection: boolean;
   onResetToRecommended?: () => void;
   actualTotalServings?: number; // Dynamic servings based on shapes
+  hasUserInteracted?: boolean; // Track if user has interacted with the configurator
 }
 
 export function GuestSlider({ 
@@ -30,7 +31,8 @@ export function GuestSlider({
   onStructureChange,
   isManualSelection,
   onResetToRecommended,
-  actualTotalServings
+  actualTotalServings,
+  hasUserInteracted = false
 }: GuestSliderProps) {
   const recommended = getRecommendedStructure(value);
   
@@ -39,6 +41,9 @@ export function GuestSlider({
   
   const isTooSmall = effectiveServings < value;
   const servingsShort = value - effectiveServings;
+  
+  // Only show the error after user has interacted with the configurator
+  const showServingsError = isTooSmall && hasUserInteracted;
 
   return (
     <motion.div
@@ -150,9 +155,9 @@ export function GuestSlider({
           </SelectContent>
         </Select>
 
-        {/* Alert when structure is too small */}
+        {/* Alert when structure is too small - only show after user interaction */}
         <AnimatePresence>
-          {isTooSmall && (
+          {showServingsError && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}

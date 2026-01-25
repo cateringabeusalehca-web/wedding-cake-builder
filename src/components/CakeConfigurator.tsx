@@ -73,6 +73,9 @@ export function CakeConfigurator() {
   // Structure selection state
   const [manualStructureId, setManualStructureId] = useState<string | null>(null);
   
+  // Track if user has interacted with the configurator (to show errors contextually)
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  
   const recommendedStructure = useMemo(() => getRecommendedStructure(guestCount), [guestCount]);
   
   const structure = useMemo(() => {
@@ -404,13 +407,20 @@ export function CakeConfigurator() {
                   {/* Guest Slider */}
                   <GuestSlider
                     value={guestCount}
-                    onChange={setGuestCount}
+                    onChange={(v) => {
+                      setGuestCount(v);
+                      setHasUserInteracted(true);
+                    }}
                     tierCount={structure.tierCount}
                     selectedStructure={structure}
-                    onStructureChange={handleStructureChange}
+                    onStructureChange={(id) => {
+                      handleStructureChange(id);
+                      setHasUserInteracted(true);
+                    }}
                     isManualSelection={manualStructureId !== null}
                     onResetToRecommended={() => setManualStructureId(null)}
                     actualTotalServings={totalServings}
+                    hasUserInteracted={hasUserInteracted}
                   />
 
                   {/* Tier Config Panel */}
