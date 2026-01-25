@@ -14,18 +14,19 @@ export const appConfig = {
     K: 1.0,   // Keto
     DF: 0.5,  // Dairy-Free
   } as Record<string, number>,
-  // Separator prices based on diameter and height (even sizes only: 4, 6, 8, 10)
-  acrylicSeparatorPrices: {
-    // 5cm height prices
-    "4-5": 15,
-    "6-5": 20,
-    "8-5": 28,
-    "10-5": 35,
-    // 10cm height prices
-    "4-10": 22,
-    "6-10": 30,
-    "8-10": 40,
-    "10-10": 50,
+  // Separator RENTAL prices based on diameter and height (even sizes only: 4, 6, 8, 10)
+  // These are rental fees, not purchase prices
+  acrylicSeparatorRentalPrices: {
+    // 5cm height rental prices
+    "4-5": 8,
+    "6-5": 10,
+    "8-5": 14,
+    "10-5": 18,
+    // 10cm height rental prices
+    "4-10": 12,
+    "6-10": 15,
+    "8-10": 20,
+    "10-10": 25,
   } as Record<string, number>,
 };
 
@@ -172,11 +173,11 @@ export function getServingsForTier(sizeInches: number, shape: CakeShape): number
   return servingsPerSize[shape][sizeInches] || servingsPerSize.round[sizeInches] || 0;
 }
 
-// Helper to get separator price based on config
+// Helper to get separator RENTAL price based on config
 export function getSeparatorPrice(config?: SeparatorConfig): number {
   if (!config) return 0;
   const key = `${config.diameterInches}-${config.heightCm}`;
-  return appConfig.acrylicSeparatorPrices[key] || 25;
+  return appConfig.acrylicSeparatorRentalPrices[key] || 12;
 }
 
 // Get default separator config for a tier

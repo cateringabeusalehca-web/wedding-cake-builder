@@ -93,6 +93,25 @@ export function CakeConfigurator() {
       setManualStructureId(structureId);
     }
     setSelectedTier(null);
+    
+    // Clear separators for tiers that won't exist in the new structure
+    if (selected) {
+      setTierConfigs(prev => {
+        const updated = [...prev];
+        // For any tier that's at the top of the new structure, remove its separator
+        // And for tiers that won't exist, reset their config
+        for (let i = 0; i < updated.length; i++) {
+          if (i >= selected.tierCount) {
+            // Tier doesn't exist in new structure, reset it
+            updated[i] = { ...defaultTierConfig };
+          } else if (i === selected.tierCount - 1) {
+            // This is the new top tier, can't have separator above
+            updated[i] = { ...updated[i], hasSeparatorAbove: false, separatorConfig: undefined };
+          }
+        }
+        return updated;
+      });
+    }
   }, [guestCount]);
   
   // Reset to auto when guest count changes significantly
@@ -105,6 +124,20 @@ export function CakeConfigurator() {
       }
     }
   }, [guestCount, manualStructureId]);
+  
+  // Clean up separators when structure changes
+  useEffect(() => {
+    setTierConfigs(prev => {
+      const updated = [...prev];
+      for (let i = 0; i < updated.length; i++) {
+        // Top tier can't have separator above
+        if (i === structure.tierCount - 1 && updated[i].hasSeparatorAbove) {
+          updated[i] = { ...updated[i], hasSeparatorAbove: false, separatorConfig: undefined };
+        }
+      }
+      return updated;
+    });
+  }, [structure.tierCount]);
 
   const basePrice = useMemo(
     () =>
@@ -164,7 +197,8 @@ export function CakeConfigurator() {
   }, [selectedTier, tierConfigs, structure.tiers]);
 
   const handleReset = useCallback(() => {
-    setGuestCount(50);
+    // Reset to recommended structure defaults but keep guest count context
+    const recommended = getRecommendedStructure(guestCount);
     setSelectedTier(null);
     setTierConfigs([
       { ...defaultTierConfig },
@@ -181,6 +215,7 @@ export function CakeConfigurator() {
     setTopperNames("");
     setCurrentView("configurator");
     setIsReadyToOrder(false);
+    setManualStructureId(null); // Return to recommended structure
     // Reset personalization state
     setReferenceImages([]);
     setSelectedDecorations([]);
@@ -188,7 +223,7 @@ export function CakeConfigurator() {
     setSelectedColorPalette(null);
     setEventTheme("");
     setEventStyle("");
-  }, []);
+  }, [guestCount]);
 
   // Intersection observer to show sticky bar when price display scrolls out of view
   useEffect(() => {
@@ -327,14 +362,14 @@ export function CakeConfigurator() {
           </div>
         </motion.div>
 
-        {/* Configurator Grid */}
-        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-          {/* Left: SVG Cake - Sticky */}
+        {/* Configurator Grid - Fixed left column, scrollable right */}
+        <div className="grid gap-8 lg:grid-cols-[1fr,1fr] lg:gap-12">
+          {/* Left: SVG Cake - Fixed position on desktop */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="relative order-2 lg:order-1 lg:sticky lg:top-4 lg:self-start"
+            className="relative order-2 lg:order-1 lg:sticky lg:top-20 lg:self-start flex flex-col items-center"
           >
             <CakeSVG
               structure={structure}
