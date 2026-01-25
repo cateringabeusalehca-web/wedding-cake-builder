@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { CakeShape, getServingsForTier, formatSizeWithUnits, getServingsForRectangular, RECTANGULAR_DEFAULT_WIDTH_CM } from "@/data/menuDatabase";
+import { CakeShape, getServingsForTier, formatSizeWithUnits, getServingsForRectangular, RECTANGULAR_DEFAULT_WIDTH_CM, cmToInches, PORTION_WEIGHT_GRAMS, RECTANGULAR_HEIGHT_CM } from "@/data/menuDatabase";
 
 interface PortionDiagramProps {
   sizeInches: number;
@@ -208,12 +208,18 @@ export function PortionDiagram({ sizeInches, shape, rectangularLengthCm, rectang
           {renderRectangularPortions()}
         </div>
         
-        <div className="text-center">
+        <div className="text-center space-y-1">
           <p className="text-sm font-medium text-foreground">
             {servings} portions
           </p>
           <p className="text-xs text-muted-foreground">
-            {widthCm}cm × {rectangularLengthCm}cm
+            {widthCm} × {rectangularLengthCm} × {RECTANGULAR_HEIGHT_CM} cm
+          </p>
+          <p className="text-xs text-muted-foreground">
+            ({cmToInches(widthCm)}" × {cmToInches(rectangularLengthCm)}" × {cmToInches(RECTANGULAR_HEIGHT_CM)}")
+          </p>
+          <p className="text-[10px] text-secondary">
+            ~{PORTION_WEIGHT_GRAMS}g per portion
           </p>
         </div>
       </motion.div>
