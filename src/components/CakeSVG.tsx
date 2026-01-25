@@ -61,45 +61,79 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
         </defs>
         <rect width="100%" height="100%" fill="url(#grid)" />
 
-        {/* Cake Stand - Straight lines */}
+        {/* Elegant Cake Stand - Classic pedestal design */}
         <motion.g
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Stand plate (flat top) */}
-          <motion.rect
-            x={centerX - 120}
-            y={plateY}
-            width={240}
-            height={6}
-            rx="1"
-            className="fill-muted/30"
-            stroke="hsl(0 0% 10%)"
-            strokeWidth="1"
-          />
-          
-          {/* Stand pedestal - straight trapezoid */}
-          <motion.path
-            d={`M ${centerX - 80} ${plateY + 6} 
-                L ${centerX - 50} ${plateY + standHeight} 
-                L ${centerX + 50} ${plateY + standHeight} 
-                L ${centerX + 80} ${plateY + 6} Z`}
+          {/* Top plate with decorative edge */}
+          <ellipse
+            cx={centerX}
+            cy={plateY + 3}
+            rx={125}
+            ry={8}
             className="fill-muted/20"
             stroke="hsl(0 0% 10%)"
             strokeWidth="1"
           />
           
-          {/* Stand base */}
-          <motion.rect
-            x={centerX - 60}
-            y={plateY + standHeight}
-            width={120}
-            height={5}
-            rx="1"
-            className="fill-muted/30"
+          {/* Plate rim detail */}
+          <ellipse
+            cx={centerX}
+            cy={plateY + 3}
+            rx={115}
+            ry={6}
+            fill="none"
+            stroke="hsl(0 0% 10% / 0.3)"
+            strokeWidth="0.5"
+          />
+          
+          {/* Elegant curved stem */}
+          <path
+            d={`M ${centerX - 40} ${plateY + 10}
+                Q ${centerX - 50} ${plateY + 18} ${centerX - 35} ${plateY + 25}
+                Q ${centerX - 20} ${plateY + 32} ${centerX - 25} ${plateY + 45}
+                L ${centerX + 25} ${plateY + 45}
+                Q ${centerX + 20} ${plateY + 32} ${centerX + 35} ${plateY + 25}
+                Q ${centerX + 50} ${plateY + 18} ${centerX + 40} ${plateY + 10}
+                Z`}
+            className="fill-muted/15"
             stroke="hsl(0 0% 10%)"
             strokeWidth="1"
+          />
+          
+          {/* Decorative middle ring */}
+          <ellipse
+            cx={centerX}
+            cy={plateY + 28}
+            rx={30}
+            ry={4}
+            className="fill-muted/25"
+            stroke="hsl(0 0% 10%)"
+            strokeWidth="0.8"
+          />
+          
+          {/* Base foot with elegant curve */}
+          <ellipse
+            cx={centerX}
+            cy={plateY + standHeight + 5}
+            rx={55}
+            ry={7}
+            className="fill-muted/25"
+            stroke="hsl(0 0% 10%)"
+            strokeWidth="1"
+          />
+          
+          {/* Base foot top detail */}
+          <ellipse
+            cx={centerX}
+            cy={plateY + standHeight}
+            rx={50}
+            ry={5}
+            className="fill-muted/15"
+            stroke="hsl(0 0% 10%)"
+            strokeWidth="0.8"
           />
         </motion.g>
 
@@ -135,28 +169,22 @@ export function CakeSVG({ structure, selectedTier, onTierSelect, tierConfigs, se
               className="cursor-pointer"
               style={{ transformOrigin: `${centerX}px ${tier.y + tier.visualHeight / 2}px` }}
             >
-              {/* Tier body - simple rounded rectangle, no middle line */}
-              <motion.rect
-                x={centerX - tier.width / 2}
-                y={tier.y}
-                width={tier.width}
-                height={tier.visualHeight}
-                rx="3"
+              {/* Tier body - rounded rectangle with curved top edge */}
+              <motion.path
+                d={`M ${centerX - tier.width / 2 + 3} ${tier.y}
+                    Q ${centerX - tier.width / 2} ${tier.y} ${centerX - tier.width / 2} ${tier.y + 3}
+                    L ${centerX - tier.width / 2} ${tier.y + tier.visualHeight - 3}
+                    Q ${centerX - tier.width / 2} ${tier.y + tier.visualHeight} ${centerX - tier.width / 2 + 3} ${tier.y + tier.visualHeight}
+                    L ${centerX + tier.width / 2 - 3} ${tier.y + tier.visualHeight}
+                    Q ${centerX + tier.width / 2} ${tier.y + tier.visualHeight} ${centerX + tier.width / 2} ${tier.y + tier.visualHeight - 3}
+                    L ${centerX + tier.width / 2} ${tier.y + 3}
+                    Q ${centerX + tier.width / 2} ${tier.y} ${centerX + tier.width / 2 - 3} ${tier.y}
+                    Q ${centerX} ${tier.y - 8} ${centerX - tier.width / 2 + 3} ${tier.y}
+                    Z`}
                 className={isSelected ? "fill-secondary/15" : "fill-background"}
                 stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
                 strokeWidth={isSelected ? 2 : 1.5}
                 whileHover={{ strokeWidth: 2 }}
-              />
-
-              {/* Top ellipse for 3D effect */}
-              <motion.ellipse
-                cx={centerX}
-                cy={tier.y}
-                rx={tier.width / 2}
-                ry="6"
-                className={isSelected ? "fill-secondary/10" : "fill-muted/20"}
-                stroke={isSelected ? "hsl(43 60% 52%)" : "hsl(0 0% 10%)"}
-                strokeWidth={isSelected ? 2 : 1.5}
               />
 
               {/* LEFT: Size in inches */}
