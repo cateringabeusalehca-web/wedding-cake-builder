@@ -411,15 +411,62 @@ export function CakeDecorationOverlays({
           
           {/* Topper content based on type */}
           {hasSilhouette && (
-            <motion.text
-              x={centerX - 12}
-              y={topTierY - 30}
-              className="text-2xl"
+            <motion.g
               animate={{ y: [0, -2, 0] }}
               transition={{ duration: 3, repeat: Infinity }}
             >
-              👫
-            </motion.text>
+              {/* Minimalist couple silhouette - line art style */}
+              <motion.path
+                d={`
+                  M ${centerX - 8} ${topTierY - 28}
+                  C ${centerX - 10} ${topTierY - 32}, ${centerX - 8} ${topTierY - 38}, ${centerX - 5} ${topTierY - 42}
+                  C ${centerX - 3} ${topTierY - 45}, ${centerX} ${topTierY - 46}, ${centerX + 2} ${topTierY - 45}
+                  C ${centerX + 5} ${topTierY - 43}, ${centerX + 6} ${topTierY - 40}, ${centerX + 5} ${topTierY - 37}
+                  C ${centerX + 4} ${topTierY - 34}, ${centerX + 2} ${topTierY - 32}, ${centerX} ${topTierY - 31}
+                  C ${centerX - 2} ${topTierY - 30}, ${centerX - 5} ${topTierY - 29}, ${centerX - 8} ${topTierY - 28}
+                `}
+                fill="none"
+                stroke="hsl(43 60% 52%)"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Left figure (taller) */}
+              <motion.path
+                d={`
+                  M ${centerX - 6} ${topTierY - 42}
+                  C ${centerX - 7} ${topTierY - 44}, ${centerX - 6} ${topTierY - 47}, ${centerX - 4} ${topTierY - 48}
+                  C ${centerX - 2} ${topTierY - 49}, ${centerX - 1} ${topTierY - 48}, ${centerX - 2} ${topTierY - 46}
+                `}
+                fill="none"
+                stroke="hsl(43 60% 52%)"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              {/* Right figure (slightly shorter, leaning in) */}
+              <motion.path
+                d={`
+                  M ${centerX + 4} ${topTierY - 40}
+                  C ${centerX + 5} ${topTierY - 42}, ${centerX + 4} ${topTierY - 44}, ${centerX + 2} ${topTierY - 45}
+                  C ${centerX} ${topTierY - 46}, ${centerX - 1} ${topTierY - 45}, ${centerX - 1} ${topTierY - 44}
+                `}
+                fill="none"
+                stroke="hsl(43 60% 52%)"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              {/* Embrace arms */}
+              <motion.path
+                d={`
+                  M ${centerX - 4} ${topTierY - 38}
+                  Q ${centerX} ${topTierY - 36}, ${centerX + 3} ${topTierY - 37}
+                `}
+                fill="none"
+                stroke="hsl(43 60% 52%)"
+                strokeWidth="1"
+                strokeLinecap="round"
+              />
+            </motion.g>
           )}
           
           {hasMrMrs && (
