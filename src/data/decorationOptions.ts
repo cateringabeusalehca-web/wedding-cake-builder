@@ -148,6 +148,14 @@ export const metallicOptions: DecorationItem[] = [
 // 3D Printed Toppers
 export const topperOptions3D: DecorationItem[] = [
   {
+    id: "topper_none",
+    name: "No Topper",
+    description: "Clean finish without topper",
+    price: 0,
+    priceType: "flat",
+    category: "toppers",
+  },
+  {
     id: "topper_initials",
     name: "Custom Initials",
     description: "Two letters in elegant font",
@@ -180,7 +188,7 @@ export const topperOptions3D: DecorationItem[] = [
   {
     id: "topper_silhouette",
     name: "Couple Silhouette",
-    description: "Elegant couple design",
+    description: "Minimalist embracing couple",
     price: 45,
     priceType: "flat",
     category: "toppers",
