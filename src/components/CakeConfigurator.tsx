@@ -389,6 +389,8 @@ export function CakeConfigurator() {
                         onClose={() => setSelectedTier(null)}
                         totalTiers={structure.tierCount}
                         isTopTier={selectedTier === structure.tierCount}
+                        allTierConfigs={tierConfigs}
+                        allDefaultTierSizes={structure.tiers.map(t => t.sizeInches)}
                       />
                     )}
                   </AnimatePresence>

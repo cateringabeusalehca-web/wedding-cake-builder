@@ -14,24 +14,18 @@ export const appConfig = {
     K: 1.0,   // Keto
     DF: 0.5,  // Dairy-Free
   } as Record<string, number>,
-  // Separator prices based on diameter and height
+  // Separator prices based on diameter and height (even sizes only: 4, 6, 8, 10)
   acrylicSeparatorPrices: {
     // 5cm height prices
-    "4-5": 12,
-    "5-5": 14,
-    "6-5": 16,
-    "7-5": 18,
-    "8-5": 22,
-    "9-5": 25,
-    "10-5": 28,
+    "4-5": 15,
+    "6-5": 20,
+    "8-5": 28,
+    "10-5": 35,
     // 10cm height prices
-    "4-10": 18,
-    "5-10": 20,
-    "6-10": 24,
-    "7-10": 28,
-    "8-10": 32,
-    "9-10": 38,
-    "10-10": 45,
+    "4-10": 22,
+    "6-10": 30,
+    "8-10": 40,
+    "10-10": 50,
   } as Record<string, number>,
 };
 
@@ -42,41 +36,27 @@ export type CakeShape = "round" | "square";
 export const PORTION_WEIGHT_GRAMS = 110; // ~110g per portion (industry standard)
 export const PORTION_SIZE_DESCRIPTION = "1\"×2\"×4\" (2.5×5×10 cm)"; // Standard wedding cake portion
 
-// Servings per size based on shape (re-evaluated for round cakes - industry standard portions)
+// Servings per size based on shape (even sizes only: 4, 6, 8, 10, 12, 14, 16, 18 inches)
 // Round cakes yield fewer portions due to geometry
 export const servingsPerSize: Record<CakeShape, Record<number, number>> = {
   round: {
     4: 4,
-    5: 6,
     6: 8,
-    7: 12,
     8: 20,
-    9: 24,
     10: 30,
-    11: 36,
     12: 44,
-    13: 52,
     14: 63,
-    15: 72,
     16: 84,
-    17: 96,
     18: 110,
   },
   square: {
     4: 8,
-    5: 12,
     6: 18,
-    7: 24,
     8: 32,
-    9: 40,
     10: 50,
-    11: 60,
     12: 72,
-    13: 84,
     14: 98,
-    15: 112,
     16: 128,
-    17: 144,
     18: 162,
   },
 };
@@ -109,8 +89,8 @@ export interface SeparatorConfig {
   shape: SeparatorShape;
 }
 
-// Available separator sizes
-export const availableSeparatorDiameters = [4, 5, 6, 7, 8, 9, 10] as const;
+// Available separator sizes (even numbers only)
+export const availableSeparatorDiameters = [4, 6, 8, 10] as const;
 export const availableSeparatorHeights: SeparatorHeight[] = [5, 10];
 
 // Convert inches to cm
@@ -134,9 +114,45 @@ export interface TierConfiguration {
   customSizeInches?: number; // Optional custom size (allows same-size tiers)
 }
 
-// Available tier sizes (4" to 18")
-export const availableTierSizes = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] as const;
+// Available tier sizes (4" to 18", even numbers only)
+export const availableTierSizes = [4, 6, 8, 10, 12, 14, 16, 18] as const;
 export type TierSize = typeof availableTierSizes[number];
+
+// Get available sizes for a specific tier based on structural constraints
+// Bottom tier can be any size, but higher tiers must be smaller than or equal to the tier below
+export function getAvailableSizesForTier(
+  tierIndex: number,
+  totalTiers: number,
+  tierConfigs: TierConfiguration[],
+  defaultTierSizes: number[]
+): number[] {
+  // Get the maximum allowed size based on the tier below (if any)
+  let maxSize = 18; // Bottom tier can be any size
+  
+  if (tierIndex > 0) {
+    // This tier must be smaller than or equal to the tier below
+    const tierBelowIndex = tierIndex - 1;
+    const tierBelowConfig = tierConfigs[tierBelowIndex];
+    const tierBelowDefaultSize = defaultTierSizes[tierBelowIndex] || 18;
+    const tierBelowSize = tierBelowConfig?.customSizeInches || tierBelowDefaultSize;
+    maxSize = tierBelowSize; // Can be same size or smaller
+  }
+  
+  // Get the minimum allowed size based on the tier above (if any)
+  let minSize = 4; // Top tier can be as small as 4"
+  
+  if (tierIndex < totalTiers - 1) {
+    // This tier must be larger than or equal to the tier above
+    const tierAboveIndex = tierIndex + 1;
+    const tierAboveConfig = tierConfigs[tierAboveIndex];
+    const tierAboveDefaultSize = defaultTierSizes[tierAboveIndex] || 4;
+    const tierAboveSize = tierAboveConfig?.customSizeInches || tierAboveDefaultSize;
+    minSize = tierAboveSize; // Can be same size or larger
+  }
+  
+  // Filter available sizes based on constraints
+  return availableTierSizes.filter(size => size >= minSize && size <= maxSize);
+}
 
 // Helper to get servings for a tier based on shape
 export function getServingsForTier(sizeInches: number, shape: CakeShape): number {
@@ -181,10 +197,10 @@ export const cakeStructures: CakeStructure[] = [
     tierCount: 2,
     tiers: [
       { tierLevel: 1, sizeInches: 10, servings: 30, height: 60 },
-      { tierLevel: 2, sizeInches: 7, servings: 12, height: 55 },
+      { tierLevel: 2, sizeInches: 6, servings: 8, height: 55 },
     ],
-    totalServings: 42,
-    basePrice: 252, // 42 * $6.00
+    totalServings: 38,
+    basePrice: 228, // 38 * $6.00
   },
   {
     id: "grand",
