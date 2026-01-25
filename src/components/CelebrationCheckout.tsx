@@ -98,7 +98,7 @@ export function CelebrationCheckout({
         ease: [0.16, 1, 0.3, 1],
         scale: { type: "spring", stiffness: 100, damping: 15 }
       }}
-      className="relative overflow-hidden rounded-3xl shadow-2xl min-h-[65vh] flex flex-col justify-center"
+      className="relative overflow-hidden rounded-3xl shadow-2xl min-h-[85vh] lg:min-h-[65vh] flex flex-col justify-center mx-auto"
       style={{
         background: "linear-gradient(135deg, hsl(20, 15%, 8%) 0%, hsl(25, 20%, 12%) 30%, hsl(30, 25%, 10%) 70%, hsl(20, 15%, 6%) 100%)",
       }}
