@@ -428,9 +428,9 @@ export function CakeConfigurator() {
               </div>
             </div>
             
-            {/* Right 50%: Guest Slider */}
+            {/* Right 50%: Guest Slider + Price */}
             {!isReadyToOrder && (
-              <div className="w-1/2 flex flex-col justify-center">
+              <div className="w-1/2 flex flex-col justify-center gap-2">
                 <GuestSlider
                   value={guestCount}
                   onChange={(v) => {
@@ -448,6 +448,19 @@ export function CakeConfigurator() {
                   actualTotalServings={totalServings}
                   hasUserInteracted={hasUserInteracted}
                 />
+                
+                {/* Estimated Price */}
+                <div className="text-center py-2 px-3 rounded-lg bg-secondary/10 border border-secondary/20">
+                  <span className="text-xs text-muted-foreground block">Estimated Total</span>
+                  <motion.span
+                    key={totalPrice}
+                    initial={{ scale: 1.1, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="font-display text-2xl font-semibold text-secondary"
+                  >
+                    ${totalPrice.toFixed(0)}
+                  </motion.span>
+                </div>
               </div>
             )}
           </div>
