@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Copy, DollarSign, Cake, Layers, Palette, Circle, Square, Minus } from "lucide-react";
+import { Check, Copy, DollarSign, Cake, Layers, Palette, Circle, Square, Minus, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -26,6 +26,13 @@ import {
   getSeparatorPrice,
   availableTierSizes,
   getEffectiveTierSize,
+  availableSeparatorDiameters,
+  availableSeparatorHeights,
+  SeparatorConfig,
+  SeparatorShape,
+  SeparatorHeight,
+  getDefaultSeparatorConfig,
+  formatSizeWithUnits,
 } from "@/data/menuDatabase";
 import { useMemo } from "react";
 import { PortionDiagram } from "./PortionDiagram";
@@ -67,7 +74,9 @@ export function TierConfigPanel({
   );
   
   // Calculate separator price if enabled
-  const separatorPrice = config.hasSeparatorAbove ? getSeparatorPrice(effectiveSize) : 0;
+  const separatorPrice = config.hasSeparatorAbove && config.separatorConfig 
+    ? getSeparatorPrice(config.separatorConfig) 
+    : 0;
 
   // Filter sponges based on dietary selection
   const availableSponges = useMemo(() => {
@@ -242,30 +251,122 @@ export function TierConfigPanel({
 
       {/* Acrylic Separator Option - Not for top tier */}
       {!isTopTier && (
-        <div className="flex items-center justify-between py-2 border-b border-border">
-          <div className="flex items-center gap-3">
-            <Minus className="h-4 w-4 text-secondary" />
-            <div>
-              <Label htmlFor="separator" className="text-sm font-medium">
-                Acrylic Separator Above
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                Decorative transparent stand
-              </p>
+        <div className="space-y-3 py-3 border-b border-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Minus className="h-4 w-4 text-secondary" />
+              <div>
+                <Label htmlFor="separator" className="text-sm font-medium">
+                  Acrylic Separator Above
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Decorative transparent stand
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-secondary font-medium">
+                +${config.separatorConfig ? getSeparatorPrice(config.separatorConfig) : 0}
+              </span>
+              <Switch
+                id="separator"
+                checked={config.hasSeparatorAbove}
+                onCheckedChange={(checked) => {
+                  if (checked && !config.separatorConfig) {
+                    // Initialize with default config
+                    onConfigChange({ 
+                      ...config, 
+                      hasSeparatorAbove: checked,
+                      separatorConfig: getDefaultSeparatorConfig(effectiveSize)
+                    });
+                  } else {
+                    onConfigChange({ ...config, hasSeparatorAbove: checked });
+                  }
+                }}
+              />
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-secondary font-medium">
-              +${getSeparatorPrice(tierInfo.sizeInches)}
-            </span>
-            <Switch
-              id="separator"
-              checked={config.hasSeparatorAbove}
-              onCheckedChange={(checked) => 
-                onConfigChange({ ...config, hasSeparatorAbove: checked })
-              }
-            />
-          </div>
+          
+          {/* Separator Configuration - Only show when enabled */}
+          {config.hasSeparatorAbove && config.separatorConfig && (
+            <div className="ml-7 space-y-3 pt-2 border-t border-border/50">
+              {/* Separator Shape */}
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-medium text-muted-foreground w-16">Shape:</span>
+                <div className="flex gap-2">
+                  <Button
+                    variant={config.separatorConfig.shape === "round" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onConfigChange({ 
+                      ...config, 
+                      separatorConfig: { ...config.separatorConfig!, shape: "round" }
+                    })}
+                    className={`gap-1 px-3 ${config.separatorConfig.shape === "round" ? "btn-gold" : ""}`}
+                  >
+                    <Circle className="h-3 w-3" />
+                    Round
+                  </Button>
+                  <Button
+                    variant={config.separatorConfig.shape === "square" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onConfigChange({ 
+                      ...config, 
+                      separatorConfig: { ...config.separatorConfig!, shape: "square" }
+                    })}
+                    className={`gap-1 px-3 ${config.separatorConfig.shape === "square" ? "btn-gold" : ""}`}
+                  >
+                    <Square className="h-3 w-3" />
+                    Square
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Separator Diameter */}
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-medium text-muted-foreground w-16">Diameter:</span>
+                <div className="flex flex-wrap gap-1">
+                  {availableSeparatorDiameters.map((size) => (
+                    <Button
+                      key={size}
+                      variant={config.separatorConfig!.diameterInches === size ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => onConfigChange({ 
+                        ...config, 
+                        separatorConfig: { ...config.separatorConfig!, diameterInches: size }
+                      })}
+                      className={`min-w-[40px] px-2 text-xs ${config.separatorConfig!.diameterInches === size ? "btn-gold" : ""}`}
+                    >
+                      {size}"
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-foreground ml-20">
+                {formatSizeWithUnits(config.separatorConfig.diameterInches)}
+              </p>
+              
+              {/* Separator Height */}
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-medium text-muted-foreground w-16">Height:</span>
+                <div className="flex gap-2">
+                  {availableSeparatorHeights.map((height) => (
+                    <Button
+                      key={height}
+                      variant={config.separatorConfig!.heightCm === height ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => onConfigChange({ 
+                        ...config, 
+                        separatorConfig: { ...config.separatorConfig!, heightCm: height }
+                      })}
+                      className={`px-3 text-xs ${config.separatorConfig!.heightCm === height ? "btn-gold" : ""}`}
+                    >
+                      {height} cm ({Math.round(height / 2.54 * 10) / 10}")
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
