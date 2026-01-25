@@ -556,7 +556,7 @@ export function getRecommendedStructure(guests: number): CakeStructure {
 }
 
 // Get fillings allowed for a specific sponge
-export function getAllowedFillings(spongeId: string): FillingOption[] {
+export function getAllowedFillings(spongeId: string): FillingOptionWithCategory[] {
   const sponge = spongeOptions.find((s) => s.id === spongeId);
   if (!sponge) return fillingOptions;
   
@@ -576,7 +576,7 @@ export function getSpongesForDietary(dietaryId: string): SpongeOption[] {
 }
 
 // Get fillings available for a dietary restriction
-export function getFillingsForDietary(dietaryId: string): FillingOption[] {
+export function getFillingsForDietary(dietaryId: string): FillingOptionWithCategory[] {
   if (!dietaryId || dietaryId === "none") {
     return fillingOptions;
   }
