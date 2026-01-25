@@ -485,6 +485,7 @@ export function CakeConfigurator() {
                         allTierConfigs={tierConfigs}
                         allDefaultTierSizes={structure.tiers.map(t => t.sizeInches)}
                         onForceRectangular={handleForceRectangular}
+                        guestCount={guestCount}
                       />
                     )}
                   </AnimatePresence>

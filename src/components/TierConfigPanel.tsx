@@ -472,6 +472,46 @@ interface TierConfigPanelProps {
   allTierConfigs: TierConfiguration[];
   allDefaultTierSizes: number[];
   onForceRectangular?: () => void;
+  guestCount?: number;
+}
+
+// Calculate optimal rectangular dimensions for a target number of servings
+function calculateOptimalRectangularDimensions(targetServings: number): { width: number; length: number } {
+  // Each portion is 5cm x 5cm
+  const portionSize = 5;
+  const minDim = 20;
+  const maxDim = 150;
+  
+  let bestWidth = 40;
+  let bestLength = 50;
+  let bestDiff = Infinity;
+  
+  // Try different width/length combinations
+  for (let width = minDim; width <= maxDim; width += 5) {
+    for (let length = width; length <= maxDim; length += 5) {
+      const portionsWide = Math.floor(width / portionSize);
+      const portionsLong = Math.floor(length / portionSize);
+      const servings = portionsWide * portionsLong;
+      
+      // We want servings >= target, but as close as possible
+      if (servings >= targetServings) {
+        const diff = servings - targetServings;
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          bestWidth = width;
+          bestLength = length;
+        }
+      }
+    }
+  }
+  
+  // If no exact match found, find closest that exceeds
+  if (bestDiff === Infinity) {
+    bestWidth = maxDim;
+    bestLength = maxDim;
+  }
+  
+  return { width: bestWidth, length: bestLength };
 }
 
 export function TierConfigPanel({
@@ -486,6 +526,7 @@ export function TierConfigPanel({
   allTierConfigs,
   allDefaultTierSizes,
   onForceRectangular,
+  guestCount,
 }: TierConfigPanelProps) {
   const tierLabel = getTierLabel(tierNumber, totalTiers);
   
@@ -743,11 +784,31 @@ export function TierConfigPanel({
       {/* Rectangular Dimensions - Flexible sliders for both dimensions */}
       {config.shape === "rectangular" && (
         <div className="space-y-4 border-b border-border pb-4">
-          {/* Height Notice */}
-          <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg text-xs">
-            <span className="text-muted-foreground">
-              Fixed height: <span className="font-semibold text-foreground">{RECTANGULAR_HEIGHT_CM} cm ({cmToInches(RECTANGULAR_HEIGHT_CM)}")</span>
-            </span>
+          {/* Auto-fit button and height notice */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg text-xs flex-1">
+              <span className="text-muted-foreground">
+                Height: <span className="font-semibold text-foreground">{RECTANGULAR_HEIGHT_CM} cm ({cmToInches(RECTANGULAR_HEIGHT_CM)}")</span>
+              </span>
+            </div>
+            {guestCount && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const optimal = calculateOptimalRectangularDimensions(guestCount);
+                  onConfigChange({
+                    ...config,
+                    rectangularWidthCm: optimal.width,
+                    rectangularLengthCm: optimal.length,
+                  });
+                }}
+                className="gap-1.5 text-xs h-8 px-3 bg-secondary/10 border-secondary/30 text-secondary hover:bg-secondary/20 hover:text-secondary"
+              >
+                <Ruler className="h-3 w-3" />
+                Auto-fit {guestCount} guests
+              </Button>
+            )}
           </div>
           
           {/* Width Slider */}
