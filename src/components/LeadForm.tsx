@@ -156,24 +156,59 @@ export function LeadForm({
     };
 
     try {
-      // Removed console.log statements that exposed PII
+      // Save order to database first
+      const { error: dbError } = await supabase.from("cake_orders").insert({
+        customer_name: formData.fullName,
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        event_date: formData.eventDate?.toISOString().split("T")[0],
+        guest_count: guestCount,
+        estimated_price: totalPrice,
+        special_requests: formData.additionalNotes || null,
+        reference_images: referenceImages,
+        cake_config: {
+          structure: {
+            id: structure.id,
+            name: structure.name,
+            tierCount: structure.tierCount,
+            totalServings: structure.totalServings,
+          },
+          tiersConfiguration: payload.project.tiersConfiguration,
+          frosting: payload.project.frosting,
+          decoration: payload.project.decoration,
+          floralPalette: payload.project.floralPalette,
+          topper: payload.project.topper,
+          colorPalette: payload.project.colorPalette,
+          eventTheme: payload.project.eventTheme,
+          eventStyle: payload.project.eventStyle,
+          advancedDecorations: payload.project.advancedDecorations,
+          eventType: formData.eventType,
+          requiresSavoryBites: formData.requiresSavoryBites,
+        },
+        status: "pending",
+      });
 
+      if (dbError) {
+        console.error("Error saving order to database:", dbError);
+        // Continue with email even if DB save fails
+      }
+
+      // Send order email
       const { data, error } = await supabase.functions.invoke("send-order-email", {
         body: payload,
       });
 
       if (error) {
         console.error("Error sending order email:", error);
-        throw error;
+        // Don't throw - we still saved to DB
       }
 
-      console.log("Order email sent successfully:", data);
       setIsSubmitting(false);
       onSuccess();
     } catch (error) {
-      console.error("Failed to send order:", error);
+      console.error("Failed to process order:", error);
       setIsSubmitting(false);
-      // Still show success to user (email failure shouldn't block the UX)
+      // Still show success to user (partial failure shouldn't block the UX)
       onSuccess();
     }
   };
