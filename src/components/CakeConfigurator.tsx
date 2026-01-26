@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Instagram, Facebook, Layers } from "lucide-react";
+import { ExternalLink, Instagram, Facebook, Layers, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CakeSVG } from "./CakeSVG";
 import { GuestSlider } from "./GuestSlider";
@@ -344,9 +345,18 @@ export function CakeConfigurator() {
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
           />
-          <span className="text-sketch text-muted-foreground hidden sm:block">
-            Wedding Cake Builder
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-sketch text-muted-foreground hidden sm:block">
+              Wedding Cake Builder
+            </span>
+            <Link
+              to="/admin"
+              className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-accent"
+              title="Admin Dashboard"
+            >
+              <Shield className="h-5 w-5" />
+            </Link>
+          </div>
         </div>
       </motion.header>
 
