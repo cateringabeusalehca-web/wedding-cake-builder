@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cake_orders: {
+        Row: {
+          cake_config: Json
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          estimated_price: number | null
+          event_date: string | null
+          guest_count: number
+          id: string
+          reference_images: string[] | null
+          special_requests: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cake_config?: Json
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          estimated_price?: number | null
+          event_date?: string | null
+          guest_count?: number
+          id?: string
+          reference_images?: string[] | null
+          special_requests?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cake_config?: Json
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          estimated_price?: number | null
+          event_date?: string | null
+          guest_count?: number
+          id?: string
+          reference_images?: string[] | null
+          special_requests?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
