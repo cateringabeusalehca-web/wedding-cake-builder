@@ -333,7 +333,7 @@ export function CakeConfigurator() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       
       {/* Lead Form Modal */}
       <AnimatePresence>
@@ -446,11 +446,11 @@ export function CakeConfigurator() {
 
         {/* Mobile: Sticky header with Cake Preview (left 60%) + Guest Slider (right 40%) - Hidden when checkout is active */}
         {!isReadyToOrder && (
-        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-2 py-2 shadow-md">
-          <div className="flex items-center gap-1 min-h-[340px]">
+        <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-2 py-2 shadow-md overflow-hidden">
+          <div className="flex items-center gap-1 min-h-[360px]">
             {/* Left 60%: Cake Preview - Tiers are tappable for editing */}
-            <div className="w-[60%] h-[340px] flex items-center justify-center relative">
-              <div className="transform scale-[0.75] origin-center">
+            <div className="w-[60%] h-[360px] flex items-center justify-center relative">
+              <div className="transform scale-[0.85] origin-center">
                 <CakeSVG
                   structure={structure}
                   selectedTier={selectedTier}
