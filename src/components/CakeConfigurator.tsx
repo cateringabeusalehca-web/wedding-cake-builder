@@ -31,6 +31,7 @@ import {
   calculateTotalServings,
 } from "@/data/menuDatabase";
 import { calculateDecorationTotal } from "@/data/decorationOptions";
+import { supabase } from "@/integrations/supabase/client";
 
 type View = "configurator" | "form" | "success";
 
@@ -75,6 +76,34 @@ export function CakeConfigurator() {
   
   // Track if user has interacted with the configurator (to show errors contextually)
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  
+  // Admin role check
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  useEffect(() => {
+    const checkAdminRole = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .eq('role', 'admin')
+          .maybeSingle();
+        setIsAdmin(!!data);
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    
+    checkAdminRole();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      checkAdminRole();
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
   
   const recommendedStructure = useMemo(() => getRecommendedStructure(guestCount), [guestCount]);
   
@@ -349,13 +378,15 @@ export function CakeConfigurator() {
             <span className="text-sketch text-muted-foreground hidden sm:block">
               Wedding Cake Builder
             </span>
-            <Link
-              to="/admin"
-              className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-accent"
-              title="Admin Dashboard"
-            >
-              <Shield className="h-5 w-5" />
-            </Link>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-accent"
+                title="Admin Dashboard"
+              >
+                <Shield className="h-5 w-5" />
+              </Link>
+            )}
           </div>
         </div>
       </motion.header>
