@@ -525,42 +525,191 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email sent successfully");
 
-    // Also send confirmation to client
+    // Build tier summary for client email
+    const clientTiersHtml = orderData.project.tiersConfiguration
+      .map(
+        (tier) => `
+        <tr style="border-bottom: 1px solid #e5e5e5;">
+          <td style="padding: 10px 8px; font-weight: 600; font-size: 13px;">${tier.tierLabel}</td>
+          <td style="padding: 10px 8px; font-size: 13px;">${tier.sizeInches}"</td>
+          <td style="padding: 10px 8px; font-size: 13px;">${tier.sponge}</td>
+          <td style="padding: 10px 8px; font-size: 13px;">${tier.filling}</td>
+        </tr>
+      `
+      )
+      .join("");
+
+    const clientEventDate = new Date(orderData.client.eventDate).toLocaleDateString("en-CA", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    // Also send confirmation to client with full summary
     const clientConfirmationHtml = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <title>We Received Your Cake Design!</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Your Cake Design Summary</title>
       </head>
       <body style="margin: 0; padding: 0; font-family: 'Georgia', serif; background-color: #faf9f7;">
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 40px; text-align: center;">
-              <h1 style="color: #d4a574; margin: 0; font-size: 24px; font-weight: 400; letter-spacing: 2px;">
+            <td style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 32px; text-align: center;">
+              <h1 style="color: #d4a574; margin: 0; font-size: 22px; font-weight: 400; letter-spacing: 2px;">
                 ✨ Thank You, ${orderData.client.fullName}!
               </h1>
+              <p style="color: #a0a0a0; margin: 10px 0 0 0; font-size: 14px;">
+                Your cake design has been received
+              </p>
             </td>
           </tr>
+
+          <!-- Intro -->
           <tr>
-            <td style="padding: 40px;">
-              <p style="font-size: 16px; line-height: 1.8; color: #333; margin: 0 0 20px 0;">
-                We've received your custom cake design request and are excited to bring your vision to life!
-              </p>
-              <div style="background-color: #faf9f7; padding: 24px; border-radius: 8px; text-align: center; margin: 24px 0;">
-                <span style="color: #666; font-size: 12px; text-transform: uppercase;">Your Design</span><br>
-                <strong style="font-size: 20px; color: #1a1a1a;">${orderData.project.structure.name}</strong><br>
-                <span style="color: #d4a574; font-size: 24px; font-weight: 600;">$${orderData.project.estimatedQuote.toFixed(0)}</span>
-                <span style="color: #666; font-size: 14px;"> estimated</span>
-              </div>
-              <p style="font-size: 16px; line-height: 1.8; color: #333; margin: 0 0 20px 0;">
-                Our atelier will review your specifications and reach out within <strong>24-48 hours</strong> to confirm details and finalize your quote.
-              </p>
-              <p style="font-size: 14px; color: #666; margin: 0;">
-                If you have any questions, simply reply to this email.
+            <td style="padding: 28px 24px 16px 24px;">
+              <p style="font-size: 15px; line-height: 1.7; color: #333; margin: 0;">
+                We're excited to bring your vision to life! Our atelier will review your specifications and reach out within <strong>24-48 hours</strong> to confirm details.
               </p>
             </td>
           </tr>
+
+          <!-- Event Details -->
+          <tr>
+            <td style="padding: 0 24px 20px 24px;">
+              <div style="background-color: #faf9f7; padding: 20px; border-radius: 8px; border-left: 4px solid #d4a574;">
+                <table width="100%" cellpadding="4" cellspacing="0">
+                  <tr>
+                    <td style="color: #666; font-size: 13px; width: 100px;">Event:</td>
+                    <td style="font-size: 14px; font-weight: 600;">${orderData.client.eventType}</td>
+                  </tr>
+                  <tr>
+                    <td style="color: #666; font-size: 13px;">Date:</td>
+                    <td style="font-size: 14px; font-weight: 600; color: #d4a574;">${clientEventDate}</td>
+                  </tr>
+                  <tr>
+                    <td style="color: #666; font-size: 13px;">Guests:</td>
+                    <td style="font-size: 14px;">${orderData.project.guestCount} people</td>
+                  </tr>
+                </table>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Cake Summary Box -->
+          <tr>
+            <td style="padding: 0 24px 20px 24px;">
+              <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 24px; border-radius: 8px; text-align: center;">
+                <span style="color: #a0a0a0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Your Design</span><br>
+                <strong style="font-size: 20px; color: #ffffff; display: block; margin: 8px 0;">${orderData.project.structure.name}</strong>
+                <span style="color: #d4a574; font-size: 28px; font-weight: 600;">$${orderData.project.estimatedQuote.toFixed(0)}</span>
+                <span style="color: #a0a0a0; font-size: 13px;"> estimated</span>
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                  <span style="color: #a0a0a0; font-size: 12px;">${orderData.project.structure.tierCount} tiers • ${orderData.project.structure.totalServings} servings</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Tier Details -->
+          <tr>
+            <td style="padding: 0 24px 20px 24px;">
+              <h3 style="color: #1a1a1a; font-size: 14px; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #d4a574; padding-bottom: 8px;">
+                Your Tier Selections
+              </h3>
+              <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px;">
+                <thead>
+                  <tr style="background-color: #f5f5f5;">
+                    <th style="padding: 10px 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #666;">Tier</th>
+                    <th style="padding: 10px 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #666;">Size</th>
+                    <th style="padding: 10px 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #666;">Sponge</th>
+                    <th style="padding: 10px 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #666;">Filling</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${clientTiersHtml}
+                </tbody>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Finishes -->
+          <tr>
+            <td style="padding: 0 24px 20px 24px;">
+              <h3 style="color: #1a1a1a; font-size: 14px; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #d4a574; padding-bottom: 8px;">
+                Finishes & Decoration
+              </h3>
+              <table width="100%" cellpadding="6" cellspacing="0">
+                <tr>
+                  <td style="color: #666; font-size: 13px; width: 120px;">Frosting:</td>
+                  <td style="font-size: 14px;">${orderData.project.frosting}</td>
+                </tr>
+                <tr>
+                  <td style="color: #666; font-size: 13px;">Decoration:</td>
+                  <td style="font-size: 14px;">${orderData.project.decoration}</td>
+                </tr>
+                ${orderData.project.floralPalette ? `
+                <tr>
+                  <td style="color: #666; font-size: 13px;">Floral Palette:</td>
+                  <td style="font-size: 14px;">${orderData.project.floralPalette}</td>
+                </tr>
+                ` : ''}
+                <tr>
+                  <td style="color: #666; font-size: 13px;">Topper:</td>
+                  <td style="font-size: 14px;">${orderData.project.topper}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          ${orderData.blindSpotCheck.additionalNotes ? `
+          <!-- Notes -->
+          <tr>
+            <td style="padding: 0 24px 20px 24px;">
+              <div style="background-color: #faf9f7; padding: 16px; border-radius: 4px; border-left: 4px solid #d4a574;">
+                <strong style="color: #666; font-size: 11px; text-transform: uppercase;">Your Notes:</strong>
+                <p style="margin: 8px 0 0 0; font-size: 14px; line-height: 1.6; color: #333;">${orderData.blindSpotCheck.additionalNotes}</p>
+              </div>
+            </td>
+          </tr>
+          ` : ''}
+
+          ${orderData.blindSpotCheck.requiresSavoryBites ? `
+          <!-- Savory Interest -->
+          <tr>
+            <td style="padding: 0 24px 20px 24px;">
+              <p style="background-color: #d4a574; color: #1a1a1a; padding: 12px 16px; border-radius: 4px; margin: 0; font-size: 14px;">
+                ✓ You're interested in <strong>Savory Bites / Dessert Table</strong> add-on
+              </p>
+            </td>
+          </tr>
+          ` : ''}
+
+          <!-- Reference Images -->
+          ${orderData.assets.inspirationUrls.length > 0 ? `
+          <tr>
+            <td style="padding: 0 24px 20px 24px;">
+              <p style="color: #666; font-size: 13px; margin: 0;">
+                📷 You uploaded <strong>${orderData.assets.inspirationUrls.length} reference image(s)</strong> for inspiration
+              </p>
+            </td>
+          </tr>
+          ` : ''}
+
+          <!-- CTA -->
+          <tr>
+            <td style="padding: 8px 24px 28px 24px; text-align: center;">
+              <p style="font-size: 14px; color: #666; margin: 0;">
+                Questions? Simply reply to this email and we'll get back to you.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
           <tr>
             <td style="background-color: #1a1a1a; padding: 24px; text-align: center;">
               <p style="color: #d4a574; margin: 0; font-size: 14px; letter-spacing: 1px;">
