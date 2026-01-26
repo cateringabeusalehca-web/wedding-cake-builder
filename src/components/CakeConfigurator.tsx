@@ -447,10 +447,10 @@ export function CakeConfigurator() {
         {/* Mobile: Sticky header with Cake Preview (left 60%) + Guest Slider (right 40%) - Hidden when checkout is active */}
         {!isReadyToOrder && (
         <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border -mx-4 px-2 py-2 shadow-md overflow-hidden">
-          <div className="flex items-start gap-1 min-h-[320px]">
+          <div className="flex items-start gap-1 min-h-[280px]">
             {/* Left 60%: Cake Preview - Tiers are tappable for editing */}
-            <div className="w-[60%] h-[320px] flex flex-col items-center pt-2 relative">
-              <div className="transform scale-[0.75] origin-top">
+            <div className="w-[60%] h-[280px] flex flex-col items-center justify-start relative overflow-visible">
+              <div className="transform scale-[0.65] origin-top -mt-4">
                 <CakeSVG
                   structure={structure}
                   selectedTier={selectedTier}
@@ -460,10 +460,10 @@ export function CakeConfigurator() {
                   totalServings={totalServings}
                 />
               </div>
-              {/* Expand button */}
+              {/* Expand button - positioned at bottom */}
               <button
                 onClick={() => setShowFullscreenCake(true)}
-                className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1.5 text-[10px] bg-secondary/20 hover:bg-secondary/30 text-secondary border border-secondary/30 rounded-full transition-colors flex items-center gap-1 z-10"
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1.5 text-[10px] bg-secondary/20 hover:bg-secondary/30 text-secondary border border-secondary/30 rounded-full transition-colors flex items-center gap-1 z-10 whitespace-nowrap"
                 aria-label="Expand cake view"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
