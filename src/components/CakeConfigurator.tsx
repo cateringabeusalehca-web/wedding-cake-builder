@@ -460,6 +460,15 @@ export function CakeConfigurator() {
           <div className="flex items-start gap-1 min-h-[280px]">
             {/* Left 60%: Cake Preview - Tiers are tappable for editing */}
             <div className="w-[60%] h-[280px] flex flex-col items-center justify-start relative overflow-visible">
+              {/* Tap hint for mobile */}
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, repeat: 2, repeatType: "reverse", duration: 1.2 }}
+                className="flex items-center gap-1 px-2 py-1 rounded-full bg-secondary/15 border border-secondary/30 mb-0 z-10"
+              >
+                <span className="text-[9px] font-medium text-secondary tracking-wide uppercase">👆 Tap a tier to select flavors</span>
+              </motion.div>
               <div className="transform scale-[0.65] origin-top -mt-4">
                 <CakeSVG
                   structure={structure}
@@ -585,14 +594,17 @@ export function CakeConfigurator() {
             />
 
             {/* Hint */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5 }}
-              className="mt-4 text-center text-xs text-muted-foreground"
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="mt-5 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/10 border border-secondary/25"
             >
-              Click on a tier to customize Sponge, Filling & Dietary options
-            </motion.p>
+              <span className="text-lg">👆</span>
+              <p className="text-xs font-medium text-secondary tracking-wide uppercase">
+                Click on a tier to select flavors, fillings & dietary options
+              </p>
+            </motion.div>
           </motion.div>
 
           <div className="space-y-6">
