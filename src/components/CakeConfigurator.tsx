@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Instagram, Facebook, Layers, Shield } from "lucide-react";
+import { Instagram, Facebook, Layers, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CakeSVG } from "./CakeSVG";
@@ -248,11 +248,21 @@ export function CakeConfigurator() {
         const tierIndex = structure.tiers.findIndex(t => t.tierLevel === selectedTier);
         if (tierIndex !== -1) {
           next[tierIndex] = config;
+          
+          // Auto-correct upper tiers if this tier's size shrank
+          const currentSize = config.customSizeInches || structure.tiers[tierIndex]?.sizeInches || 18;
+          for (let i = tierIndex + 1; i < structure.tierCount; i++) {
+            const upperTierDefaultSize = structure.tiers[i]?.sizeInches || 4;
+            const upperTierSize = next[i]?.customSizeInches || upperTierDefaultSize;
+            if (upperTierSize > currentSize) {
+              next[i] = { ...next[i], customSizeInches: currentSize };
+            }
+          }
         }
         return next;
       });
     },
-    [selectedTier, structure.tiers]
+    [selectedTier, structure.tiers, structure.tierCount]
   );
   
   // Force rectangular mode: switch to single tier structure and set rectangular shape
@@ -746,20 +756,7 @@ export function CakeConfigurator() {
                       ✨ I'm Ready to Order My Cake! ✨
                     </Button>
 
-                    <a
-                      href="https://cateringabeusaleh.ca/product/cake-taster-box/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block"
-                    >
-                      <Button
-                        variant="outline"
-                        className="btn-architectural w-full gap-2"
-                      >
-                        <span>Not sure? Order a Cake Taster Box</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </Button>
-                    </a>
+                    {/* External taster box link removed — now integrated into checkout flow */}
                   </motion.div>
                 </motion.div>
               )}
@@ -786,6 +783,12 @@ export function CakeConfigurator() {
                     topperNames={topperNames}
                     floralPalette={floralPalette}
                     onGoBack={() => setIsReadyToOrder(false)}
+                    referenceImages={referenceImages}
+                    selectedDecorations={selectedDecorations}
+                    decorationCustomInputs={decorationCustomInputs}
+                    selectedColorPalette={selectedColorPalette}
+                    eventTheme={eventTheme}
+                    eventStyle={eventStyle}
                   />
                 </motion.div>
               )}

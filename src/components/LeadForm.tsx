@@ -45,6 +45,7 @@ interface LeadFormProps {
   topperId: string;
   floralPalette: string;
   totalPrice: number;
+  orderType?: "taster" | "quote";
   onClose: () => void;
   onSuccess: () => void;
   // Advanced customization props
@@ -65,6 +66,7 @@ export function LeadForm({
   topperId,
   floralPalette,
   totalPrice,
+  orderType = "quote",
   onClose,
   onSuccess,
   referenceImages = [],
@@ -167,6 +169,7 @@ export function LeadForm({
         special_requests: formData.additionalNotes || null,
         reference_images: referenceImages,
         cake_config: {
+          orderType,
           structure: {
             id: structure.id,
             name: structure.name,
@@ -246,31 +249,40 @@ export function LeadForm({
         </button>
 
         <div className="mb-8 text-center">
-          <h2 className="heading-display text-3xl md:text-4xl">
-            Finalize Your Blueprint
+          <h2 className="heading-display text-2xl sm:text-3xl md:text-4xl">
+            {orderType === "taster" ? "Reserve Your Tasting" : "Finalize Your Blueprint"}
           </h2>
-          <p className="mt-2 text-muted-foreground">
-            Our atelier will review your specifications within 24 hours
+          <p className="mt-2 text-muted-foreground text-sm">
+            {orderType === "taster" 
+              ? "Secure your date & taste your dream flavors — $80 applied as credit" 
+              : "Our atelier will review your specifications within 24 hours"}
           </p>
         </div>
 
         {/* Summary */}
-        <div className="mb-8 flex items-center justify-center gap-6 border-y border-border py-4 flex-wrap">
+        <div className="mb-8 flex items-center justify-center gap-4 sm:gap-6 border-y border-border py-4 flex-wrap">
           <div className="text-center">
-            <span className="text-sketch text-muted-foreground">Structure</span>
-            <p className="font-display text-lg">{structure.name}</p>
+            <span className="text-sketch text-muted-foreground text-xs sm:text-sm">Structure</span>
+            <p className="font-display text-base sm:text-lg">{structure.name}</p>
           </div>
           <div className="h-8 w-px bg-border hidden sm:block" />
           <div className="text-center">
-            <span className="text-sketch text-muted-foreground">Servings</span>
-            <p className="font-display text-lg">{structure.totalServings}</p>
+            <span className="text-sketch text-muted-foreground text-xs sm:text-sm">Servings</span>
+            <p className="font-display text-base sm:text-lg">{structure.totalServings}</p>
           </div>
           <div className="h-8 w-px bg-border hidden sm:block" />
           <div className="text-center">
-            <span className="text-sketch text-muted-foreground">Estimate</span>
-            <p className="font-display text-2xl text-secondary">
-              ${totalPrice.toFixed(0)}
+            <span className="text-sketch text-muted-foreground text-xs sm:text-sm">
+              {orderType === "taster" ? "Tasting Fee" : "Estimate"}
+            </span>
+            <p className="font-display text-xl sm:text-2xl text-secondary">
+              {orderType === "taster" ? "$80" : `$${totalPrice.toFixed(0)}`}
             </p>
+            {orderType === "taster" && (
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Credit toward your ${totalPrice.toFixed(0)} cake
+              </p>
+            )}
           </div>
         </div>
 
@@ -507,7 +519,7 @@ export function LeadForm({
               ) : (
                 <>
                   <Send className="h-4 w-4" />
-                  Confirm Design & Request Quote
+                  {orderType === "taster" ? "Reserve & Pay $80" : "Confirm Design & Request Quote"}
                 </>
               )}
             </Button>
