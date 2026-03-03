@@ -239,7 +239,15 @@ export function LeadForm({
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto bg-background/95 backdrop-blur-md p-8 shadow-2xl rounded-2xl border border-secondary/20"
+        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto p-8 shadow-2xl rounded-2xl border border-secondary/20"
+        style={{
+          background: `
+            linear-gradient(135deg, hsla(30, 10%, 96%, 0.97) 0%, hsla(35, 15%, 93%, 0.95) 50%, hsla(30, 10%, 96%, 0.97) 100%),
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='6' stitchTiles='stitch' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.82 0 0 0 0 0.78 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E")
+          `,
+          backgroundSize: "cover",
+          backdropFilter: "blur(12px)",
+        }}
       >
         <button
           onClick={onClose}
