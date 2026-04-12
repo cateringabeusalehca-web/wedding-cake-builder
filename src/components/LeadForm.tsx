@@ -45,7 +45,7 @@ interface LeadFormProps {
   topperId: string;
   floralPalette: string;
   totalPrice: number;
-  orderType?: "taster" | "quote";
+  orderType?: "taster" | "consultation";
   onClose: () => void;
   onSuccess: () => void;
   // Advanced customization props
@@ -66,7 +66,7 @@ export function LeadForm({
   topperId,
   floralPalette,
   totalPrice,
-  orderType = "quote",
+  orderType = "consultation",
   onClose,
   onSuccess,
   referenceImages = [],
@@ -258,12 +258,12 @@ export function LeadForm({
 
         <div className="mb-8 text-center">
           <h2 className="heading-display text-2xl sm:text-3xl md:text-4xl">
-            {orderType === "taster" ? "Reserve Your Tasting" : "Finalize Your Blueprint"}
+            {orderType === "taster" ? "Request Your Taste Wedding Box" : "Book a Consultation"}
           </h2>
           <p className="mt-2 text-muted-foreground text-sm">
             {orderType === "taster" 
-              ? "Secure your date & taste your dream flavors — $80 applied as credit" 
-              : "Our atelier will review your specifications within 24 hours"}
+              ? "Taste your dream flavors — $80 applied as credit toward your cake" 
+              : "Let's review your design together and craft the perfect plan"}
           </p>
         </div>
 
@@ -281,7 +281,7 @@ export function LeadForm({
           <div className="h-8 w-px bg-border hidden sm:block" />
           <div className="text-center">
             <span className="text-sketch text-muted-foreground text-xs sm:text-sm">
-              {orderType === "taster" ? "Tasting Fee" : "Estimate"}
+              {orderType === "taster" ? "Tasting Box" : "Estimate"}
             </span>
             <p className="font-display text-xl sm:text-2xl text-secondary">
               {orderType === "taster" ? "$80" : `$${totalPrice.toFixed(0)}`}
@@ -527,7 +527,7 @@ export function LeadForm({
               ) : (
                 <>
                   <Send className="h-4 w-4" />
-                  {orderType === "taster" ? "Reserve & Pay $80" : "Confirm Design & Request Quote"}
+                  {orderType === "taster" ? "Request Taste Wedding Box" : "Book My Consultation"}
                 </>
               )}
             </Button>
