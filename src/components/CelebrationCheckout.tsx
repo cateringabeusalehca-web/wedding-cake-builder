@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Gift, CalendarHeart } from "lucide-react";
 import { BrandCornerDecor, BrandAccent } from "./BrandLogoShape";
+import { SuccessScreen } from "./SuccessScreen";
 import { LeadForm } from "./LeadForm";
 import logoHorizontal from "@/assets/logo-horizontal.png";
 import type { CakeStructure, TierConfiguration } from "@/data/menuDatabase";
@@ -25,7 +27,7 @@ interface CelebrationCheckoutProps {
   eventStyle?: string;
 }
 
-type OrderType = "taster" | "quote";
+type OrderType = "taster" | "consultation";
 
 export function CelebrationCheckout({
   totalPrice,
@@ -47,17 +49,26 @@ export function CelebrationCheckout({
 }: CelebrationCheckoutProps) {
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [orderType, setOrderType] = useState<OrderType>("taster");
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleFormSuccess = (type: OrderType) => {
-    const price = type === "taster" ? 80 : totalPrice;
-    const checkoutUrl = `https://cateringabeusaleh.ca/product/custom-wedding-cake/?custom_price=${price.toFixed(2)}`;
-    window.location.href = checkoutUrl;
+  const handleFormSuccess = () => {
+    setShowLeadForm(false);
+    setShowSuccess(true);
   };
 
   const openForm = (type: OrderType) => {
     setOrderType(type);
     setShowLeadForm(true);
   };
+
+  if (showSuccess) {
+    return (
+      <SuccessScreen
+        onReset={onGoBack}
+        orderType={orderType}
+      />
+    );
+  }
 
   return (
     <>
@@ -74,7 +85,7 @@ export function CelebrationCheckout({
             totalPrice={totalPrice}
             orderType={orderType}
             onClose={() => setShowLeadForm(false)}
-            onSuccess={() => handleFormSuccess(orderType)}
+            onSuccess={handleFormSuccess}
             referenceImages={referenceImages}
             selectedDecorations={selectedDecorations}
             decorationCustomInputs={decorationCustomInputs}
@@ -218,7 +229,7 @@ export function CelebrationCheckout({
             transition={{ delay: 1 }}
             className="space-y-3 pt-2"
           >
-            {/* OPTION A: Taster Box — Primary CTA */}
+            {/* OPTION A: Taste Wedding Box — Primary CTA */}
             <div className="space-y-1">
               <motion.div
                 animate={{
@@ -246,12 +257,15 @@ export function CelebrationCheckout({
                     border: "2px solid hsl(43, 74%, 60%)",
                   }}
                 >
-                  <span className="flex flex-col items-center gap-0.5 leading-tight">
-                    <span className="text-sm sm:text-base md:text-lg font-extrabold">
-                      RESERVE YOUR DATE & TASTE FLAVORS
-                    </span>
-                    <span className="text-xs sm:text-sm font-semibold opacity-90">
-                      $80 — Applied as credit toward your cake
+                  <span className="flex items-center justify-center gap-2">
+                    <Gift className="h-5 w-5" />
+                    <span className="flex flex-col items-start gap-0.5 leading-tight">
+                      <span className="text-sm sm:text-base md:text-lg font-extrabold">
+                        REQUEST TASTE WEDDING BOX
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold opacity-90">
+                        $80 — Applied as credit toward your cake
+                      </span>
                     </span>
                   </span>
                 </Button>
@@ -260,7 +274,7 @@ export function CelebrationCheckout({
                 className="text-[10px] sm:text-xs text-center"
                 style={{ color: "hsl(43, 30%, 55%)" }}
               >
-                Your $80 tasting becomes a credit toward your final cake
+                Taste your dream flavors — the $80 fee becomes credit toward your final cake
               </p>
             </div>
 
@@ -288,9 +302,9 @@ export function CelebrationCheckout({
               />
             </div>
 
-            {/* OPTION B: Full Design Quote — Secondary CTA */}
+            {/* OPTION B: Book a Consultation — Secondary CTA */}
             <Button
-              onClick={() => openForm("quote")}
+              onClick={() => openForm("consultation")}
               variant="outline"
               className="w-full py-4 sm:py-5 rounded-xl transition-all duration-300 hover:scale-[1.02]"
               style={{
@@ -299,15 +313,18 @@ export function CelebrationCheckout({
                 border: "1.5px solid hsl(43, 40%, 35%)",
               }}
             >
-              <span className="flex flex-col items-center gap-0.5 leading-tight">
-                <span className="text-xs sm:text-sm md:text-base font-bold tracking-wide">
-                  REQUEST FULL DESIGN QUOTE
-                </span>
-                <span
-                  className="text-[10px] sm:text-xs font-normal"
-                  style={{ color: "hsl(43, 20%, 50%)" }}
-                >
-                  Get your complete ${totalPrice.toFixed(0)} blueprint reviewed
+              <span className="flex items-center justify-center gap-2">
+                <CalendarHeart className="h-5 w-5" />
+                <span className="flex flex-col items-start gap-0.5 leading-tight">
+                  <span className="text-xs sm:text-sm md:text-base font-bold tracking-wide">
+                    BOOK A CONSULTATION WITH ADVISOR
+                  </span>
+                  <span
+                    className="text-[10px] sm:text-xs font-normal"
+                    style={{ color: "hsl(43, 20%, 50%)" }}
+                  >
+                    Let's review your ${totalPrice.toFixed(0)} design together
+                  </span>
                 </span>
               </span>
             </Button>

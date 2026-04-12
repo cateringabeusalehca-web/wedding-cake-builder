@@ -1,12 +1,15 @@
 import { motion } from "framer-motion";
-import { CheckCircle2, Mail, ArrowRight } from "lucide-react";
+import { CheckCircle2, Mail, ArrowRight, Gift, CalendarHeart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SuccessScreenProps {
   onReset: () => void;
+  orderType?: "taster" | "consultation";
 }
 
-export function SuccessScreen({ onReset }: SuccessScreenProps) {
+export function SuccessScreen({ onReset, orderType = "consultation" }: SuccessScreenProps) {
+  const isTaster = orderType === "taster";
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -42,9 +45,9 @@ export function SuccessScreen({ onReset }: SuccessScreenProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="heading-display mb-4 text-4xl md:text-5xl"
+          className="heading-display mb-4 text-3xl md:text-5xl"
         >
-          Blueprint Received
+          {isTaster ? "Taste Box Requested!" : "Consultation Booked!"}
         </motion.h1>
 
         {/* Message */}
@@ -52,9 +55,11 @@ export function SuccessScreen({ onReset }: SuccessScreenProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="mb-6 text-lg text-muted-foreground"
+          className="mb-6 text-base sm:text-lg text-muted-foreground leading-relaxed"
         >
-          Your design specifications have been sent to our atelier.
+          {isTaster
+            ? "We've received your Taste Wedding Box request. Check your inbox — we'll reach out within 24 hours to arrange your tasting experience."
+            : "Your consultation request has been received. Check your inbox — our advisor will contact you within 24 hours to schedule your meeting."}
         </motion.p>
 
         {/* Email Card */}
@@ -62,22 +67,46 @@ export function SuccessScreen({ onReset }: SuccessScreenProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="mb-8 inline-flex items-center gap-3 border border-border bg-card px-6 py-4"
+          className="mb-8 inline-flex items-center gap-3 border border-border bg-card px-6 py-4 rounded-lg"
         >
           <Mail className="h-5 w-5 text-secondary" />
-          <span className="text-sm">orders@cateringabeusaleh.ca</span>
+          <span className="text-sm">Check your email for your design summary</span>
         </motion.div>
 
-        {/* Response Time */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+        {/* What's Next */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="mb-10 text-sm text-muted-foreground"
+          className="mb-8 text-left bg-card border border-border rounded-lg p-5 sm:p-6"
         >
-          Our team will review your architectural specifications and respond
-          within <strong className="text-foreground">24 hours</strong>.
-        </motion.p>
+          <h3 className="text-sketch text-sm font-semibold mb-3 text-secondary">What Happens Next?</h3>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            {isTaster ? (
+              <>
+                <li className="flex items-start gap-2">
+                  <Gift className="h-4 w-4 text-secondary mt-0.5 shrink-0" />
+                  <span>We'll confirm your Taste Wedding Box and arrange delivery or pickup</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CalendarHeart className="h-4 w-4 text-secondary mt-0.5 shrink-0" />
+                  <span>Your $80 will be applied as credit toward your wedding cake</span>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="flex items-start gap-2">
+                  <CalendarHeart className="h-4 w-4 text-secondary mt-0.5 shrink-0" />
+                  <span>An advisor will reach out to schedule your personalized consultation</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Gift className="h-4 w-4 text-secondary mt-0.5 shrink-0" />
+                  <span>We'll review your design together and refine every detail</span>
+                </li>
+              </>
+            )}
+          </ul>
+        </motion.div>
 
         {/* Actions */}
         <motion.div
@@ -86,19 +115,24 @@ export function SuccessScreen({ onReset }: SuccessScreenProps) {
           transition={{ delay: 0.9 }}
           className="flex flex-col items-center gap-4"
         >
-          <Button onClick={onReset} className="btn-gold gap-2">
-            Design Another Cake
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-
           <a
-            href="https://cateringabeusaleh.ca"
+            href="https://cateringabeusaleh.ca/catering/weddings"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sketch text-muted-foreground transition-colors hover:text-secondary"
+            className="w-full"
           >
-            Visit Our Main Site
+            <Button className="btn-gold gap-2 w-full">
+              Explore Our Full Catering Services
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </a>
+
+          <button
+            onClick={onReset}
+            className="text-sketch text-muted-foreground transition-colors hover:text-secondary text-sm underline underline-offset-4"
+          >
+            Design Another Cake
+          </button>
         </motion.div>
 
         {/* Decorative Elements */}

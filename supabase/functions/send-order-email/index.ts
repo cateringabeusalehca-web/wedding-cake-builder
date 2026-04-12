@@ -436,6 +436,19 @@ const generateEmailHtml = (order: OrderEmailRequest): string => {
         </tr>
         ` : ''}
 
+        <!-- Catering CTA -->
+        <tr>
+          <td style="padding: 20px 32px 32px 32px; text-align: center;">
+            <p style="color: #a0a0a0; font-size: 14px; margin: 0 0 16px 0;">
+              Complete the wedding experience with our full catering services
+            </p>
+            <a href="https://cateringabeusaleh.ca/catering/weddings" 
+               style="display: inline-block; background: linear-gradient(135deg, #d4a574, #b8956a); color: #1a1a1a; padding: 14px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; letter-spacing: 1px;">
+              VIEW WEDDING CATERING PACKAGES →
+            </a>
+          </td>
+        </tr>
+
         <!-- Footer -->
         <tr>
           <td style="background-color: #1a1a1a; padding: 24px; text-align: center;">
@@ -700,10 +713,23 @@ const handler = async (req: Request): Promise<Response> => {
           </tr>
           ` : ''}
 
-          <!-- CTA -->
+          <!-- CTA - Catering -->
+          <tr>
+            <td style="padding: 8px 24px 12px 24px; text-align: center;">
+              <p style="font-size: 14px; color: #333; margin: 0 0 16px 0; line-height: 1.6;">
+                Want to make your celebration truly unforgettable? Explore our complete wedding catering — from appetizers to dessert tables.
+              </p>
+              <a href="https://cateringabeusaleh.ca/catering/weddings" 
+                 style="display: inline-block; background: linear-gradient(135deg, #d4a574, #b8956a); color: #1a1a1a; padding: 14px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; letter-spacing: 1px;">
+                EXPLORE WEDDING CATERING →
+              </a>
+            </td>
+          </tr>
+
+          <!-- Reply info -->
           <tr>
             <td style="padding: 8px 24px 28px 24px; text-align: center;">
-              <p style="font-size: 14px; color: #666; margin: 0;">
+              <p style="font-size: 13px; color: #666; margin: 0;">
                 Questions? Simply reply to this email and we'll get back to you.
               </p>
             </td>
