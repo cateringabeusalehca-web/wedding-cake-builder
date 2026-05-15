@@ -393,9 +393,10 @@ export function LeadForm({
                 (minimum 28 days lead time)
               </span>
             </label>
-            <Popover>
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen} modal>
               <PopoverTrigger asChild>
                 <Button
+                  type="button"
                   variant="outline"
                   className={cn(
                     "input-sketch mt-2 w-full justify-start border-0 border-b text-left font-normal",
@@ -410,13 +411,18 @@ export function LeadForm({
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent
+                className="w-auto p-0 pointer-events-auto z-50"
+                align="start"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+              >
                 <Calendar
                   mode="single"
                   selected={formData.eventDate}
-                  onSelect={(date) =>
-                    setFormData({ ...formData, eventDate: date })
-                  }
+                  onSelect={(date) => {
+                    setFormData({ ...formData, eventDate: date });
+                    setDatePickerOpen(false);
+                  }}
                   disabled={(date) => date < minDate}
                   initialFocus
                   className="pointer-events-auto"
