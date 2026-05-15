@@ -88,6 +88,7 @@ export function LeadForm({
     honeypot: "", // Anti-bot honeypot field
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const minDate = getMinEventDate();
 
