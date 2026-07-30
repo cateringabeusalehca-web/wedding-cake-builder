@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://ewomkmirqlyqgwarfril.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "wedding-cake-builder",
+      "version": "0.1.0",
+      "title": "Wedding Cake Builder"
+    },
+    "tools": [
+      {
+        "name": "list_cake_orders",
+        "title": "List cake orders",
+        "description": "List wedding cake quote requests (leads) captured by the builder, newest first. Optionally filter by status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "description": "Optional status filter, e.g. pending, contacted, confirmed."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max rows to return (default 20, max 100)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_cake_order",
+        "title": "Get cake order",
+        "description": "Get the full detail of one cake quote request, including the complete cake design configuration and reference images.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The cake order id (uuid)."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_cake_order_status",
+        "title": "Update cake order status",
+        "description": "Update the pipeline status of a cake quote request (for example pending, contacted, consultation_booked, confirmed, closed).",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The cake order id (uuid)."
+            },
+            "status": {
+              "type": "string",
+              "description": "The new status value."
+            }
+          },
+          "required": [
+            "id",
+            "status"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
