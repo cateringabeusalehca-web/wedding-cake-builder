@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -22,26 +22,32 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+
+  // Only same-origin relative paths are allowed as a post-login redirect.
+  const rawNext = searchParams.get("next") ?? "";
+  const nextPath =
+    rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/admin";
 
   useEffect(() => {
     // Check if already logged in
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
-          navigate("/admin");
+          navigate(nextPath);
         }
       }
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        navigate("/admin");
+        navigate(nextPath);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, nextPath]);
 
   const validateForm = () => {
     try {
@@ -101,7 +107,7 @@ export default function Auth() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/admin`,
+            emailRedirectTo: `${window.location.origin}${nextPath}`,
           },
         });
 
